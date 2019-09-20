@@ -1,0 +1,118 @@
+<RCC>
+    <qresource prefix="/icon/imageEditor">
+        <file alias="hand">resources/img/iconfinder_Hand_1021018.png</file>
+        <file>resources/img/TSP/A.png</file>
+        <file>resources/img/TSP/AD.png</file>
+        <file>resources/img/TSP/AB.png</file>
+        <file>resources/img/TSP/Follicular Unit.png</file>
+        <file>resources/img/TSP/AP.png</file>
+        <file>resources/img/TSP/T.png</file>
+        <file>resources/img/TSP/C.png</file>
+        <file>resources/img/TSP/D.png</file>
+    </qresource>
+    <qresource prefix="/icon/imageEditor/colored">
+        <file>resources/img/colored/balance.png</file>
+        <file>resources/img/colored/blackandwhite.png</file>
+        <file>resources/img/colored/block.png</file>
+        <file>resources/img/colored/blur.png</file>
+        <file>resources/img/colored/brightness.png</file>
+        <file>resources/img/colored/brush 2.png</file>
+        <file>resources/img/colored/brush.png</file>
+        <file>resources/img/colored/clone.png</file>
+        <file>resources/img/colored/color.png</file>
+        <file>resources/img/colored/colorpalette.png</file>
+        <file>resources/img/colored/curves.png</file>
+        <file>resources/img/colored/cutter.png</file>
+        <file>resources/img/colored/dropper.png</file>
+        <file>resources/img/colored/effects.png</file>
+        <file>resources/img/colored/eraser.png</file>
+        <file>resources/img/colored/exposure.png</file>
+        <file>resources/img/colored/finger.png</file>
+        <file>resources/img/colored/fix.png</file>
+        <file>resources/img/colored/flip.png</file>
+        <file alias="hand">resources/img/colored/hand.png</file>
+        <file>resources/img/colored/intersect.png</file>
+        <file>resources/img/colored/invest.png</file>
+        <file>resources/img/colored/layout.png</file>
+        <file alias="magic-wand">resources/img/colored/magicwand.png</file>
+        <file>resources/img/colored/mask.png</file>
+        <file>resources/img/colored/move.png</file>
+        <file>resources/img/colored/navigator.png</file>
+        <file alias="new">resources/img/colored/new.png</file>
+        <file>resources/img/colored/paint.png</file>
+        <file>resources/img/colored/paintingtool.png</file>
+        <file>resources/img/colored/patch.png</file>
+        <file>resources/img/colored/paths.png</file>
+        <file>resources/img/colored/pencil.png</file>
+        <file>resources/img/colored/pentool.png</file>
+        <file>resources/img/colored/photo.png</file>
+        <file>resources/img/colored/quickselection.png</file>
+        <file>resources/img/colored/redeyes.png</file>
+        <file>resources/img/colored/rotate 2.png</file>
+        <file>resources/img/colored/rotate.png</file>
+        <file alias="scale">resources/img/colored/scale.png</file>
+        <file>resources/img/colored/selective.png</file>
+        <file>resources/img/colored/settings 2.png</file>
+        <file>resources/img/colored/settings.png</file>
+        <file>resources/img/colored/sharpen.png</file>
+        <file>resources/img/colored/spray.png</file>
+        <file>resources/img/colored/square.png</file>
+        <file>resources/img/colored/temperature.png</file>
+        <file>resources/img/colored/transform.png</file>
+        <file>resources/img/colored/view.png</file>
+        <file alias="zoom">resources/img/colored/zoom.png</file>
+        <file alias="arrow-1">resources/img/colored/arrow-1.png</file>
+    </qresource>
+    <qresource prefix="/icon/imageEditor/black">
+        <file>resources/img/black/turn.png</file>
+        <file>resources/img/black/adjustment.png</file>
+        <file>resources/img/black/allocation-1.png</file>
+        <file>resources/img/black/allocation.png</file>
+        <file>resources/img/black/arrow-1.png</file>
+        <file>resources/img/black/arrow.png</file>
+        <file>resources/img/black/assembly-area.png</file>
+        <file>resources/img/black/black-and-white.png</file>
+        <file>resources/img/black/brush-history.png</file>
+        <file>resources/img/black/contrast.png</file>
+        <file>resources/img/black/crop-perspective.png</file>
+        <file>resources/img/black/crop.png</file>
+        <file>resources/img/black/curves.png</file>
+        <file>resources/img/black/drop.png</file>
+        <file>resources/img/black/eraser.png</file>
+        <file>resources/img/black/fragments.png</file>
+        <file>resources/img/black/free-transport.png</file>
+        <file>resources/img/black/group-selection.png</file>
+        <file>resources/img/black/hand.png</file>
+        <file>resources/img/black/history-brush.png</file>
+        <file>resources/img/black/lasso.png</file>
+        <file>resources/img/black/levels.png</file>
+        <file>resources/img/black/line-tool.png</file>
+        <file>resources/img/black/live-paint.png</file>
+        <file>resources/img/black/magnifiying-glass.png</file>
+        <file>resources/img/black/mirror.png</file>
+        <file>resources/img/black/move-content.png</file>
+        <file>resources/img/black/note.png</file>
+        <file>resources/img/black/paint-brush-1.png</file>
+        <file>resources/img/black/paint-brush.png</file>
+        <file>resources/img/black/paint-bucket.png</file>
+        <file>resources/img/black/paint-selection.png</file>
+        <file>resources/img/black/patch-crop.png</file>
+        <file>resources/img/black/pen-1.png</file>
+        <file>resources/img/black/pen-2.png</file>
+        <file>resources/img/black/pen.png</file>
+        <file>resources/img/black/pencil.png</file>
+        <file>resources/img/black/pipette.png</file>
+        <file>resources/img/black/red-eye.png</file>
+        <file>resources/img/black/ruler.png</file>
+        <file>resources/img/black/scissors.png</file>
+        <file>resources/img/black/search.png</file>
+        <file>resources/img/black/sharpen.png</file>
+        <file>resources/img/black/smudge.png</file>
+        <file>resources/img/black/spraying.png</file>
+        <file>resources/img/black/stamp-1.png</file>
+        <file>resources/img/black/stamp.png</file>
+        <file>resources/img/black/text.png</file>
+        <file>resources/img/black/tilt.png</file>
+        <file>resources/img/black/transition.png</file>
+    </qresource>
+</RCC>
