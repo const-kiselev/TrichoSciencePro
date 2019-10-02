@@ -1,14 +1,6 @@
 <RCC>
     <qresource prefix="/icon/imageEditor">
         <file alias="hand">resources/img/iconfinder_Hand_1021018.png</file>
-        <file>resources/img/TSP/A.png</file>
-        <file>resources/img/TSP/AD.png</file>
-        <file>resources/img/TSP/AB.png</file>
-        <file>resources/img/TSP/Follicular Unit.png</file>
-        <file>resources/img/TSP/AP.png</file>
-        <file>resources/img/TSP/T.png</file>
-        <file>resources/img/TSP/C.png</file>
-        <file>resources/img/TSP/D.png</file>
     </qresource>
     <qresource prefix="/icon/imageEditor/colored">
         <file>resources/img/colored/balance.png</file>
@@ -114,5 +106,24 @@
         <file>resources/img/black/text.png</file>
         <file>resources/img/black/tilt.png</file>
         <file>resources/img/black/transition.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file alias="DensityAndDiameter">resources/img/TSP/DensityAndDiameter.png</file>
+        <file alias="Marker_FollicularUnit">resources/img/TSP/Marker_FollicularUnit.png</file>
+        <file alias="PeripilarSign_BrokenHair">resources/img/TSP/PeripilarSign_BrokenHair.png</file>
+        <file alias="PeripilarSign_ExclamationHair">resources/img/TSP/PeripilarSign_ExclamationHair.png</file>
+        <file alias="PeripilarSign_SpikyHair">resources/img/TSP/PeripilarSign_SpikyHair.png</file>
+        <file alias="RootType_Anagen">resources/img/TSP/RootType_Anagen.png</file>
+        <file alias="RootType_AnagenWithPapilla">resources/img/TSP/RootType_AnagenWithPapilla.png</file>
+        <file alias="RootType_BrokenAnagen">resources/img/TSP/RootType_BrokenAnagen.png</file>
+        <file alias="RootType_Catagen">resources/img/TSP/RootType_Catagen.png</file>
+        <file alias="RootType_DysplasticAnagen">resources/img/TSP/RootType_DysplasticAnagen.png</file>
+        <file alias="RootType_Dystrophic">resources/img/TSP/RootType_Dystrophic.png</file>
+        <file alias="RootType_Telogen">resources/img/TSP/RootType_Telogen.png</file>
+        <file alias="PeripilarSign_CadaverizedHair">resources/img/TSP/PeripilarSign_CadaverizedHair.png</file>
+        <file alias="PeripilarSign_RedDot">resources/img/TSP/PeripilarSign_RedDot.png</file>
+        <file alias="PeripilarSign_Hyperpigmentation">resources/img/TSP/PeripilarSign_Hyperpigmentation.png</file>
+        <file alias="PeripilarSign_YellowDot">resources/img/TSP/PeripilarSign_YellowDot.png</file>
+        <file alias="PeripilarSign_WhiteDot">resources/img/TSP/PeripilarSign_WhiteDot.png</file>
     </qresource>
 </RCC>

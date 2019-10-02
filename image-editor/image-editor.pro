@@ -20,6 +20,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
+ICON = resources/TSP.icns
+
+
 SOURCES += \
     ImageEditor.cpp \
     _global_ie.cpp \
@@ -68,3 +71,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     IE_res.qrc
+
+ICON = TSP.icns

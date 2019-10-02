@@ -2,6 +2,7 @@
 #define IE_TOOL_IMAGE_H
 
 #include <QGraphicsPixmapItem>
+#include <QMessageBox>
 #include <QObject>
 #include "ie_tool.h"
 #include <QFile>
@@ -17,19 +18,19 @@ class IE_Tool_Image:public QObject, public QGraphicsPixmapItem, public ie_tool
 {
     Q_OBJECT
 public:
-    explicit IE_Tool_Image( QString resDir,
-                            QObject* parent=nullptr,
-                            QGraphicsPixmapItem* pPixmapItem = nullptr,
+    explicit IE_Tool_Image();
+    explicit IE_Tool_Image( QString destDir,
+                            QString destParentDir,
+                            QString tmpDir,
+                            QString originalFilePath = "",
                             ToolType tt=ToolType::Image);
-    explicit IE_Tool_Image( QString resDir,
-                            QObject* parent=nullptr,
-                            ToolType tt=ToolType::Image);
-    explicit IE_Tool_Image( QString resDir,
-                            QString tmpResDir,
-                            QString relativeFilePath,
-                            QString filePath,
-                            ToolType tt=ToolType::Image);
+
     ~IE_Tool_Image() override;
+
+    void setDirs(QString destDir,
+                 QString destParentDir,
+                 QString tmpDir);
+
     void mouseFirstPress(QPointF point) override {}
     int mouseMove(QPointF point)        override {}
     void wheelMode(QWheelEvent *pe)     override {}
@@ -51,9 +52,7 @@ protected:
 private:
     QFile*      _pFile;
     QFileInfo   _fileInfo;
-    QDir        _resDir;
-    QDir        _tmpResDir;
-    QString     _relativeFilePath;
+    QDir        _destDir, _tmpDir, _destParentDir;
 
     void copyFileToWorkDir();
     void loadImage(QString filePath);

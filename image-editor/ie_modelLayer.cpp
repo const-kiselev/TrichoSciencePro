@@ -92,7 +92,11 @@ ie_tool *IE_ModelLayer::getToolPtr(){
 
 void IE_ModelLayer::read(const QJsonObject &json)
 {
-
+    parentItem()->setPos(json["posX"].toDouble(), json["posY"].toDouble());
+    visible = json["visible"].toBool();
+    QJsonObject layerData = json["layerData"].toObject();
+    pTool->read(layerData);
+    toolType = convertToolTitleToToolType(json["typeTitle"].toString());
 }
 
 void IE_ModelLayer::write(QJsonObject &json) const

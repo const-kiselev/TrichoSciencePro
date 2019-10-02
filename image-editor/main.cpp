@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("TrichoScience Pro");
 
     app.setOrganizationDomain("tsp.com");
-    app.setApplicationName("TrichoScience.Pro");
+    app.setApplicationName("imageEditor.TrichoScience.Pro");
     auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (path.isEmpty()) qFatal("Cannot determine settings storage location");
     QDir d(path);

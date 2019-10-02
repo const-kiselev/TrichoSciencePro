@@ -11,7 +11,6 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
     measureIndex = 1;
 
     pModel = new TSPImageEditorModel();
-    pModel->initAsNewModel("/Users/const/main/Develop/Trichoscience/projects/tmp1/3.jpg");
 
     pView = new TSPImageEditorView(pModel);
 
@@ -120,11 +119,8 @@ void IE_ToolCalibration::modelItemsControl()
 
 void IE_ToolCalibration::openImage()
 {
-    // загружаем изображение из папки
 
-    QString imageFilePath;
-    imageFilePath = QFileDialog::getOpenFileName(nullptr, "Directory Dialog", QDir::currentPath());
-    pModel->setMainImage(imageFilePath);
+    pModel->initAsNewModel(_Model_patientData());
 }
 
 qreal IE_ToolCalibration::calculateMeasure(int measureLenght)

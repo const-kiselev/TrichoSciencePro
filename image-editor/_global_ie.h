@@ -6,6 +6,14 @@ enum UnitType {m = 0,cm,mm,um,px};
 
 static const char* UnitTypeTitle[] = {"м", "см", "мм", "мкм", "px"};
 
+static const char   * IE_MODEL_DIR = "./IE_models",
+                    * IE_MODEL_DIR_NAME = "IE_models",
+                    * IE_MODEL_RES_DIR = "./res",
+                    * IE_MODEL_RES_DIR_NAME = "res",
+                    * IE_MODEL_FILE_NAME_POSTFIX = "_IE_model",
+                    * IE_MODEL_FILE_NAME_EXTENSION = "json",
+                    * IE_TMP_DIR = "./tmp", * IE_TMP_DIR_NAME = "tmp";
+
 template <class T>
 class Singleton {
 public:

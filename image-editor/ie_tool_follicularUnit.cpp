@@ -60,6 +60,7 @@ bool IE_Tool_FollicularUnit::deactivateEditMode()
 void IE_Tool_FollicularUnit::read(const QJsonObject &json)
 {
     setText(json["text"].toString());
+    num = json["text"].toInt();
 }
 
 void IE_Tool_FollicularUnit::write(QJsonObject &json) const

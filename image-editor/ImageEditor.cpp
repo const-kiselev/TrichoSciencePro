@@ -1,12 +1,20 @@
-﻿#include "imageEditor.h"
+﻿#include "ImageEditor.h"
 
 
 TSPimageEditor::TSPimageEditor():QMainWindow(nullptr)
 {
     init();
-    pModel->initAsNewModel("/Users/const/main/Develop/Trichoscience/projects/tmp1/3.jpg");
+#ifdef _IE_DEBUG_NEW_MODEL_
+    _Model_patientData patientData;
+    patientData.modelPath = "data/0";
+    patientData.modelDir = "data/0";
+    pModel->initAsNewModel(patientData);
+#endif // _DEBUG_NEW_MODEL_
+#ifdef _IE_DEBUG_OPEN_MODEL_
+    pModel->initWithModel(_Model_patientData());
+#endif // _DEBUG_OPEN_MODEL_
 
-    // после профилирования необходимо IE связать с модулем вычислений
+    // TODO: после профилирования необходимо IE связать с модулем вычислений
 
     //QWidget *tmpPWidget = new QWidget();
     //QBoxLayout *pbxLayout = new QBoxLayout(QBoxLayout::LeftToRight);
@@ -65,12 +73,13 @@ void TSPimageEditor::menuInit()
   QMenuBar *pMenuBar;
 
 
-   #ifdef Q_OS_MAC
+    #ifdef Q_OS_MAC
        pMenuBar = new QMenuBar(0);
-   #else
+    #else
        pMenuBar = new QMenuBar();
-   #endif
-   QMenu *oneMenu = new QMenu("Файл");
+    #endif
+    QMenu *oneMenu = new QMenu("Файл");
+
     QAction *pActionNewFile = new QAction("Сохранить");
     connect(pActionNewFile, &QAction::triggered, [this](){
         if(!(this->pModel->saveModel()))
@@ -83,9 +92,9 @@ void TSPimageEditor::menuInit()
     pActionNewFile = new QAction("Сохранить изображение");
     oneMenu->addAction(pActionNewFile);
 
-   pMenuBar->addAction(oneMenu->menuAction());
+    pMenuBar->addAction(oneMenu->menuAction());
 
-   oneMenu = new QMenu("Правка");
+    oneMenu = new QMenu("Правка");
 
    pActionNewFile = new QAction("Масштаб изображения");
    connect(pActionNewFile, &QAction::triggered, [this](){

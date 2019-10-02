@@ -182,7 +182,7 @@ int IE_Tool_Marker::mouseMove(QPointF point)
 
 void IE_Tool_Marker::read(const QJsonObject &json)
 {
-
+    _toolType = convertToolTitleToToolType(json["typeTitle"].toString());
 }
 
 void IE_Tool_Marker::write(QJsonObject &json) const

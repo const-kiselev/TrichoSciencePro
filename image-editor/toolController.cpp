@@ -1,13 +1,12 @@
 #include "toolController.h"
 
 
-// Задачи:
-// сделать логику обнудения pActiveTool = nullptr; !!!!
+// TODO: сделать логику обнудения pActiveTool = nullptr; !!!!
 
 
 ToolsController::ToolsController()
 {
-    setIconSize(QSize(30,30));
+    setIconSize(QSize(20,20));
     setMovable(false);
 
     toolSetType = ToolSet::AllTools;
@@ -157,7 +156,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
             case QEvent::MouseButtonPress:
             {
 
-                pActiveTool = new IE_ModelLayer(ToolType::Marker, new IE_Tool_FollicularUnit());
+                pActiveTool = new IE_ModelLayer(ToolType::Marker_FollicularUnit, new IE_Tool_FollicularUnit());
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(pe);
                 QPointF mousePos = mouseEvent->pos();
                 if(mouseEvent->localPos()!=mouseEvent->pos())
@@ -393,7 +392,7 @@ void ToolsController::initToolActions()
         }
         case ToolType::DensityAndDiameter:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/colored/resources/img/colored/brush 2.png"),"Плотность, диаметр и длина");
+            pToolAction = new QAction(QPixmap("://DensityAndDiameter"),"Плотность, диаметр и длина");
             break;
         }
         case ToolType::Zoom:
@@ -403,7 +402,7 @@ void ToolsController::initToolActions()
         }
         case ToolType::Marker_FollicularUnit:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/Follicular Unit.png"), "Маркер фолликулярных юнитов");
+            pToolAction = new QAction(QPixmap("://Marker_FollicularUnit"), "Маркер фолликулярных юнитов");
             break;
         }
         case ToolType::Ruler:
@@ -414,78 +413,78 @@ void ToolsController::initToolActions()
 
             case ToolType::PeripilarSign_SpikyHair:
         {
-            pToolAction = new QAction("Остроконечный волос");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_SpikyHair"),"Остроконечный волос");
             break;
         }
             case ToolType::PeripilarSign_ExclamationHair:
         {
-            pToolAction = new QAction("Волос в виде восклицательного знака");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_ExclamationHair"),"Волос в виде восклицательного знака");
             break;
         }
             case ToolType::PeripilarSign_BrokenHair:
         {
-            pToolAction = new QAction("Обломанный волос");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_BrokenHair"),"Обломанный волос");
             break;
         }
             case ToolType::PeripilarSign_CadaverizedHair:
         {
-            pToolAction = new QAction("Кадаверизированный волос");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_CadaverizedHair"),"Кадаверизированный волос");
             break;
         }
             case ToolType::PeripilarSign_YellowDot:
         {
-            pToolAction = new QAction("Желтая точка");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_YellowDot"),"Желтая точка");
             break;
         }
             case ToolType::PeripilarSign_RedDot:
         {
-            pToolAction = new QAction("Красная точка");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_RedDot"),"Красная точка");
             break;
         }
             case ToolType::PeripilarSign_WhiteDot:
         {
-            pToolAction = new QAction("Белая точка");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_WhiteDot"),"Белая точка");
             break;
         }
         case ToolType::PeripilarSign_Hyperpigmentation:
         {
-            pToolAction = new QAction("Гиперпигментация");
+            pToolAction = new QAction(QPixmap("://PeripilarSign_Hyperpigmentation"),"Гиперпигментация");
             break;
         }
 
             case ToolType::RootType_Anagen:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/A.png"), "Анагеновый");
+            pToolAction = new QAction(QPixmap("://RootType_Anagen"), "Анагеновый");
             break;
         }
             case ToolType::RootType_DysplasticAnagen:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/AD.png"), "Диспластичный анагеновый");
+            pToolAction = new QAction(QPixmap("://RootType_DysplasticAnagen"), "Диспластичный анагеновый");
             break;
         }
             case ToolType::RootType_BrokenAnagen:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/AB.png"), "Обломанный анагенновый");
+            pToolAction = new QAction(QPixmap("://RootType_BrokenAnagen"), "Обломанный анагенновый");
             break;
         }
             case ToolType::RootType_AnagenWithPapilla:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/AP.png"), "Анагеновый с папиллой");
+            pToolAction = new QAction(QPixmap("://RootType_AnagenWithPapilla"), "Анагеновый с папиллой");
             break;
         }
             case ToolType::RootType_Telogen:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/T.png"), "Телогеновый");
+            pToolAction = new QAction(QPixmap("://RootType_Telogen"), "Телогеновый");
             break;
         }
             case ToolType::RootType_Catagen:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/C.png"), "Катагеновый");
+            pToolAction = new QAction(QPixmap("://RootType_Catagen"), "Катагеновый");
             break;
         }
             case ToolType::RootType_Dystrophic:
         {
-            pToolAction = new QAction(QPixmap(":/icon/imageEditor/resources/img/TSP/D.png"), "Дистрофичный");
+            pToolAction = new QAction(QPixmap("://RootType_Dystrophic"), "Дистрофичный");
             break;
         }
 

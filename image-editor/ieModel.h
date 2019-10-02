@@ -18,32 +18,49 @@
 
 QT_CHARTS_USE_NAMESPACE
 
+// TODO: переделать в класс
 struct ModelData
 {
 
-    QString patientFullName, workDir;
-    QDir    modelDir,
-            resDir,
-            tmpDir;
+    QString patientFullName; //     ФИО
+
+    QDir    modelDir, // директория модели. Новая создается в папке IE_MODEL_RES_DIR_NAME
+            resDir, // директория ресурсов модели. В ней хранятся различные изображения, файлы, которые используются.
+            tmpDir; // директория временного размещения данных модели, в ней хранятся данные до сохранения. Удаляется после закрытия модели.
     uint    patientID,
-            patientUID,
+            patientUID, // присваивается ЕДИНОЖДЫ !!!
             model_ID;
-    void initNew(QString workPath)
-    {
-        model_ID = QDateTime::currentDateTime().toTime_t();
-        modelDir.setPath(workPath+"/"+QString().number(model_ID));
-        tmpDir.setPath("tmp/IE_sessions/"+QString().number(model_ID));
-    }
+
+
     void initNew(_Model_patientData patientData)
     {
-        workDir = patientData.modelDir;
-        modelDir = patientData.modelDir+"/IE_sessions";
+        model_ID = QDateTime::currentDateTime().toTime_t();
+        init(patientData);
+        modelDir = QString("%1/%2").arg(patientData.modelDir).arg(IE_MODEL_DIR_NAME);
+        update();
+    }
+
+    void init(_Model_patientData patientData)
+    {
         patientID = patientData.patient_ID;
         patientUID = patientData.patient_UID;
         patientFullName = patientData.patient_fullName;
-        initNew(modelDir.path());
-
+        modelDir = patientData.modelDir;
+        update();
     }
+
+    void update()
+    {
+        modelDir.setPath(QString("%1/%2").  arg(modelDir.path()).
+                                            arg(model_ID)
+                         );
+        tmpDir.setPath(QString("%1/%2/%3"). arg(IE_TMP_DIR_NAME).
+                                            arg(IE_MODEL_DIR_NAME).
+                                            arg(model_ID)
+                       );
+        resDir.setPath(QString("%1").arg(IE_MODEL_RES_DIR_NAME));
+    }
+
 #ifdef QT_DEBUG
     void activateTestData()
     {
@@ -68,6 +85,35 @@ struct ModelData
         return answer;
     }
 
+    void    read(const QJsonObject &json)
+    {
+        if(patientUID == 0)
+        {
+            patientID = json["patient_ID"].toString().toUInt();
+            patientFullName = json["patient_fullName"].toString();
+        }
+
+        model_ID = json["model_ID"].toString().toUInt();
+        patientUID = json["patient_UID"].toString().toUInt();
+        update();
+    }
+    void    write(QJsonObject &json)const
+    {
+        json["model_ID"] = QString().number(model_ID);
+        json["patient_ID"] = QString().number(patientID);
+        json["patient_UID"] = QString().number(patientUID);
+        json["patient_fullName"] = patientFullName;
+    }
+    void printAllData()
+    {
+        qDebug() << modelDir;
+        qDebug() << resDir;
+        qDebug() << tmpDir;
+        qDebug() << patientID;
+        qDebug() << patientUID;
+        qDebug() << model_ID;
+        qDebug() << patientFullName;
+    }
 };
 
 class TSPImageEditorModel : public QGraphicsScene
@@ -87,7 +133,7 @@ public:
     QGraphicsPixmapItem*    getPMainImage() const;
     qreal                   getMeasureIndex() const;
     ToolsController*        getPToolCnt() const;
-    int                     setMainImage(QString imageFilePath);
+
     void                    setMeasureIndex(const qreal &value);
     void                    setPToolCnt(ToolsController *value);
 
@@ -128,11 +174,13 @@ signals:
     void                    measureIndexChanged(qreal measure);
 
 public slots:
-    void initAsNewModel(QString imageFilePath);
+//    void initAsNewModel(QString imageFilePath);
     void initAsNewModel(_Model_patientData patientData);
-    void initWithModel(QString modelFilePath);
+//    void initWithModel(QString modelFilePath);
+    void initWithModel(_Model_patientData patientData);
     void save(QString modelFilePath);
     void close(QString modelFilePath);
+
 
 
     void addLayerViaToolCnt();
@@ -158,7 +206,7 @@ private:
     IE_ComputeModule        *pCompMod;
     ModelData               _modelData;
 
-
+    int                     setMainImage(QString imageFilePath);
     int globalDataKey; // ключ владения глобальным объектом
 
 private slots:

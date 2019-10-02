@@ -33,7 +33,7 @@
 //    QGraphicsScene::~QGraphicsScene();
 }
 
-int        TSPImageEditorModel::saveModel()
+int         TSPImageEditorModel::saveModel()
 {
     enum SaveFormat
     {Json, Bin}saveFormat;
@@ -46,7 +46,12 @@ int        TSPImageEditorModel::saveModel()
     _modelData.modelDir.mkpath("./res");
 
 
-    QString filePAth = _modelData.modelDir.path() +"/"+QString().number(_modelData.model_ID)+"_model.json";
+    QString filePAth = QString("%1/%2%3.%4").arg(_modelData.modelDir.path()).
+                                        arg(_modelData.model_ID).
+                                        arg(IE_MODEL_FILE_NAME_POSTFIX).
+                                        arg(IE_MODEL_FILE_NAME_EXTENSION);
+
+
     QFile saveFile(saveFormat == Json
             ? filePAth
             : QStringLiteral("model.dat"));
@@ -56,9 +61,10 @@ int        TSPImageEditorModel::saveModel()
             return 1;
         }
 
-        QJsonObject gameObject;
-        write(gameObject);
-        QJsonDocument saveDoc(gameObject);
+        QJsonObject jsonObj;
+        jsonObj["TSP_docType"] = "TSP_JSON_IE_model";
+        write(jsonObj);
+        QJsonDocument saveDoc(jsonObj);
         saveFile.write(saveFormat == Json
             ? saveDoc.toJson()
             : saveDoc.toBinaryData());
@@ -73,11 +79,85 @@ void        TSPImageEditorModel::saveModelAsImage()
 
 void        TSPImageEditorModel::read(const QJsonObject &json)
 {
+    _modelData.read(json);
+    IE_GLOBAL_DATA.setMeasureIndex(json["measureIndex"].toDouble(),globalDataKey);
+    QJsonArray layersArray = json["layers"].toArray();
+    qDebug() << "numOfLayer = " << layersArray.size();
+    for (int layerIndex = 0; layerIndex < layersArray.size(); ++layerIndex) {
+            QJsonObject layerObject = layersArray[layerIndex].toObject();
+            IE_ModelLayer* pLayer = nullptr;
 
+            {
+                QGraphicsItem* pParentItem = nullptr;
+                switch (convertToolTitleToToolType(layerObject["typeTitle"].toString()))
+                {
+                case ToolType::MainImage:
+                {
+                    pParentItem = new IE_Tool_Image();
+                    dynamic_cast<IE_Tool_Image*>(pParentItem)->setDirs(QString("%1/%2")
+                                                                            .arg(_modelData.modelDir.path())
+                                                                            .arg(_modelData.resDir.path()),
+                                                                       _modelData.modelDir.path(),
+                                                                       _modelData.tmpDir.path()
+                                                                       );
+                    break;
+                }
+                case ToolType::DensityAndDiameter:
+                {
+                    pParentItem = new IE_Line_DD();
+                    break;
+                }
+                case ToolType::Ruler:
+                {
+                    pParentItem = new IERuler();
+                    break;
+                }
+                case ToolType::SimpleLine:
+                {
+                    pParentItem = new IELine();
+                    break;
+                }
+                case ToolType::Marker_FollicularUnit:
+                {
+                    pParentItem = new IE_Tool_FollicularUnit();
+                    break;
+                }
+                case ToolType::PeripilarSign_SpikyHair:
+                case ToolType::PeripilarSign_ExclamationHair:
+                case ToolType::PeripilarSign_BrokenHair:
+                case ToolType::PeripilarSign_CadaverizedHair:
+                case ToolType::PeripilarSign_YellowDot:
+                case ToolType::PeripilarSign_RedDot:
+                case ToolType::PeripilarSign_WhiteDot:
+                case ToolType::PeripilarSign_Hyperpigmentation:
+                case ToolType::RootType_Anagen:
+                case ToolType::RootType_DysplasticAnagen:
+                case ToolType::RootType_BrokenAnagen:
+                case ToolType::RootType_AnagenWithPapilla:
+                case ToolType::RootType_Telogen:
+                case ToolType::RootType_Catagen:
+                case ToolType::RootType_Dystrophic:
+                {
+                    pParentItem = new IE_Tool_Marker();
+                    break;
+                }
+                }
+                pLayer = new IE_ModelLayer(pParentItem);
+            }
+            pLayer->read(layerObject);
+            addLayer(pLayer);
+            if(convertToolTitleToToolType(layerObject["typeTitle"].toString()) == ToolType::MainImage)
+            {
+                pMainImageLayer = pLayer;
+                imageRect = pLayer->boundingRect();
+            }
+        }
 }
 
 void        TSPImageEditorModel::write(QJsonObject &json) const
 {
+    _modelData.write(json);
+    json["measureIndex"] = IE_GLOBAL_DATA.getMeasureIndex();
     QJsonArray layerArray;
     foreach(IE_ModelLayer* layer, layersList)
     {
@@ -88,7 +168,7 @@ void        TSPImageEditorModel::write(QJsonObject &json) const
     json["layers"] = layerArray;
 }
 
-void        TSPImageEditorModel::initAsNewModel(QString imageFilePath)
+/*void        TSPImageEditorModel::initAsNewModel(QString imageFilePath)
 {
 
 #ifdef QT_DEBUG
@@ -107,7 +187,7 @@ void        TSPImageEditorModel::initAsNewModel(QString imageFilePath)
 
     setMainImage(imageFilePath);
 
-}
+}*/
 
 void TSPImageEditorModel::initAsNewModel(_Model_patientData patientData)
 {
@@ -117,14 +197,55 @@ void TSPImageEditorModel::initAsNewModel(_Model_patientData patientData)
         _modelData.tmpDir.mkpath(".");
     }
     _modelData.tmpDir.mkpath("./res");
-    _modelData.resDir.setPath("res");
 
     setMainImage("");
 }
 
-void        TSPImageEditorModel::initWithModel(QString modelFilePath)
+/*void        TSPImageEditorModel::initWithModel(QString modelFilePath)
 {
 
+}*/
+
+void TSPImageEditorModel::initWithModel(_Model_patientData patientData)
+{
+
+    if(patientData.modelPath == "Empty")
+    {
+        patientData.modelPath = QFileDialog::getOpenFileName(nullptr,
+                                                             "Выбор модели изображения",
+                                                             QStandardPaths::displayName(
+                                                                 QStandardPaths::HomeLocation ) );
+    }
+
+    QFile modelFile;
+    modelFile.setFileName(patientData.modelPath);
+    if(!modelFile.exists())
+    {
+        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не существует.").arg(patientData.modelPath));
+        return;
+    }
+    if(!modelFile.open(QIODevice::ReadOnly))
+    {
+        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не удается прочитать.").arg(patientData.modelPath));
+        qWarning("Couldn't open file.");
+        return;
+    }
+
+    QByteArray saveData = modelFile.readAll();
+    modelFile.close();
+    QJsonDocument loadDoc(QJsonDocument::fromJson(saveData));
+    QJsonObject jsonObj = loadDoc.object();
+
+    if(jsonObj["TSP_docType"] != "TSP_JSON_IE_model")
+    {
+        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не является моделью изображения.").arg(patientData.modelPath));
+        qWarning() << modelFile.fileName() << "isn't TSP_JSON_IE_model.";
+//        patientBaseFile.rename("data/patients/!!!patientBase_ERROR.json");
+        return;
+    }
+
+    _modelData.init(patientData);
+    read(jsonObj);
 }
 
 // ------- GETTERS and SETTERS
@@ -140,11 +261,14 @@ QGraphicsPixmapItem *
 }
 int         TSPImageEditorModel::setMainImage(QString imageFilePath)
 {
-    IE_Tool_Image *pToolImage_mainImage = new IE_Tool_Image(_modelData.modelDir.path()+"/"+_modelData.resDir.path(),
-                                                            _modelData.tmpDir.path()+"/"+_modelData.resDir.path(),
-                                                            _modelData.resDir.path(),
+    IE_Tool_Image *pToolImage_mainImage = new IE_Tool_Image(QString("%1/%2").arg(_modelData.modelDir.path())
+                                                                            .arg(_modelData.resDir.path()),
+                                                            _modelData.modelDir.path(),
+                                                            QString("%1/%2").arg(_modelData.tmpDir.path())
+                                                                            .arg(IE_MODEL_RES_DIR_NAME),
                                                             imageFilePath,
-                                                            ToolType::MainImage);
+                                                            ToolType::MainImage
+                                                            );
     pToolImage_mainImage->setPos(0,0);
 
     pMainImageLayer = new IE_ModelLayer(ToolType::MainImage, pToolImage_mainImage);
@@ -519,6 +643,14 @@ void        TSPImageEditorModel::addLayer(ToolType toolType, QGraphicsItem *item
 
 void        TSPImageEditorModel::addLayer(IE_ModelLayer* layerToAdd)
 {
+
+    for (QList<IE_ModelLayer*>::iterator iter = layersList.begin();iter!=layersList.end();iter++)
+        if((*iter) == layerToAdd)
+        {
+            qWarning() << "Tring to add existed layer.";
+            return;
+        }
+
     addItem(layerToAdd->parentItem());
     layersList.append(layerToAdd);
 }

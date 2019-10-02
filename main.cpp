@@ -7,7 +7,6 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     QCoreApplication::setApplicationName("TrichoScience Pro");
-
     app.setOrganizationDomain("tsp.com");
     app.setApplicationName("TrichoScience.Pro");
     auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);

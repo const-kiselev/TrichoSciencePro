@@ -48,7 +48,7 @@ static QString getToolTitle(ToolType _toolType)
     {
     case ToolType::NoneTool: { return QString("NoneTool");}
     case ToolType::Zoom: { return QString("Zoom");}
-    case ToolType::checkableTool : { return QString("checkableTool ");}
+    case ToolType::checkableTool: { return QString("checkableTool");}
     case ToolType::MainImage: { return QString("MainImage");}
     case ToolType::Image: { return QString("Image");}
     case ToolType::ComputingArea: { return QString("ComputingArea");}
@@ -79,6 +79,42 @@ static QString getToolTitle(ToolType _toolType)
     case ToolType::Ruler: { return QString("Ruler");}
     case ToolType::DensityAndDiameter: { return QString("DensityAndDiameter");}
     }
+}
+
+static ToolType convertToolTitleToToolType(QString toolTitle)
+{
+    if(toolTitle == "NoneTool") return ToolType::NoneTool;
+    if(toolTitle == "Zoom") return ToolType::Zoom;
+    if(toolTitle == "checkableTool") return ToolType::checkableTool;
+    if(toolTitle == "MainImage") return ToolType::MainImage;
+    if(toolTitle == "Image") return ToolType::Image;
+    if(toolTitle == "ComputingArea") return ToolType::ComputingArea;
+    if(toolTitle == "Marker") return ToolType::Marker;
+    if(toolTitle == "Marker_Colored") return ToolType::Marker_Colored;
+    if(toolTitle == "Marker_FollicularUnit") return ToolType::Marker_FollicularUnit;
+    if(toolTitle == "Marker_PeripilarSign") return ToolType::Marker_PeripilarSign;
+    if(toolTitle == "Marker_RootType") return ToolType::Marker_RootType;
+
+    if(toolTitle == "PeripilarSign_SpikyHair") return ToolType::PeripilarSign_SpikyHair;
+    if(toolTitle == "PeripilarSign_ExclamationHair") return ToolType::PeripilarSign_ExclamationHair;
+    if(toolTitle == "PeripilarSign_BrokenHair") return ToolType::PeripilarSign_BrokenHair;
+    if(toolTitle == "PeripilarSign_CadaverizedHair") return ToolType::PeripilarSign_CadaverizedHair;
+    if(toolTitle == "PeripilarSign_YellowDot") return ToolType::PeripilarSign_YellowDot;
+    if(toolTitle == "PeripilarSign_RedDot") return ToolType::PeripilarSign_RedDot;
+    if(toolTitle == "PeripilarSign_WhiteDot") return ToolType::PeripilarSign_WhiteDot;
+    if(toolTitle == "PeripilarSign_Hyperpigmentation") return ToolType::PeripilarSign_Hyperpigmentation;
+
+    if(toolTitle == "RootType_Anagen") return ToolType::RootType_Anagen;
+    if(toolTitle == "RootType_DysplasticAnagen") return ToolType::RootType_DysplasticAnagen;
+    if(toolTitle == "RootType_BrokenAnagen") return ToolType::RootType_BrokenAnagen;
+    if(toolTitle == "RootType_AnagenWithPapilla") return ToolType::RootType_AnagenWithPapilla;
+    if(toolTitle == "RootType_Telogen") return ToolType::RootType_Telogen;
+    if(toolTitle == "RootType_Catagen") return ToolType::RootType_Catagen;
+    if(toolTitle == "RootType_Dystrophic") return ToolType::RootType_Dystrophic;
+    if(toolTitle == "SimpleLine") return ToolType::SimpleLine;
+    if(toolTitle == "SmartLine") return ToolType::SmartLine;
+    if(toolTitle == "Ruler") return ToolType::Ruler;
+    if(toolTitle == "DensityAndDiameter") return ToolType::DensityAndDiameter;
 }
 
 enum class ToolSet {AllTools, CallibrationToolSet};
