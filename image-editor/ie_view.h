@@ -2,19 +2,18 @@
 #define TSPIMAGEEDITORVIEW_H
 
 #include <QtWidgets>
-#include "ieModel.h"
-#include "toolController.h"
+#include "ie_model.h"
+#include "ie_toolController.h"
 
-class TSPImageEditorView : public QGraphicsView
+class IE_View : public QGraphicsView
 {
 Q_OBJECT
 public:
-    TSPImageEditorView();
-    TSPImageEditorView(TSPImageEditorModel *pModel);
+    IE_View(IE_Model *pModel);
 
     QString getStatusBarInfoDataForUser() const;
-    TSPImageEditorModel *getPImgModel() const;
-    void setPImgModel(TSPImageEditorModel *value);
+    IE_Model *getPImgModel() const;
+    void setPImgModel(IE_Model *value);
 
     ToolsController *getPToolsController() const;
     void resize(int w, int h);
@@ -23,13 +22,15 @@ public:
 
     QPointF computeSceneRelativelyPosition(const QPointF point);
 
-    TSPImageEditorModel *getPModel() const;
-    void setPModel(TSPImageEditorModel *value);
+    IE_Model *getPModel() const;
+    void setPModel(IE_Model *value);
 
     QDockWidget *getPDockInfo() const;
 
     QDockWidget *getPDockDebugInfo() const;
     QDockWidget * initDockDebugWidget();
+
+
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -40,15 +41,18 @@ protected:
 
     virtual void wheelEvent (QWheelEvent *pe) override;
 
+    _global_ie *p_ie_global_data() const;
 private:
     QString statusBarData;
-    TSPImageEditorModel *pModel;
+    IE_Model *pModel;
     ToolsController *pToolsController;
     QDockWidget *pDockInfo, *pDockDebugInfo;
     QTableWidget *pdockTableWidget, *pDockInfoTable, *pDockLayersWidget;
 
     qreal currentScale;
     QPoint currentViewedModelLeftTopPoint; // Координата относительно Модели изображения видимой самой верхней левой точки
+
+    _global_ie *_p_ie_global_data;
 
 //    QLabel  *pImageOfModelSize, *pZoomScale,
 //            *pCurrentSizeOfViewWidget, *pLabelMousePos,

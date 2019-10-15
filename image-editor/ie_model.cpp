@@ -1,44 +1,33 @@
-#include "ieModel.h"
+#include "ie_model.h"
 
-            TSPImageEditorModel::TSPImageEditorModel()
+            IE_Model::IE_Model    ()
 {
-    pCompMod = new IE_ComputeModule();
-    connect(&IE_GLOBAL_DATA, &_global_ie::changed,
-            pCompMod, &IE_ComputeModule::makeCompute);
-
-
-    connect(pCompMod, &IE_ComputeModule::needListOfElements, [this](){
-        for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-             tmpIter!=layersList.end();tmpIter++)
-        {
-            pCompMod->addElementToCompute(*tmpIter);
-        }
-
-    });
-
-
-    connect(this, &TSPImageEditorModel::changed, this,
-            &TSPImageEditorModel::layersController);
-
-
     // ключ к глобальному объекту с информацией о масштабе итд
     qsrand(100000);
     globalDataKey = qrand();
-    IE_GLOBAL_DATA.setOwner(globalDataKey);
+    __global_data = new _global_ie(globalDataKey);
+
+
+
+
+
+    connect(this, &IE_Model::changed, this,
+            &IE_Model::layersController);
+
 }
 
-            TSPImageEditorModel::~TSPImageEditorModel()
+            IE_Model::~IE_Model   ()
 {
-    _modelData.tmpDir.removeRecursively();
+    if(_modelData.tmpDir.exists())
+        _modelData.tmpDir.removeRecursively();
 //    QGraphicsScene::~QGraphicsScene();
 }
 
-int         TSPImageEditorModel::saveModel()
+int         IE_Model::saveModel              ()
 {
     enum SaveFormat
     {Json, Bin}saveFormat;
     saveFormat = SaveFormat::Json;
-
     if (!_modelData.modelDir.exists()) {
         _modelData.modelDir.mkpath(".");
     }
@@ -72,17 +61,18 @@ int         TSPImageEditorModel::saveModel()
         return 0;
 }
 
-void        TSPImageEditorModel::saveModelAsImage()
+int         IE_Model::saveModelAsImage       ()
 {
 
 }
 
-void        TSPImageEditorModel::read(const QJsonObject &json)
+int         IE_Model::read                   (const QJsonObject &json)
 {
     _modelData.read(json);
-    IE_GLOBAL_DATA.setMeasureIndex(json["measureIndex"].toDouble(),globalDataKey);
+
+    __global_data->setMeasureIndex(json["measureIndex"].toDouble(),globalDataKey);
+    //! \todo Добавить пороги!
     QJsonArray layersArray = json["layers"].toArray();
-    qDebug() << "numOfLayer = " << layersArray.size();
     for (int layerIndex = 0; layerIndex < layersArray.size(); ++layerIndex) {
             QJsonObject layerObject = layersArray[layerIndex].toObject();
             IE_ModelLayer* pLayer = nullptr;
@@ -104,17 +94,17 @@ void        TSPImageEditorModel::read(const QJsonObject &json)
                 }
                 case ToolType::DensityAndDiameter:
                 {
-                    pParentItem = new IE_Line_DD();
+                    pParentItem = new IE_Line_DD(__global_data);
                     break;
                 }
                 case ToolType::Ruler:
                 {
-                    pParentItem = new IERuler();
+                    pParentItem = new IERuler(__global_data);
                     break;
                 }
                 case ToolType::SimpleLine:
                 {
-                    pParentItem = new IELine();
+                    pParentItem = new IELine(__global_data);
                     break;
                 }
                 case ToolType::Marker_FollicularUnit:
@@ -145,19 +135,21 @@ void        TSPImageEditorModel::read(const QJsonObject &json)
                 pLayer = new IE_ModelLayer(pParentItem);
             }
             pLayer->read(layerObject);
-            addLayer(pLayer);
+            addLayer(pLayer);/*
             if(convertToolTitleToToolType(layerObject["typeTitle"].toString()) == ToolType::MainImage)
             {
                 pMainImageLayer = pLayer;
                 imageRect = pLayer->boundingRect();
-            }
+            }*/
         }
+    return 0;
 }
 
-void        TSPImageEditorModel::write(QJsonObject &json) const
+int         IE_Model::write                  (QJsonObject &json) const
 {
     _modelData.write(json);
-    json["measureIndex"] = IE_GLOBAL_DATA.getMeasureIndex();
+    json["measureIndex"] = __global_data->getMeasureIndex();
+    //! \todo Добавить пороги!
     QJsonArray layerArray;
     foreach(IE_ModelLayer* layer, layersList)
     {
@@ -166,30 +158,10 @@ void        TSPImageEditorModel::write(QJsonObject &json) const
         layerArray.append(layerObject);
     }
     json["layers"] = layerArray;
+    return 0;
 }
 
-/*void        TSPImageEditorModel::initAsNewModel(QString imageFilePath)
-{
-
-#ifdef QT_DEBUG
-    _modelData.activateTestData();
-    _modelData.initNew(_modelData.modelDir.path());
-#endif
-#ifndef QT_DEBUG
-    _modelData.initNew("");
-#endif
-
-    if (!_modelData.tmpDir.exists()) {
-        _modelData.tmpDir.mkpath(".");
-    }
-    _modelData.tmpDir.mkpath("./res");
-    _modelData.resDir.setPath("res");
-
-    setMainImage(imageFilePath);
-
-}*/
-
-void TSPImageEditorModel::initAsNewModel(_Model_patientData patientData)
+int         IE_Model::initAsNewModel         (_Model_patientData patientData)
 {
     _modelData.initNew(patientData);
 
@@ -198,7 +170,22 @@ void TSPImageEditorModel::initAsNewModel(_Model_patientData patientData)
     }
     _modelData.tmpDir.mkpath("./res");
 
-    setMainImage("");
+    if(makeDialogForSetupModelAsNew() != QDialog::Accepted)
+    {
+        qDebug() << "makeDialogForSetupModelAsNew() was rejected.";
+        return 1;
+    }
+
+    if( m_pFieldOfViewCnt->makeDialogForSetupAsNew() != QDialog::Accepted)
+    {
+        qDebug() << "m_pFieldOfViewCnt->makeDialogForSetupAsNew() was rejected.";
+        return 1;
+    }
+
+
+    //! \todo загрузить !!!!!!
+
+    //setMainImage("");
 }
 
 /*void        TSPImageEditorModel::initWithModel(QString modelFilePath)
@@ -206,7 +193,7 @@ void TSPImageEditorModel::initAsNewModel(_Model_patientData patientData)
 
 }*/
 
-void TSPImageEditorModel::initWithModel(_Model_patientData patientData)
+int         IE_Model::initWithModel          (_Model_patientData patientData)
 {
 
     if(patientData.modelPath == "Empty")
@@ -215,6 +202,7 @@ void TSPImageEditorModel::initWithModel(_Model_patientData patientData)
                                                              "Выбор модели изображения",
                                                              QStandardPaths::displayName(
                                                                  QStandardPaths::HomeLocation ) );
+
     }
 
     QFile modelFile;
@@ -222,13 +210,13 @@ void TSPImageEditorModel::initWithModel(_Model_patientData patientData)
     if(!modelFile.exists())
     {
         QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не существует.").arg(patientData.modelPath));
-        return;
+        return 1;
     }
     if(!modelFile.open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не удается прочитать.").arg(patientData.modelPath));
         qWarning("Couldn't open file.");
-        return;
+        return 1;
     }
 
     QByteArray saveData = modelFile.readAll();
@@ -241,25 +229,22 @@ void TSPImageEditorModel::initWithModel(_Model_patientData patientData)
         QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не является моделью изображения.").arg(patientData.modelPath));
         qWarning() << modelFile.fileName() << "isn't TSP_JSON_IE_model.";
 //        patientBaseFile.rename("data/patients/!!!patientBase_ERROR.json");
-        return;
+        return 1;
     }
 
     _modelData.init(patientData);
     read(jsonObj);
+    return 0;
 }
 
 // ------- GETTERS and SETTERS
 
-QRectF      TSPImageEditorModel::getImageRect() const
+QRectF      IE_Model::getImageRect           () const
 {
     return imageRect;
 }
-QGraphicsPixmapItem *
-            TSPImageEditorModel::getPMainImage() const
-{
-    return pMainImage;
-}
-int         TSPImageEditorModel::setMainImage(QString imageFilePath)
+
+/*int         IE_Model::setMainImage           (QString imageFilePath)
 {
     IE_Tool_Image *pToolImage_mainImage = new IE_Tool_Image(QString("%1/%2").arg(_modelData.modelDir.path())
                                                                             .arg(_modelData.resDir.path()),
@@ -282,32 +267,34 @@ int         TSPImageEditorModel::setMainImage(QString imageFilePath)
     addLayer(pMainImageLayer);
 
     return 1;
-}
-qreal       TSPImageEditorModel::getMeasureIndex() const
+}*/
+
+
+qreal       IE_Model::getMeasureIndex        () const
 {
-    return IE_GLOBAL_DATA.getMeasureIndex();
+    return __global_data->getMeasureIndex();
 }
-void        TSPImageEditorModel::setMeasureIndex(const qreal &value)
+void        IE_Model::setMeasureIndex        (const qreal &value)
 {
-    IE_GLOBAL_DATA.setMeasureIndex(value, globalDataKey);
-    IE_GLOBAL_DATA.setUnitType(UnitType::mm, globalDataKey);
+    __global_data->setMeasureIndex(value, globalDataKey);
+    __global_data->setUnitType(UnitType::mm, globalDataKey);
     emit(measureIndexChanged(value));
 }
 ToolsController *
-            TSPImageEditorModel::getPToolCnt() const
+            IE_Model::getPToolCnt            () const
 {
     return pToolCnt;
 }
-void        TSPImageEditorModel::setPToolCnt(ToolsController *value)
+void        IE_Model::setPToolCnt            (ToolsController *value)
 {
     pToolCnt = value;
 }
-QDockWidget*TSPImageEditorModel::getPDockLayers() const
+QDockWidget*IE_Model::getPDockLayers         () const
 {
     return pDockLayers;
 }
 QList<IE_ModelLayer*>::const_iterator
-            TSPImageEditorModel::getLayersListIter() const
+            IE_Model::getLayersListIter      () const
 {
     if(layersList.isEmpty())
         return layersList.end();
@@ -315,23 +302,26 @@ QList<IE_ModelLayer*>::const_iterator
 }
 
 QList<IE_ModelLayer *>
-            TSPImageEditorModel::getLayersList() const
+            IE_Model::getLayersList          () const
 {
     return layersList;
 }
-IE_ComputeModule *
-            TSPImageEditorModel::getPCompMod() const
+
+
+_Model_patientData
+            IE_Model::get_Model_patientData()
 {
-    return pCompMod;
+    return _modelData.to_Model_patientData();
 }
 IE_ModelLayer *
-            TSPImageEditorModel::getLayerByListIndex(int listIndex)
+            IE_Model::getLayerByListIndex    (int listIndex)
 {
     QList<IE_ModelLayer*>::iterator iterResult = getLayerIteratorByListIndex(listIndex);
     return iterResult == layersList.end() ? nullptr : *iterResult;
 }
 QList<IE_ModelLayer*>::iterator
-            TSPImageEditorModel::getLayerIteratorByListIndex(int listIndex)
+            IE_Model::getLayerIteratorByListIndex
+                                                        (int listIndex)
 {
     if(listIndex<0 || listIndex >= layersList.count())
         return layersList.end();
@@ -343,127 +333,38 @@ QList<IE_ModelLayer*>::iterator
 
 // ------- END GETTERS and SETTERS
 
-// !!!!!! ------- TODO:
-QDockWidget*TSPImageEditorModel::initInfoDock()
+/// \todo !!!!!! ------- :
+QDockWidget*IE_Model::initInfoDock           ()
 {
 }
-QDockWidget*TSPImageEditorModel::initComputeDock()
-{
-    return pCompMod->initViewTable();
-}
-QDockWidget*TSPImageEditorModel::initToolInfoDock()
+QDockWidget*IE_Model::initToolInfoDock       ()
 {
     return pToolCnt->initInfoDock();
 }
 
-void        TSPImageEditorModel::makeHairDensityComputeWithWidget()
+void        IE_Model::makeHairDensityComputeWithWidget
+                                                        ()
 {
-    int i = 0, termin = 0, well = 0;
-    qreal penWidth;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if( tmpIter.i->t()->getToolType() == ToolType::DensityAndDiameter)
-        {
-            if(!tmpIter.i->t()->isVisible())
-                continue;
-            i++;
-            penWidth = dynamic_cast<IELine*>(tmpIter.i->t()->getToolPtr())->getPenWidth();
-                if(IE_GLOBAL_DATA.convertWithForamtF(penWidth, (UnitType)IE_GLOBAL_DATA.getIndexThreshold_terminal_wellus_unitType()) >=
-                        IE_GLOBAL_DATA.getThreshold_TW())
-                termin++;
-            else
-                well++;
+    //! \bug Утечка памяти!
+    IE_Report * pReport = new IE_Report(__global_data);
+    IE_Compute comp(__global_data,&layersList);
 
-
-        }
-    }
-
-    qreal square = computeSquare()/(IE_GLOBAL_DATA.getMeasureIndex()*IE_GLOBAL_DATA.getMeasureIndex());
-    qreal totalHairInCm2 = round(i/square*100.0);
-    qreal percentTermin = termin*1.0/i*100.0;
-    qreal terminHairInCm2 = round(termin/square*100.0);
-    qreal percentWellus = well*1.0/i*100.0;
-    qreal wellusHairInCm2 = round(well/square*100.0);
-
-
-
-    QChart *chart = new QChart();
-    QChartView *chartView = new QChartView(chart);
-
-    QBarSet *set0 = new QBarSet("Всего волос");
-    *set0 << totalHairInCm2;
-    QBarSet *set1 = new QBarSet("Терминальных волос");
-    *set1 << terminHairInCm2;
-    QBarSet *set2 = new QBarSet("Веллус");
-    *set2 << wellusHairInCm2;
-
-    QBarSeries *series = new QBarSeries();
-    series->append(set0);
-    series->append(set1);
-    series->append(set2);
-
-    series->setLabelsFormat("@value");
-    series->setLabelsPosition(QAbstractBarSeries::LabelsInsideEnd);
-    series->setLabelsVisible();
-
-    chart->addSeries(series);
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-    chartView->setRenderHint(QPainter::Antialiasing);
-
-    QValueAxis *axisY = new QValueAxis();
-    axisY->setRange(0,300);
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-
-
-    QCategoryAxis *axisY3 = new QCategoryAxis;
-    axisY3->append(" ", 190);
-    axisY3->append("Норма", 230);
-    axisY3->append(" ", 300);
-    axisY3->setShadesPen(Qt::NoPen);
-    axisY3->setShadesBrush(QBrush(QColor(0x99, 0xcc, 0xcc, 0x55)));
-    axisY3->setShadesVisible(true);
-
-    chart->addAxis(axisY3, Qt::AlignRight);
-    series->attachAxis(axisY3);
-
-    QWidget* pTmp = new QWidget();
-    pTmp->setWindowFlag(Qt::Tool);
-    pTmp->setWindowTitle("[Отчет] Плотность волос");
-    QVBoxLayout *pVertBoxLayout = new QVBoxLayout(pTmp);
-    pVertBoxLayout->addWidget(chartView);
-
-
-//    length->setNum(0);
-//    QHBoxLayout *pHorBoxLayout = new QHBoxLayout(this)
-
-
-
-
-
-
-    QLabel *pLabel;
-//    pLabel->setNum(i);
-    pLabel = new QLabel(QString("Всего измеренно волос: %1. Это %2 на см.кв.").arg(i).arg(totalHairInCm2), pTmp);
-    pVertBoxLayout->addWidget(pLabel);
-    pLabel = new QLabel(QString("Из них терминальных волос: %1. Это %2 на см.кв. или %3 %").arg(termin).
-                                                                                            arg(terminHairInCm2).
-                                                                                            arg(percentTermin), pTmp);
-    pVertBoxLayout->addWidget(pLabel);
-    pLabel = new QLabel(QString("Веллус: %1. Это %2 на см.кв. или %3 %"). arg(well).arg(wellusHairInCm2).
-                                                                                            arg(percentWellus), pTmp);
-    pVertBoxLayout->addWidget(pLabel);
-    pLabel = new QLabel(QString("Площадь изображения: %1 %2.кв.").arg(square).arg(UnitTypeTitle[IE_GLOBAL_DATA.getUnitType()]), pTmp);
-    pVertBoxLayout->addWidget(pLabel);
-
-    pTmp->setMinimumWidth(500);
-    pTmp->setMinimumHeight(500);
-    pTmp->show();
+    pReport->makeHairDensityReport_dialog(comp.compute(IE_Compute::ComputeType::HairDensity));
 }
 
-qreal       TSPImageEditorModel::computeSquare()
+void        IE_Model::makeHairDiameterComputeWithWidget
+                                                        ()
+{
+    //! \bug Утечка памяти!
+    IE_Report * pReport = new IE_Report(__global_data);
+    IE_Compute comp(__global_data,&layersList);
+
+    pReport->makeHairDiameterReport_dialog(comp.compute(IE_Compute::ComputeType::HairDiameter));
+}
+
+
+
+qreal       IE_Model::computeSquare          ()
 {
     qreal sq = 1;
     for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
@@ -480,8 +381,9 @@ qreal       TSPImageEditorModel::computeSquare()
     return sq;
 }
 
-void        TSPImageEditorModel::setInputArgs()
+void        IE_Model::setInputArgs           ()
 {
+    //! \bug утечка данных
     QPushButton *ppbSave = new QPushButton();
     ppbSave->setText("Сохранить");
 
@@ -502,42 +404,85 @@ void        TSPImageEditorModel::setInputArgs()
 
     lst << UnitTypeTitle[0] << UnitTypeTitle[1] << UnitTypeTitle[2] << UnitTypeTitle[3] << UnitTypeTitle[4];
     pcbo->addItems(lst);
-    pcbo->setCurrentIndex(IE_GLOBAL_DATA.getUnitType());
+    pcbo->setCurrentIndex(__global_data->getUnitType());
     pVertBoxLayout->addWidget(pLabel);
     pVertBoxLayout->addWidget(pcbo);
 
     connect(ppbSave, &QPushButton::released, [this, pcbo]()
     {
-        IE_GLOBAL_DATA.setIndexUnitType(pcbo->currentIndex(), globalDataKey);
-
+        __global_data->setIndexUnitType(pcbo->currentIndex(), globalDataKey);
     });
+
+
 
     pLabel = new QLabel("Порог для Терминальных/Веллусных:");
 
-
-    QSpinBox *pSpinBox = new QSpinBox(pTmp);
-    pLabel->setBuddy(pSpinBox);
+    QHBoxLayout *pHorBoxLayout = new QHBoxLayout(pTmp);
+    QLineEdit *pLineEdit = new QLineEdit(pTmp);
+    pLabel->setBuddy(pLineEdit);
     //pSpinBox->setEnabled(false);
-    pSpinBox->setRange(1,100);
-    pSpinBox->setValue(IE_GLOBAL_DATA.getThreshold_TW());
-    pSpinBox->setWrapping(true); // циклический режим
-    pSpinBox->setButtonSymbols(QSpinBox::PlusMinus);
-    pLabel->setBuddy(pSpinBox);
-    QHBoxLayout *phbl = new QHBoxLayout(pTmp);
-    phbl->addWidget(pSpinBox,3);
+    pLineEdit->setText(QString().number(__global_data->getThreshold_TW()));
 
-    pcbo = new QComboBox(pTmp);
-    pcbo->addItems(lst);
-    pcbo->setCurrentIndex(IE_GLOBAL_DATA.getIndexThreshold_terminal_wellus_unitType());
-    phbl->addWidget(pcbo,1);
     pVertBoxLayout->addWidget(pLabel);
-    pVertBoxLayout->addItem(phbl);
+    pHorBoxLayout->addWidget(pLineEdit);
 
-    connect(ppbSave, &QPushButton::released, [this, pSpinBox, pcbo]()
+    QLabel *chosenUnit = new QLabel();
+    chosenUnit->setText(pcbo->currentText());
+    connect(pcbo, &QComboBox::currentTextChanged, chosenUnit, &QLabel::setText);
+
+    pHorBoxLayout->addWidget(chosenUnit);
+    pVertBoxLayout->addLayout(pHorBoxLayout);
+
+
+
+    connect(ppbSave, &QPushButton::released, [this, pLineEdit]()
     {
-        IE_GLOBAL_DATA.setThreshold_TW(pSpinBox->value(), globalDataKey);
-        IE_GLOBAL_DATA.setThreshold_terminal_wellus_unitType(pcbo->currentIndex(), globalDataKey);
+        __global_data->setThreshold_TW(QString(pLineEdit->text()).toDouble(), globalDataKey);
+    });
 
+
+    pLabel = new QLabel("Верхний порог для <b>тонкого</b> волоса:");
+    pLabel->setTextFormat( Qt::RichText );
+
+    pHorBoxLayout = new QHBoxLayout(pTmp);
+    pLineEdit = new QLineEdit(pTmp);
+    pLabel->setBuddy(pLineEdit);
+    pLineEdit->setText(QString().number(__global_data->getThreshold_thinHair()));
+
+    pVertBoxLayout->addWidget(pLabel);
+    pHorBoxLayout->addWidget(pLineEdit);
+
+    chosenUnit = new QLabel();
+    chosenUnit->setText(pcbo->currentText());
+    connect(pcbo, &QComboBox::currentTextChanged, chosenUnit, &QLabel::setText);
+    pHorBoxLayout->addWidget(chosenUnit);
+    pVertBoxLayout->addLayout(pHorBoxLayout);
+
+    connect(ppbSave, &QPushButton::released, [this, pLineEdit]()
+    {
+        __global_data->setThreshold_thinHair(QString(pLineEdit->text()).toDouble(), globalDataKey);
+    });
+
+    pLabel = new QLabel("Верхний порог для <b>среднего</b> волоса:");
+    pLabel->setTextFormat( Qt::RichText );
+
+    pHorBoxLayout = new QHBoxLayout(pTmp);
+    pLineEdit = new QLineEdit(pTmp);
+    pLabel->setBuddy(pLineEdit);
+    pLineEdit->setText(QString().number(__global_data->getThreshold_mediumHair()));
+
+    pVertBoxLayout->addWidget(pLabel);
+    pHorBoxLayout->addWidget(pLineEdit);
+
+    chosenUnit = new QLabel();
+    chosenUnit->setText(pcbo->currentText());
+    connect(pcbo, &QComboBox::currentTextChanged, chosenUnit, &QLabel::setText);
+    pHorBoxLayout->addWidget(chosenUnit);
+    pVertBoxLayout->addLayout(pHorBoxLayout);
+
+    connect(ppbSave, &QPushButton::released, [this, pLineEdit]()
+    {
+        __global_data->setThreshold_mediumHair(QString(pLineEdit->text()).toDouble(), globalDataKey);
     });
 
 
@@ -546,6 +491,8 @@ void        TSPImageEditorModel::setInputArgs()
     pTmp->setLayout(pVertBoxLayout);
 
     pTmp->show();
+    pTmp->raise();
+    pTmp->activateWindow();
 
 
 }
@@ -555,7 +502,7 @@ void        TSPImageEditorModel::setInputArgs()
 
 // ------- Layer manipulations
 
-QDockWidget*TSPImageEditorModel::initLayersDock()
+QDockWidget*IE_Model::initLayersDock         ()
 {
     pDockLayers = new QDockWidget("Слои");
     pDockLayersTableView = new QTableView();
@@ -569,12 +516,12 @@ QDockWidget*TSPImageEditorModel::initLayersDock()
                 col = pDockLayersTableView->columnAt(pos.x());
         if(row==-1 || col==-1)
             return;
-
-           QAction action1("Удалить слой");
-           connect(&action1, &QAction::triggered, [this, row](){
-                this->eraseLayer(row);
-           });
-           contextMenu.addAction(&action1);
+        /// \bug : при удалении слоя все вылетает, когда нажимаешь на другой слой
+//           QAction action1("Удалить слой");
+//           connect(&action1, &QAction::triggered, [this, row](){
+//                this->eraseLayer(row);
+//           });
+//           contextMenu.addAction(&action1);
 
            bool visible = layersList.at(row)->isVisible();
 
@@ -603,7 +550,7 @@ QDockWidget*TSPImageEditorModel::initLayersDock()
 
     //layersDockController();
 //    connect(this, &TSPImageEditorModel::changed, pDockLayersTableModel, &IE_LayersTableModel::toChange);
-    connect(this, &TSPImageEditorModel::changed, [this](){
+    connect(this, &IE_Model::changed, [this](){
         delete pDockLayersTableModel;
 //        pToolCnt->resetEditingMode();
         pDockLayersTableModel = new IE_LayersTableModel();
@@ -625,7 +572,7 @@ QDockWidget*TSPImageEditorModel::initLayersDock()
     return pDockLayers;
 }
 
-void        TSPImageEditorModel::addLayerViaToolCnt()
+void        IE_Model::addLayerViaToolCnt     ()
 {
     if(pToolCnt)
     {
@@ -634,14 +581,83 @@ void        TSPImageEditorModel::addLayerViaToolCnt()
     }
 }
 
-void        TSPImageEditorModel::addLayer(ToolType toolType, QGraphicsItem *item)
+QDialog::DialogCode IE_Model::makeDialogForSetupModelAsNew()
 {
-//    addItem(item);
-//    IE_ModelLayer *layerData = new IE_ModelLayer(toolType, item);
-//    layersList.append(layerData);
+    QDialog * locPDialog = new QDialog();
+    QVBoxLayout * pMainLayout = new QVBoxLayout(locPDialog);
+    pMainLayout->addWidget(new QLabel("Первичные настройки для создания нового обследования:",locPDialog));
+    QComboBox    *pcboProfile;
+    if(_modelData.profile == IE_ProfileType::None)
+    {
+        QLabel *pLabel = new QLabel("Тип обследования:", locPDialog);
+
+        pcboProfile = new QComboBox(locPDialog);
+        pLabel->setBuddy(pcboProfile);
+        QStringList  lst;
+
+        lst << "Трихограмма" << "Трихоскопия" << "Фототрихограмма";
+        pcboProfile->addItems(lst);
+        pcboProfile->setCurrentIndex( IE_FieldOfView_Controller::getStandartQuantity(_modelData.profile)  );
+        pMainLayout->addWidget(pLabel);
+        pMainLayout->addWidget(pcboProfile);
+
+    }
+
+    QLabel *pLabel = new QLabel("Количество полей зрения:", locPDialog);
+
+    QComboBox    *pcboQuiantityFV = new QComboBox(locPDialog);
+    pLabel->setBuddy(locPDialog);
+    QStringList  lst;
+
+    lst << QString().number(IE_FieldOfView_Controller::Quantity::One)
+        << QString().number(IE_FieldOfView_Controller::Quantity::Two)
+        << QString().number(IE_FieldOfView_Controller::Quantity::Three)
+        << QString().number(IE_FieldOfView_Controller::Quantity::Four)
+        << QString().number(IE_FieldOfView_Controller::Quantity::Six);
+    pcboQuiantityFV->addItems(lst);
+    pcboQuiantityFV->setCurrentIndex( IE_FieldOfView_Controller::getStandartQuantity(_modelData.profile)  );
+
+    pMainLayout->addWidget(pLabel);
+    pMainLayout->addWidget(pcboQuiantityFV);
+
+
+    locPDialog->setLayout(pMainLayout);
+    locPDialog->setModal(true);
+
+    locPDialog->show();
+    int answer =  locPDialog->exec();
+
+    if(answer == QDialog::Accepted)
+    {
+        switch (pcboProfile->currentIndex()) {
+        case (IE_ProfileType::Trichogram + 1):
+        {
+            _modelData.profile = IE_ProfileType::Trichogram;
+            break;
+        }
+        case (IE_ProfileType::Trichoscopy + 1):
+        {
+            _modelData.profile = IE_ProfileType::Trichoscopy;
+            break;
+        }
+        case (IE_ProfileType::Phototrichogram + 1):
+        {
+            _modelData.profile = IE_ProfileType::Phototrichogram;
+            break;
+        }
+        }
+        m_pFieldOfViewCnt->init((IE_FieldOfView_Controller::Quantity)pcboQuiantityFV->currentText().toInt());
+    }
+    delete locPDialog;
+    return (QDialog::DialogCode)answer;
 }
 
-void        TSPImageEditorModel::addLayer(IE_ModelLayer* layerToAdd)
+_global_ie *IE_Model::getPGlobal_data() const
+{
+    return __global_data;
+}
+
+void        IE_Model::addLayer               (IE_ModelLayer* layerToAdd)
 {
 
     for (QList<IE_ModelLayer*>::iterator iter = layersList.begin();iter!=layersList.end();iter++)
@@ -655,9 +671,9 @@ void        TSPImageEditorModel::addLayer(IE_ModelLayer* layerToAdd)
     layersList.append(layerToAdd);
 }
 
-void        TSPImageEditorModel::showLayer(int listIndex)
+void        IE_Model::showLayer              (int listIndex)
 {
-    IE_ModelLayer* foundLayer = getLayerByListIndex(listIndex);
+    IE_ModelLayer* foundLayer = getLayerByListIndex     (listIndex);
     if(!foundLayer)
     {
         qDebug() << "TSPImageEditorModel::showLayer(int listIndex) >> getLayerByListIndex returns nullptr.";
@@ -666,7 +682,7 @@ void        TSPImageEditorModel::showLayer(int listIndex)
 
     foundLayer->unhide();
 }
-void        TSPImageEditorModel::hideLayer(int listIndex)
+void        IE_Model::hideLayer              (int listIndex)
 {
     IE_ModelLayer* foundLayer = getLayerByListIndex(listIndex);
     if(!foundLayer)
@@ -678,8 +694,8 @@ void        TSPImageEditorModel::hideLayer(int listIndex)
     foundLayer->hide();
 }
 
-// !!!!!! ------- TODO:
-void        TSPImageEditorModel::layersController()
+/// \todo !!!!!! ------- :
+void        IE_Model::layersController       ()
 {
 //    static QList<QGraphicsItem*> itemsList;
 //    itemsList = items(Qt::AscendingOrder);
@@ -703,14 +719,14 @@ void        TSPImageEditorModel::layersController()
 
 }
 
-void        TSPImageEditorModel::eraseLayer(int listIndex)
+void        IE_Model::eraseLayer             (int listIndex)
 {
     QList<IE_ModelLayer*>::iterator iterResult = getLayerIteratorByListIndex(listIndex);
     if(iterResult == layersList.end())
         return;
     eraseLayer(iterResult);
 }
-void        TSPImageEditorModel::eraseLayer(QList<IE_ModelLayer*>::iterator iter)
+void        IE_Model::eraseLayer             (QList<IE_ModelLayer*>::iterator iter)
 {
     QGraphicsItem *pGraphicsItem = *iter;
 
@@ -725,37 +741,38 @@ void        TSPImageEditorModel::eraseLayer(QList<IE_ModelLayer*>::iterator iter
         {
             pGraphicsItem = (QGraphicsItem*) *tmpIter;
             layersList.erase(tmpIter);
+            this->removeItem(pGraphicsItem->parentItem());
+            delete pGraphicsItem;
+            pGraphicsItem = nullptr;
             break;
         }
     }
 
-    this->removeItem(pGraphicsItem->parentItem());
-    delete pGraphicsItem;
-    pGraphicsItem = nullptr;
+
 }
 
-// !!!!!! ------- TODO:
-void        TSPImageEditorModel::selectedLayer(int row)
+/// \todo !!!!!! ------- :
+void        IE_Model::selectedLayer          (int row)
 {
 
 }
 
 // ------- END Layer manipulations ------- //
 
-// !!!!!! ------- TODO:
-void        TSPImageEditorModel::save(QString modelFilePath)
+/// \todo !!!!!! ------- :
+void        IE_Model::save                   (QString modelFilePath)
 {
 
 }
-// !!!!!! ------- TODO:
-void        TSPImageEditorModel::close(QString modelFilePath)
+/// \todo !!!!!! ------- :
+void        IE_Model::close                  (QString modelFilePath)
 {
-    static QList<QGraphicsItem*> itemsList;
-    itemsList = items(Qt::AscendingOrder);
-    for (QListIterator<QGraphicsItem*> listIter(itemsList);listIter.hasNext();)
-    {
-        static QGraphicsItem* current = listIter.next();
-    }
+//    static QList<QGraphicsItem*> itemsList;
+//    itemsList = items(Qt::AscendingOrder);
+//    for (QListIterator<QGraphicsItem*> listIter(itemsList);listIter.hasNext();)
+//    {
+//        static QGraphicsItem* current = listIter.next();
+//    }
 }
 
 

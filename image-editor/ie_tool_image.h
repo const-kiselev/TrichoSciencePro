@@ -31,6 +31,8 @@ public:
                  QString destParentDir,
                  QString tmpDir);
 
+    int loadImage(QString filePath);
+
     void mouseFirstPress(QPointF point) override {}
     int mouseMove(QPointF point)        override {}
     void wheelMode(QWheelEvent *pe)     override {}
@@ -40,8 +42,8 @@ public:
     bool deactivateEditMode()           override {}
     void makeCompute()                  override {}
     QWidget* getWidgetPtr()             override {return nullptr;}
-    void    read(const QJsonObject &json)           override;
-    void    write(QJsonObject &json)const           override;
+    int    read(const QJsonObject &json)           override;
+    int    write(QJsonObject &json)const           override;
     QRectF          boundingRect() const                override;
 protected:
 
@@ -55,7 +57,7 @@ private:
     QDir        _destDir, _tmpDir, _destParentDir;
 
     void copyFileToWorkDir();
-    void loadImage(QString filePath);
+
 };
 
 #endif // IE_TOOL_IMAGE_H

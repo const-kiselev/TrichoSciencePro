@@ -3,16 +3,16 @@
 
 #include <QObject>
 #include <QtWidgets>
-#include "ieView.h"
-#include "ie_toolCalibration.h"
+#include "ie_view.h"
+#include "ie_calibration.h"
 
-class TSPimageEditor: public QMainWindow
+
+class ImageEditor: public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit TSPimageEditor();
-    TSPimageEditor(_Model_patientData patientData);
-    ~TSPimageEditor() override;
+    explicit ImageEditor();
+    ~ImageEditor() override;
 protected:
     void closeEvent(QCloseEvent *event) override;
 private:
@@ -22,17 +22,19 @@ private:
 
     QWidget *pSceneWidget;
 
-    TSPImageEditorView *pView;
-    TSPImageEditorModel *pModel;
+    IE_View *pView;
+    IE_Model *pModel;
     ToolsController *pIEToolController;
 
     void menuInit();
 
     // History Item
 private slots:
-
+    void makeCalibration();
 public slots:
-    void makeCalibration(qreal mIndex);
+    void open(_Model_patientData patientData);
+    void openNew(_Model_patientData patientData);
+
 signals:
     void wasClosed();
     void wasSaved(_Model_patientData patientData);

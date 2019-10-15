@@ -6,6 +6,7 @@
 #include "patient-manager/PatientManager.h"
 #include "image-editor/ImageEditor.h"
 
+
 class TrichoSciencePro : public QObject
 {
     Q_OBJECT
@@ -17,7 +18,8 @@ private:
 signals:
 
 private slots:
-    void runImageEditor(_Model_patientData patientData);
+    void runNewImageEditor(_Model_patientData patientData);
+    void runSavedImageEditor(_Model_patientData patientData);
 };
 
 #endif // TRICHOSCIENCEPRO_H

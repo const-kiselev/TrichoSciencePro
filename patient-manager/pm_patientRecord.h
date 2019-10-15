@@ -6,7 +6,7 @@
 #include <QDate>
 #include <QtWidgets>
 
-// TODO:
+/// \todo
 // - необходимо организовать проверку несохраненных сессий.
 
 

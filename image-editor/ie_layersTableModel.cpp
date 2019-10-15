@@ -42,6 +42,7 @@ void IE_LayersTableModel::setPLayersList(QList<IE_ModelLayer *> *value)
 
 void IE_LayersTableModel::toChange()
 {
-//    emit dataChanged(createIndex(0,0), createIndex(rowCount(), 0), {Qt::DisplayRole});
-
+    emit dataChanged(createIndex(0,0), createIndex(rowCount(), 0), {Qt::DisplayRole});
+//    QModelIndex topLeft = createIndex(0,0);
+//      emit dataChanged(topLeft, topLeft);
 }

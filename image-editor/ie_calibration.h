@@ -3,8 +3,8 @@
 
 #include <QtWidgets>
 
-#include "toolController.h"
-#include "ieView.h"
+#include "ie_toolController.h"
+#include "ie_view.h"
 
 class IE_ToolCalibration: public QWidget
 {
@@ -17,9 +17,9 @@ public:
 
 protected:
 private:
-    TSPImageEditorModel *pModel;
+    IE_Model *pModel;
 //    QGraphicsView *pView;
-    TSPImageEditorView *pView;
+    IE_View *pView;
     ToolsController *pToolController;
     QGraphicsLineItem *line;
     QLineEdit *pMeasureLineEdit;

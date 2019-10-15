@@ -21,6 +21,11 @@ PM_test_patientList::PM_test_patientList(QWidget *parent): QWidget (parent)
     pVBLayout->addWidget(pPatientSessions);
     pMainLayout->addLayout(pVBLayout);
 
+    connect(pPatientSessions, &QListWidget::doubleClicked,[this](const QModelIndex &index)
+    {
+        runImageEditorWithModel(pPatientSessions->item(index.row())->text());
+    });
+
     m_pButtonPatientRecord = new QPushButton("Амбулаторная карта");
     m_pButtonPatientRecord->setEnabled(false);
     pPatientActions->addWidget(m_pButtonPatientRecord);
@@ -32,7 +37,7 @@ PM_test_patientList::PM_test_patientList(QWidget *parent): QWidget (parent)
     m_pButtonCreateSession = new QPushButton("Создать сеанс-исследование");
     pPatientActions->addWidget(m_pButtonCreateSession);
 
-    connect(m_pButtonCreateSession, &QPushButton::released, this, &PM_test_patientList::initImageEditorRun);
+    connect(m_pButtonCreateSession, &QPushButton::released, this, &PM_test_patientList::runImageEditorNew);
 
     pMainLayout->addLayout(pPatientActions);
     setLayout(pMainLayout);
@@ -177,7 +182,7 @@ void PM_test_patientList::activatePatientActions(bool activate)
 void PM_test_patientList::readPatientSessionList(QString sessionsWorkPath)
 {
     QFile patientBaseFile;
-    patientBaseFile.setFileName(sessionsWorkPath+"/IE_sessions/sessionsBase.json");
+    patientBaseFile.setFileName(sessionsWorkPath+"/IE_models/sessionsBase.json");
     if(!patientBaseFile.exists())
         return;
     if(!patientBaseFile.open(QIODevice::ReadOnly))
@@ -265,12 +270,11 @@ void PM_test_patientList::currentPatientInListWasChanged(int row)
     currentPatientCard = patientList.at(row);
     pFullPatientList->setCurrentRow(row);
     pPatientSessions->clear();
-    readPatientSessionList("data/patients/"+QString().number(currentPatientCard.UID));
+    readPatientSessionList(QString("data/patients/%1").arg(currentPatientCard.UID));
 }
 
-void PM_test_patientList::initImageEditorRun()
+void PM_test_patientList::runImageEditorNew()
 {
-
     if(!currentPatientCard.ID)
         return;
     _Model_patientData patientDataTmp;
@@ -278,8 +282,23 @@ void PM_test_patientList::initImageEditorRun()
     patientDataTmp.patient_UID = currentPatientCard.UID;
     patientDataTmp.patient_fullName = currentPatientCard.fullName;
     patientDataTmp.modelDir = "data/patients/"+QString().number(currentPatientCard.UID);
-    emit needToRunImageEditor(patientDataTmp);
+    emit needToRunNewImageEditor(patientDataTmp);
 }
+
+void PM_test_patientList::runImageEditorWithModel(QString modelUID)
+{
+    if(!currentPatientCard.ID)
+        return;
+    _Model_patientData patientDataTmp;
+    patientDataTmp.patient_ID = currentPatientCard.ID;
+    patientDataTmp.patient_UID = currentPatientCard.UID;
+    patientDataTmp.patient_fullName = currentPatientCard.fullName;
+    patientDataTmp.modelDir = "data/patients/"+QString().number(currentPatientCard.UID);
+    patientDataTmp.modelPath = QString("%1/IE_models/%2/%2_IE_model.json").arg(patientDataTmp.modelDir).arg(modelUID);
+    emit needToRunSavedImageEditor(patientDataTmp);
+}
+
+
 
 void PM_test_patientList::addSavedSession(_Model_patientData patientData)
 {

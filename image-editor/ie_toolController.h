@@ -4,7 +4,7 @@
 #include <QtWidgets>
 #include "ie_toolLine.h"
 #include "ie_modelLayer.h"
-#include "ie_toolMarker.h"
+#include "ie_toolmarker.h"
 #include "ie_toolRuler.h"
 #include "ie_header.h"
 #include "ie_line_dd.h"
@@ -17,7 +17,7 @@ class ToolsController : public QToolBar
 {
     Q_OBJECT
 public:
-    ToolsController();
+    ToolsController(_global_ie *gi);
 
     IE_ModelLayer *getPActiveTool() const;
 
@@ -27,9 +27,10 @@ public:
     ToolSet getToolSetType() const;
     void setToolSetType(const ToolSet &value);
     void initToolActions();
-    void setMeasureIndexInActiveTool(qreal input);
     void resetEditingMode();
     QDockWidget* initInfoDock();
+
+    void setP_ie_global_data(_global_ie *p_ie_global_data);
 
 protected:
     virtual void mousePressEvent  (QMouseEvent* pe)override;
@@ -37,6 +38,7 @@ protected:
     virtual void mouseMoveEvent   (QMouseEvent* pe)override;
     virtual void wheelEvent (QWheelEvent *pe) override;
     virtual void keyPressEvent (QKeyEvent *pe) override;
+    _global_ie *p_ie_global_data() const;
 private:
     IE_ModelLayer *pActiveTool;
 
@@ -50,6 +52,8 @@ private:
 
     bool editModeActive;
 
+    _global_ie *_p_ie_global_data;
+
     void initToolBarView();
     void changeTool(ToolType tt, QAction* pa);
     void toolEventFilter(QInputEvent *pe);
@@ -59,7 +63,6 @@ public slots:
     void updateToolInfoDockWidget();
 
 signals:
-    void needMeasureIndex();
     void startUsingNewTool();
     void stopUsingTool();
     void zoomSignal(float delta, QPointF point);

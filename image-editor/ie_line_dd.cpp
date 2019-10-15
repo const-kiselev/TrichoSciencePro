@@ -1,33 +1,41 @@
 #include "ie_line_dd.h"
 
-IE_Line_DD::IE_Line_DD(QObject *parent):IELine(parent,
+IE_Line_DD::IE_Line_DD(_global_ie *gi, QObject *parent):IELine(gi,parent,
                                                ToolType::DensityAndDiameter,
                                                LineSettings::PenWidth)
 {
-
+    QPen locPen(pen());
+    locPen.setColor(Qt::red);
+    setPen(locPen);
 }
 
 void IE_Line_DD::wheelMode(QWheelEvent *pe)
 {
     IELine::wheelMode(pe);
-    if((int)IE_GLOBAL_DATA.convertWithForamtF(getPenWidth(),
-                    (UnitType)IE_GLOBAL_DATA.getIndexThreshold_terminal_wellus_unitType())  >=
-                                                                    IE_GLOBAL_DATA.getThreshold_TW())
-        pen().setColor(Qt::green), updateSettings();
+    QPen locPen(pen());
+    IELine::wheelMode(pe);
+    if(p_ie_global_data()->convertF(locPen.widthF())
+            >= p_ie_global_data()->getThreshold_TW())
+        locPen.setColor(Qt::green);
     else {
-        pen().setColor(Qt::red), updateSettings();
+        locPen.setColor(Qt::red);
     }
+    setPen(locPen);
+    updateSettings();
 }
 
-void IE_Line_DD::read(const QJsonObject &json)
+int IE_Line_DD::read(const QJsonObject &json)
 {
-    IELine::read(json);
+    return IELine::read(json);
 }
 
-void IE_Line_DD::write(QJsonObject &json) const
+int IE_Line_DD::write(QJsonObject &json) const
 {
-    IELine::write(json);
+    int answ;
+    if(answ = IELine::write(json))
+        return answ;
     json["typeTitle"] = getToolTitle(ToolType::DensityAndDiameter);
+    return 0;
 }
 
 //void IE_Line_DD::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

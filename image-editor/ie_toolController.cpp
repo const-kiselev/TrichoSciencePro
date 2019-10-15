@@ -1,10 +1,10 @@
-#include "toolController.h"
+#include "ie_toolController.h"
 
 
-// TODO: сделать логику обнудения pActiveTool = nullptr; !!!!
+/// \todo  сделать логику обнудения pActiveTool = nullptr; !!!!
 
 
-ToolsController::ToolsController()
+ToolsController::ToolsController(_global_ie *gi):_p_ie_global_data(gi)
 {
     setIconSize(QSize(20,20));
     setMovable(false);
@@ -68,14 +68,14 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                 {
                     switch (activeToolType) {
                     case ToolType::Ruler:
-                        pActiveTool = new IE_ModelLayer(ToolType::Ruler, new IERuler());
+                        pActiveTool = new IE_ModelLayer(ToolType::Ruler, new IERuler(p_ie_global_data()));
                         break;
                         case ToolType::SimpleLine:
-                        pActiveTool = new IE_ModelLayer(ToolType::SimpleLine, new IELine());
+                        pActiveTool = new IE_ModelLayer(ToolType::SimpleLine, new IELine(p_ie_global_data()));
                         break;
                         case ToolType::DensityAndDiameter:
                         pActiveTool = new IE_ModelLayer(ToolType::DensityAndDiameter,
-                                                        new IE_Line_DD());
+                                                        new IE_Line_DD(p_ie_global_data()));
                         break;
 
                     }
@@ -332,13 +332,23 @@ void ToolsController::keyPressEvent(QKeyEvent *pe)
     toolEventFilter(pe);
 }
 
+_global_ie *ToolsController::p_ie_global_data() const
+{
+    return _p_ie_global_data;
+}
+
+void ToolsController::setP_ie_global_data(_global_ie *p_ie_global_data)
+{
+    _p_ie_global_data = p_ie_global_data;
+}
+
 void ToolsController::initToolActions()
 {
     QActionGroup *pActionGroup = new QActionGroup(this);
     QList<ToolType> toolsList;
     switch (toolSetType){
-        case ToolSet::AllTools:
-            toolsList   << ToolType::NoneTool
+    case ToolSet::AllTools:
+        toolsList   << ToolType::NoneTool
                         << ToolType::SimpleLine
                         << ToolType::DensityAndDiameter
                         << ToolType::Zoom
@@ -498,11 +508,6 @@ void ToolsController::initToolActions()
         pActionGroup->addAction(pToolAction);
     }
     addActions(pActionGroup->actions());
-
-}
-
-void ToolsController::setMeasureIndexInActiveTool(qreal input)
-{
 
 }
 

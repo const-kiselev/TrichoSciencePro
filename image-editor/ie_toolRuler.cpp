@@ -1,6 +1,6 @@
 #include "ie_toolRuler.h"
 
-IERuler::IERuler(QObject *parent):IELine(parent, ToolType::Ruler, LineSettings::None)
+IERuler::IERuler(_global_ie *gi, QObject *parent):IELine(gi, parent, ToolType::Ruler, LineSettings::None)
 {
     selectionOffset = 10;
 }
@@ -45,15 +45,16 @@ QRectF IERuler::boundingRect() const
 
 }
 
-void IERuler::read(const QJsonObject &json)
+int IERuler::read(const QJsonObject &json)
 {
-    IELine::read(json);
+    return IELine::read(json);
 }
 
-void IERuler::write(QJsonObject &json) const
+int IERuler::write(QJsonObject &json) const
 {
     IELine::write(json);
     json["typeTitle"] = getToolTitle(ToolType::Ruler);
+    return 0;
 }
 
 

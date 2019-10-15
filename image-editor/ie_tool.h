@@ -28,8 +28,8 @@ public:
     virtual bool    activateEditMode()          =0;
     virtual bool    deactivateEditMode()        =0;
 
-    virtual void    read(const QJsonObject &json) =0;
-    virtual void    write(QJsonObject &json)const =0;
+    virtual int    read(const QJsonObject &json) =0;
+    virtual int    write(QJsonObject &json)const =0;
 
 
 };

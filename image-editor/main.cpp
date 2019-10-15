@@ -8,11 +8,14 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("TrichoScience Pro");
 
     app.setOrganizationDomain("tsp.com");
-    app.setApplicationName("imageEditor.TrichoScience.Pro");
+    app.setApplicationName("TrichoSciencePro");
     auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (path.isEmpty()) qFatal("Cannot determine settings storage location");
     QDir d(path);
-    if (d.mkpath(d.absolutePath()) && QDir::setCurrent(d.absolutePath()))
+
+    if(!d.exists())
+        d.mkpath(d.absolutePath());
+    if (QDir::setCurrent(d.absolutePath()))
     {
 ////    qDebug() << "settings in" << QDir::currentPath();
 //    QFile f{"settings.txt"};
@@ -20,12 +23,8 @@ int main(int argc, char *argv[])
 //      f.write("Hello, World");
     }
 
-
-    TSPimageEditor w;
-
-
+    ImageEditor w;
     w.show();
-
 
     return app.exec();
 }

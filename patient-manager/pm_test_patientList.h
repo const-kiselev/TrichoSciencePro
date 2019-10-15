@@ -1,7 +1,7 @@
 #ifndef PM_TEST_PATIENTLIST_H
 #define PM_TEST_PATIENTLIST_H
 
-// TODO:
+/// \todo :
 // - при создании базы пациентов проводить ревизию существующих директорий и из них извлекать данные.
 
 //#include <QWidget>
@@ -41,11 +41,16 @@ private:
     void writePatientSessionBase(QString sessionsWorkPath);
 
 signals:
-    void needToRunImageEditor(_Model_patientData patientData);
+    void needToRunNewImageEditor(_Model_patientData patientData);
+    void needToRunSavedImageEditor(_Model_patientData patientData);
 private slots:
     void createNewPatient();
     void currentPatientInListWasChanged(int row);
-    void initImageEditorRun();
+
+    void runImageEditorNew();
+    void runImageEditorWithModel(QString modelUID);
+
+    //void initImageEditorRun();
 public slots:
     void addSavedSession(_Model_patientData patientData);
 

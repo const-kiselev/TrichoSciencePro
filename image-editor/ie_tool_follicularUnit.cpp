@@ -57,16 +57,18 @@ bool IE_Tool_FollicularUnit::deactivateEditMode()
 
 }
 
-void IE_Tool_FollicularUnit::read(const QJsonObject &json)
+int IE_Tool_FollicularUnit::read(const QJsonObject &json)
 {
     setText(json["text"].toString());
     num = json["text"].toInt();
+    return 0;
 }
 
-void IE_Tool_FollicularUnit::write(QJsonObject &json) const
+int IE_Tool_FollicularUnit::write(QJsonObject &json) const
 {
     json["typeTitle"] = getToolTitle(ToolType::Marker_FollicularUnit);
     json["text"] = text();
+    return 0;
 }
 
 void IE_Tool_FollicularUnit::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)

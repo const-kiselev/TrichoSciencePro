@@ -28,7 +28,7 @@ IE_Tool_Image::IE_Tool_Image(QString destDir,
 
 IE_Tool_Image::~IE_Tool_Image()
 {
-    // TODO: удаление временного изображения
+    /// \todo  удаление временного изображения
 //    if(QFile::exists(_fileInfo.filePath()))
     //        QFile::remove(_fileInfo.filePath());
 }
@@ -40,46 +40,59 @@ void IE_Tool_Image::setDirs(QString destDir, QString destParentDir, QString tmpD
     _destParentDir = destParentDir;
 }
 
-void IE_Tool_Image::read(const QJsonObject &json)
+int IE_Tool_Image::read(const QJsonObject &json)
 {
     QString filePath = QString("%1/%2").arg(_destParentDir.path()).arg(json["filePath"].toString());
+    filePath = QDir::cleanPath(filePath);
     if(QFile::exists(filePath))
-        loadImage(filePath);
+    {
+        if(loadImage(filePath))
+            return 1;
+    }
     else
     {
         qWarning() << filePath << " doesn't exist !";
         QMessageBox::warning(nullptr, "Application", QString("Ошибка. Не удалось найти изображение %1.").arg(filePath));
-        //return 1;
+        return 1;
     }
+    return 0;
 }
 
-void IE_Tool_Image::write(QJsonObject &json) const
+int IE_Tool_Image::write(QJsonObject &json) const
 {
     json["typeTitle"] = getToolTitle(ToolType::Image);
     json["fileName"]  = _fileInfo.fileName();
-//    QString destFilePath = _destDir.relativeFilePath(_fileInfo.fileName());
     QString destFilePath = QString("%1/%2").arg(_destDir.path()).arg(_fileInfo.fileName());
 
-    if(!QFile::copy(_fileInfo.filePath(), destFilePath))
+    // Проверка на совпадение пути файла и нового файла.
+    if(_fileInfo.filePath() != destFilePath)
     {
-        json["filePath"] = _fileInfo.absolutePath();
-        return;
+        // Копирование файла
+        if(!QFile::copy(_fileInfo.filePath(), destFilePath))
+        {
+            json["fileName"]  = _fileInfo.fileName();
+            qWarning() << "Problem with coping:"<< _fileInfo.absoluteFilePath() << " "<< destFilePath;
+            json["filePath"] = _fileInfo.absoluteFilePath();
+            QMessageBox::warning(nullptr,
+                                 "Application",
+                                 QString("Не удалось скопировать изображение %1. Из-за этого при экспорте может произойти потеря данных. Пожалуйста, проверьте, что изображение доступно для копирования и не защищенно.").arg(_fileInfo.absoluteFilePath()));
+            return 1;
+        }
     }
-
-
 
     int ind = _destDir.absolutePath().indexOf(_destParentDir.path());
     int destParentDirPathSize = _destParentDir.path().size();
     if(ind!=-1)
     {
-        int ind2 = _destDir.absolutePath().indexOf("/", ind + destParentDirPathSize);
-        ind2++;
-        json["filePath"] = _destDir.absolutePath().mid(ind + destParentDirPathSize,ind2 )+_fileInfo.fileName();
+        json["filePath"] = QDir::cleanPath(QString("%1/%2") .arg(_destDir.absolutePath().mid(ind + destParentDirPathSize+1 ))
+                                                            .arg(_fileInfo.fileName())
+                                           );
     }
     else
     {
-        json["filePath"] = _fileInfo.absolutePath();
+        json["filePath"] = _fileInfo.absoluteFilePath();
     }
+    return 0;
 
 }
 
@@ -93,7 +106,7 @@ void IE_Tool_Image::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     QGraphicsPixmapItem::paint(painter, option, widget);
 }
 
-void IE_Tool_Image::loadImage(QString filePath)
+int IE_Tool_Image::loadImage(QString filePath)
 {
     while(!QFile::exists(filePath))
     {
@@ -111,5 +124,5 @@ void IE_Tool_Image::loadImage(QString filePath)
 
     _fileInfo.setFile(filePath);
     QGraphicsPixmapItem::setPixmap(QPixmap(filePath));
-
+    return 0;
 }

@@ -1,26 +1,27 @@
-#include "ieView.h"
+#include "ie_view.h"
 
 
 // Задачи:
 // - реализовать блокировку редактирования, пока не создана сцена-модель
 
-TSPImageEditorView::TSPImageEditorView()
-{
-    pModel = nullptr;
-    init();
-}
 
-TSPImageEditorView::TSPImageEditorView(TSPImageEditorModel *pInputModel):pModel(pInputModel)
+
+IE_View::IE_View(IE_Model *pInputModel):pModel(pInputModel)
 {
     init();
     sceneChanged();
+
+
 
     //resize(pModel->sceneRect().width(), pModel->sceneRect().height());
     //setFixedSize(pModel->sceneRect().width(), pModel->sceneRect().height());
 }
 
-void TSPImageEditorView::init()
+void IE_View::init()
 {
+    if(pModel)
+        _p_ie_global_data = pModel->getPGlobal_data();
+
     pDockInfo = nullptr;
     currentScale = 1.0;
     currentViewedModelLeftTopPoint = QPoint(0,0);
@@ -28,26 +29,24 @@ void TSPImageEditorView::init()
     setRenderHint (QPainter::Antialiasing, true ) ;
     centerOn(0,0);
     setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    pToolsController = new ToolsController();
+    pToolsController = new ToolsController(p_ie_global_data());
     // Связывание м/у сигнала "начало использование нового инструмента" и слотом "добавление нового элемента в модель ч/з контроллер инструментов"
     connect(pToolsController, &ToolsController::zoomSignal,
-            this, &TSPImageEditorView::zoomSlot);
+            this, &IE_View::zoomSlot);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
-    connect(pToolsController, &ToolsController::needMeasureIndex, [this](){
-        this->pToolsController->setMeasureIndexInActiveTool(this->pModel->getMeasureIndex());
-    });
+
 }
 
 // ------- EVENTS
 
-void TSPImageEditorView::resizeEvent(QResizeEvent *event)
+void IE_View::resizeEvent(QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
     emit(changedSizeOfView(size().width(), size().height()));
 }
-void TSPImageEditorView::mousePressEvent(QMouseEvent *pe)
+void IE_View::mousePressEvent(QMouseEvent *pe)
 {
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
    if(checkTheMousePosViaImageBorder(pe))
@@ -55,14 +54,14 @@ void TSPImageEditorView::mousePressEvent(QMouseEvent *pe)
    QApplication::sendEvent(pToolsController, pe);
 
 }
-void TSPImageEditorView::mouseReleaseEvent(QMouseEvent *pe)
+void IE_View::mouseReleaseEvent(QMouseEvent *pe)
 {
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
     if(checkTheMousePosViaImageBorder(pe))
         return;
     QApplication::sendEvent(pToolsController, pe);
 }
-void TSPImageEditorView::mouseMoveEvent(QMouseEvent *pe)
+void IE_View::mouseMoveEvent(QMouseEvent *pe)
 {
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
     if(checkTheMousePosViaImageBorder(pe))
@@ -70,16 +69,22 @@ void TSPImageEditorView::mouseMoveEvent(QMouseEvent *pe)
     QApplication::sendEvent(pToolsController, pe);
     emit(mousePos(pe->pos()));
 }
-void TSPImageEditorView::wheelEvent(QWheelEvent *pe)
+void IE_View::wheelEvent(QWheelEvent *pe)
 {
     QApplication::sendEvent(pToolsController, pe);
 }
 
-QDockWidget *TSPImageEditorView::getPDockDebugInfo() const
+_global_ie *IE_View::p_ie_global_data() const
+{
+    return _p_ie_global_data;
+}
+
+
+QDockWidget *IE_View::getPDockDebugInfo() const
 {
     return pDockDebugInfo;
 }
-QDockWidget *TSPImageEditorView::getPDockInfo() const
+QDockWidget *IE_View::getPDockInfo() const
 {
     return pDockInfo;
 }
@@ -89,11 +94,11 @@ QDockWidget *TSPImageEditorView::getPDockInfo() const
 // -------
 // ------- DockWidgets
 
-QDockWidget * TSPImageEditorView::initDockDebugWidget()
+QDockWidget * IE_View::initDockDebugWidget()
 {
 
 
-    static QLabel  *pImageOfModelSize, *pZoomScale, *pMeasureIndex,
+    QLabel  *pImageOfModelSize, *pZoomScale, *pMeasureIndex,
             *pCurrentSizeOfViewWidget, *pLabelMousePos, *pLabelMousePosMapToScene;
 
     pDockDebugInfo =  new QDockWidget("Debug Info");
@@ -105,36 +110,36 @@ QDockWidget * TSPImageEditorView::initDockDebugWidget()
     pImageOfModelSize = new QLabel(pdockTableWidget);
 
     pImageOfModelSize->setText(QString().number(pModel->width())+"x"+QString().number(pModel->height()));
-    connect(pModel, &TSPImageEditorModel::changedModelSize, [=](qreal fx, qreal fy){
+    connect(pModel, &IE_Model::changedModelSize, [=](qreal fx, qreal fy){
         pImageOfModelSize->setText(QString::number(fx)+" x "+QString::number(fy));
     });
 
     pMeasureIndex = new QLabel(pdockTableWidget);
     pMeasureIndex->setText(QString().number(pModel->getMeasureIndex()));
-    connect(pModel,&TSPImageEditorModel::measureIndexChanged, [=](qreal measureIndex){
+    connect(pModel,&IE_Model::measureIndexChanged, [=](qreal measureIndex){
         pMeasureIndex->setText(QString::number(measureIndex));
     });
 
     pZoomScale = new QLabel(pdockTableWidget);
     pZoomScale->setText(QString().number(currentScale));
-    connect(this, &TSPImageEditorView::changedScale, [=](qreal currentScale){
+    connect(this, &IE_View::changedScale, [=](qreal currentScale){
         pZoomScale->setText(QString::number(currentScale));
     });
 
     pCurrentSizeOfViewWidget = new QLabel(pdockTableWidget);
-    connect(this, &TSPImageEditorView::changedSizeOfView, [=](int ix, int iy){
+    connect(this, &IE_View::changedSizeOfView, [=](int ix, int iy){
         pCurrentSizeOfViewWidget->setText(QString::number(ix)+" x "+QString::number(iy));
     });
 
     pLabelMousePos = new QLabel(pdockTableWidget);
     pLabelMousePos->setText("0 x 0");
-    connect(this, &TSPImageEditorView::mousePos, [=](QPointF point){
+    connect(this, &IE_View::mousePos, [=](QPointF point){
         pLabelMousePos->setText(QString().number(point.x())+" x "+QString().number(point.y()));
     });
 
     pLabelMousePosMapToScene = new QLabel(pdockTableWidget);
     pLabelMousePosMapToScene->setText("0 x 0");
-    connect(this, &TSPImageEditorView::mousePos, [=](QPointF point){
+    connect(this, &IE_View::mousePos, [=](QPointF point){
         point = computeSceneRelativelyPosition(point);
         pLabelMousePosMapToScene->setText(QString().number(point.x())+" x "+QString().number(point.y()));
     });
@@ -163,7 +168,7 @@ QDockWidget * TSPImageEditorView::initDockDebugWidget()
     return pDockDebugInfo;
 }
 
-void TSPImageEditorView::initInfoDock()
+void IE_View::initInfoDock()
 {
 
 }
@@ -173,7 +178,7 @@ void TSPImageEditorView::initInfoDock()
 // -------
 // ------- Tool's methods
 
-void TSPImageEditorView::zoomSlot(float delta, QPointF point)
+void IE_View::zoomSlot(float delta, QPointF point)
 {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     static const double scaleFactor = 1.15;
@@ -196,14 +201,14 @@ void TSPImageEditorView::zoomSlot(float delta, QPointF point)
 // ------- END Tool's methods -------
 
 
-void TSPImageEditorView::sceneChanged()
+void IE_View::sceneChanged()
 {
     setScene(pModel);
     setSceneRect(0, 0, pModel->sceneRect().width(), pModel->sceneRect().height());
     fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
 }
 
-void TSPImageEditorView::resize(int w, int h)
+void IE_View::resize(int w, int h)
 {
     QGraphicsView::resize(w,h);
     //fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
@@ -211,7 +216,7 @@ void TSPImageEditorView::resize(int w, int h)
 
 
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
-int TSPImageEditorView::checkTheMousePosViaImageBorder(QMouseEvent *pe)
+int IE_View::checkTheMousePosViaImageBorder(QMouseEvent *pe)
 { 
     pe->setLocalPos(computeSceneRelativelyPosition(pe->pos()));
     if(pToolsController->getActiveToolType() >= ToolType::checkableTool)
@@ -229,7 +234,7 @@ int TSPImageEditorView::checkTheMousePosViaImageBorder(QMouseEvent *pe)
     return 0;
 }
     // уточнение координат относительно координаты ieView и ieModel
-QPointF TSPImageEditorView::computeSceneRelativelyPosition(const QPointF point)
+QPointF IE_View::computeSceneRelativelyPosition(const QPointF point)
 {
     return mapToScene(point.x(), point.y());
 }
@@ -237,30 +242,30 @@ QPointF TSPImageEditorView::computeSceneRelativelyPosition(const QPointF point)
 
 // ------- GETTERS and SETTERS
 
-ToolsController *TSPImageEditorView::getPToolsController() const
+ToolsController *IE_View::getPToolsController() const
 {
     return pToolsController;
 }
-TSPImageEditorModel *TSPImageEditorView::getPImgModel() const
+IE_Model *IE_View::getPImgModel() const
 {
     return pModel;
 }
-void TSPImageEditorView::setPImgModel(TSPImageEditorModel *value)
+void IE_View::setPImgModel(IE_Model *value)
 {
     pModel = value;
 }
-QString TSPImageEditorView::getStatusBarInfoDataForUser() const
+QString IE_View::getStatusBarInfoDataForUser() const
 {
 
 }
-TSPImageEditorModel *TSPImageEditorView::getPModel() const
+IE_Model *IE_View::getPModel() const
 {
     return pModel;
 }
-void TSPImageEditorView::setPModel(TSPImageEditorModel *value)
+void IE_View::setPModel(IE_Model *value)
 {
     pModel = value;
 }
 
 
-// !!!!!! ------- TODO:
+/// \todo !!!!!! ------- :

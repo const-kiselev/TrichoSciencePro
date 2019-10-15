@@ -20,56 +20,24 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 CONFIG += c++11
 
-ICON = resources/TSP.icns
-
 
 SOURCES += \
-    ImageEditor.cpp \
-    _global_ie.cpp \
-    ieModel.cpp \
-    ieView.cpp \
-    ie_computeModule.cpp \
-    ie_layersTableModel.cpp \
-    ie_line_dd.cpp \
-    ie_modelLayer.cpp \
-    ie_tool.cpp \
-    ie_toolCalibration.cpp \
-    ie_toolItemDelegate.cpp \
-    ie_toolLine.cpp \
-    ie_toolMarker.cpp \
-    ie_toolRuler.cpp \
-    ie_tool_follicularUnit.cpp \
-    ie_tool_image.cpp \
-    main.cpp \
-    toolController.cpp
+    ie_fieldOfView.cpp \
+    ie_fieldOfView_controller.cpp \
+    main.cpp
 
 HEADERS += \
     ../_header_tsp.h \
-    ImageEditor.h \
-    _global_ie.h \
-    ieModel.h \
-    ieView.h \
-    ie_computeModule.h \
-    ie_header.h \
-    ie_layersTableModel.h \
-    ie_line_dd.h \
-    ie_modelLayer.h \
-    ie_tool.h \
-    ie_toolCalibration.h \
-    ie_toolItemDelegate.h \
-    ie_toolLine.h \
-    ie_toolRuler.h \
-    ie_tool_follicularUnit.h \
-    ie_tool_image.h \
-    ie_toolmarker.h \
-    toolController.h
+    ie_fieldOfView.h \
+    ie_fieldOfView_controller.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RESOURCES += \
-    IE_res.qrc
 
-ICON = TSP.icns
+DISTFILES += \
+    image-editor.pri
+
+include(image-editor.pri)

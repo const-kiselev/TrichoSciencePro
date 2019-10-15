@@ -27,8 +27,8 @@ public:
     void            makeCompute()                       override {}
     QWidget*        getWidgetPtr()                      override {return nullptr;}
 
-    void    read(const QJsonObject &json)           override;
-    void    write(QJsonObject &json)const           override;
+    int    read(const QJsonObject &json)           override;
+    int    write(QJsonObject &json)const           override;
 private:
     void drawStar(QPainter *painter);
     void drawArrow(QPainter *painter);

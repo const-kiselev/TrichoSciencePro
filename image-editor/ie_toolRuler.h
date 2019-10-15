@@ -9,7 +9,7 @@
 class IERuler: public IELine
 {
 public:
-    IERuler(QObject* parent=nullptr);
+    IERuler(_global_ie *gi, QObject* parent=nullptr);
     void wheelMode(QWheelEvent *pe) override;
 protected:
     virtual void paint(QPainter *painter,
@@ -17,8 +17,8 @@ protected:
                        QWidget *widget) override;
     virtual QRectF boundingRect() const override;
 
-    void    read(const QJsonObject &json)           override;
-    void    write(QJsonObject &json)const           override;
+    int    read(const QJsonObject &json)           override;
+    int    write(QJsonObject &json)const           override;
 private:
     int selectionOffset;
 };

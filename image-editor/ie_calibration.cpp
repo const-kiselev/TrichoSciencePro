@@ -1,4 +1,4 @@
-#include "ie_toolCalibration.h"
+#include "ie_calibration.h"
 
 // Задачи:
 // реализовать только одну линию на поле!!!!! реализовать у
@@ -8,18 +8,17 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
     QWidget(parent)
 {
     line = nullptr;
-    measureIndex = 1;
+    measureIndex = mIndex;
 
-    pModel = new TSPImageEditorModel();
-
-    pView = new TSPImageEditorView(pModel);
+    pModel = new IE_Model();
+    pView = new IE_View(pModel);
 
     pToolController = pView->getPToolsController();
     pToolController->setToolSetType(ToolSet::CallibrationToolSet);
     pToolController->setOrientation(Qt::Vertical);
     pModel->setPToolCnt(pToolController);
     connect(pToolController, &ToolsController::startUsingNewTool,
-            pModel, &TSPImageEditorModel::addLayerViaToolCnt);
+            pModel, &IE_Model::addLayerViaToolCnt);
 
 
     setWindowTitle("Калибровка / настройка масштаба");
@@ -58,7 +57,7 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
     QHBoxLayout *pHorBoxLayout = new QHBoxLayout(this);
     pHorBoxLayout->addWidget(pLabel);
     pMeasureLineEdit = new QLineEdit();
-    pMeasureLineEdit->setText("0");
+    pMeasureLineEdit->setText(QString().number(mIndex));
     pLabel->setBuddy(pMeasureLineEdit);
     pHorBoxLayout->addWidget(pMeasureLineEdit);
     pHorBoxLayout->addWidget(new QLabel(" пикселей."));
@@ -80,7 +79,7 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
     static_cast<QBoxLayout*>(layout())->addLayout(pRightLayout, 1);
     this->resize(800,500);
 
-    connect(pModel, &TSPImageEditorModel::changed,
+    connect(pModel, &IE_Model::changed,
             this, &IE_ToolCalibration::modelItemsControl);
 
 }

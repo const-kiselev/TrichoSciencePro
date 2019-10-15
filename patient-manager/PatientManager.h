@@ -15,10 +15,12 @@ private:
     PM_test_patientList *pTestPatientList;
 signals:
 
-    void needToRunImageEditor(_Model_patientData patientData);
+    void needToRunNewImageEditor(_Model_patientData patientData);
+    void needToRunSavedImageEditor(_Model_patientData patientData);
 public slots:
 
-    void addSavedSession(_Model_patientData patientData) {emit pTestPatientList->addSavedSession(patientData);};
+    void addSavedSession(_Model_patientData patientData)
+    {emit pTestPatientList->addSavedSession(patientData);}
 };
 
 #endif // MAINWINDOW_H

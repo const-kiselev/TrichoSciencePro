@@ -8,12 +8,12 @@ class IE_Line_DD: public IELine
 {
 
 public:
-    IE_Line_DD(QObject* parent=nullptr);
+    IE_Line_DD(_global_ie *gi, QObject* parent=nullptr);
     ~IE_Line_DD() override{}
     virtual void wheelMode(QWheelEvent *pe) override;
 
-    void    read(const QJsonObject &json)           override;
-    void    write(QJsonObject &json)const           override;
+    int    read(const QJsonObject &json)           override;
+    int    write(QJsonObject &json)const           override;
 protected:
 //    virtual void paint(QPainter *painter,
 //                       const QStyleOptionGraphicsItem *option,

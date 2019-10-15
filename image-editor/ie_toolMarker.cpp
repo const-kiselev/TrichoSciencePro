@@ -180,14 +180,16 @@ int IE_Tool_Marker::mouseMove(QPointF point)
 
 }
 
-void IE_Tool_Marker::read(const QJsonObject &json)
+int IE_Tool_Marker::read(const QJsonObject &json)
 {
     _toolType = convertToolTitleToToolType(json["typeTitle"].toString());
+    return 0;
 }
 
-void IE_Tool_Marker::write(QJsonObject &json) const
+int IE_Tool_Marker::write(QJsonObject &json) const
 {
     json["typeTitle"] = getToolTitle(_toolType);
+    return 0;
 }
 
 void IE_Tool_Marker::drawStar(QPainter *painter)

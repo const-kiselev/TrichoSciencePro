@@ -1,13 +1,15 @@
 #include "_global_ie.h"
 
-_global_ie::_global_ie(QObject *parent):QObject (parent)
+_global_ie::_global_ie(int rk, QObject *parent)
+    :   QObject (parent),
+        ownerSet(true),
+        randomKey(rk)
 {
-    ownerSet = false;
     measureIndex = 1.0;
-    measureIndexUnitType = UnitType::mm;
     unitType = UnitType::px;
-    threshold_terminal_wellus = 40;
-    threshold_terminal_wellus_unitType = UnitType::px;
+    threshold_terminal_wellus = 0.04;
+    threshold_thinHair_top = 0.06;
+    threshold_mediumHair_top = 0.08;
 }
 
 qreal _global_ie::getMeasureIndex() const
@@ -23,12 +25,22 @@ qreal _global_ie::getThreshold_TW() const
     return threshold_terminal_wellus;
 }
 
-qreal _global_ie::convertF(qreal value) const
+qreal _global_ie::getThreshold_thinHair() const
 {
-    return convertWithForamtF(value, unitType);
+    return threshold_thinHair_top;
 }
 
-qreal _global_ie::convertWithForamtF(qreal value, UnitType uType) const
+qreal _global_ie::getThreshold_mediumHair() const
+{
+    return threshold_mediumHair_top;
+}
+
+qreal _global_ie::convertF(qreal value) const
+{
+    return convertPixelWithForamtF(value, unitType);
+}
+
+qreal _global_ie::convertPixelWithForamtF(qreal value, UnitType uType) const
 {
     qreal answer;
 
@@ -52,11 +64,43 @@ qreal _global_ie::convertWithForamtF(qreal value, UnitType uType) const
     return answer;
 }
 
-
-int _global_ie::getIndexThreshold_terminal_wellus_unitType() const
+qreal _global_ie::convertUnitedWithForamtF(qreal value, UnitType uType) const
 {
-    return (int)threshold_terminal_wellus_unitType;
+    qreal answer;
+    switch (unitType) {
+    case UnitType::m:
+        answer = value;
+        break;
+    case UnitType::cm:
+        answer = value/100.0;
+        break;
+    case UnitType::mm:
+        answer = value/1000.0;
+        break;
+    case UnitType::um:
+        answer = value/1000000.0;
+        break;
+    }
+
+    switch (uType) {
+    case UnitType::cm:
+        answer *= 100.0;
+        break;
+    case UnitType::mm:
+        answer *= 1000.0;
+        break;
+    case UnitType::px:
+        answer = value/(measureIndex*1000.0);
+        break;
+    case UnitType::um:
+        answer *= 1000000.0;
+        break;
+    }
+    return answer;
 }
+
+
+
 
 void _global_ie::setMeasureIndex(qreal mIndex, int key)
 {
@@ -65,6 +109,7 @@ void _global_ie::setMeasureIndex(qreal mIndex, int key)
     if(key == randomKey)
     {
         measureIndex = mIndex;
+        unitType = UnitType::mm;
         emit measureIndexChanged(mIndex);
         emit changed();
     }
@@ -120,43 +165,32 @@ void _global_ie::setThreshold_TW(qreal data, int key)
         emit changed();
     }
 }
-void _global_ie::setOwner(int randomKey)
-{
-    if(!ownerSet)
-    {
-        this->randomKey = randomKey;
-        ownerSet = true;
-        emit changed();
-    }
-}
-void _global_ie::setThreshold_terminal_wellus_unitType(int value, int key)
+
+void _global_ie::setThreshold_thinHair(qreal data, int key)
 {
     if(!ownerSet)
         return;
     if(key == randomKey)
     {
-        switch (value) {
-        case 0:
-            threshold_terminal_wellus_unitType = UnitType::m;
-            break;
-        case 1:
-            threshold_terminal_wellus_unitType = UnitType::cm;
-            break;
-        case 2:
-            threshold_terminal_wellus_unitType = UnitType::mm;
-            break;
-        case 3:
-            threshold_terminal_wellus_unitType = UnitType::um;
-            break;
-        case 4:
-            threshold_terminal_wellus_unitType = UnitType::px;
-            break;
-
-        }
+        threshold_thinHair_top = data;
         //emit unitTypeChanged(uType);
         emit changed();
     }
 }
+
+void _global_ie::setThreshold_mediumHair(qreal data, int key)
+{
+    if(!ownerSet)
+        return;
+    if(key == randomKey)
+    {
+        threshold_mediumHair_top = data;
+        //emit unitTypeChanged(uType);
+        emit changed();
+    }
+}
+
+
 
 
 

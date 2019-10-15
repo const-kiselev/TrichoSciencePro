@@ -9,7 +9,9 @@ enum LineSettings {
     None = 0,
     PenColor = (1<<1),
     BrushColor = (1<<2),
-    PenWidth = (1<<3)
+    PenWidth = (1<<3),
+    WidthTip = (1<<4),
+    LengthTip = (1<<5)
 };
 
 class IE_Tool_LineInfoWidget;
@@ -18,41 +20,8 @@ class IELine : public QObject, public QGraphicsLineItem, public ie_tool
 {
 Q_OBJECT
 public:
-/*
-//    struct metaType
-//    {
-//        qreal width;
-//        int color;
-//        qreal x1,x2,y1,y2;
-//        metaType(qreal inWidth, int inColor, qreal inX1, qreal inX2, qreal inY1, qreal inY2 )
-//        {
-//            width = inWidth;
-//            color = inColor;
-//            x1 = inX1;
-//            x2 = inX2;
-//            y1 = inY1;
-//            y2 = inY2;
-//        }
-//       QByteArray getAllDataInJSONQByteArray()
-//       {
-//           QVariantMap data;
-
-//           data.insert("width", width);
-//           data.insert("color", color);
-//           data.insert("x1", x1);
-//           data.insert("x2", x2);
-//           data.insert("y1", y1);
-//           data.insert("y2", y2);
-
-//           QJsonObject json;
-//           json.fromVariantMap(data);
-//           QJsonDocument doc(json);
-//           QByteArray docByteArray = doc.toJson(QJsonDocument::Compact);
-//           return docByteArray;
-//       }
-//    }metaData;
-*/
-    explicit        IELine( QObject* parent=nullptr,
+    explicit        IELine( _global_ie *gi,
+                            QObject* parent=nullptr,
                             ToolType tt = ToolType::SimpleLine,
                             LineSettings settings = LineSettings::AllSettings);
 
@@ -72,27 +41,43 @@ public:
     QWidget*        getWidgetPtr()                  override;
 
 
-    void    read(const QJsonObject &json)           override;
-    void    write(QJsonObject &json)const           override;
+    int    read(const QJsonObject &json)           override;
+    int    write(QJsonObject &json)const           override;
+    void setP_ie_global_data(_global_ie *value);
+
+
+
 protected:
     QRectF          boundingRect() const                override;
 
     virtual void    paint(  QPainter *painter,
                             const QStyleOptionGraphicsItem *option,
                             QWidget *widget)        override;
-    QPen _pen;
+
+    virtual void    paintLength(  QPainter *painter,
+                            const QStyleOptionGraphicsItem *option,
+                            QWidget *widget);
+    virtual void    paintWidth(  QPainter *painter,
+                            const QStyleOptionGraphicsItem *option,
+                            QWidget *widget);
+    _global_ie *p_ie_global_data() const;
+
 protected slots:
     void            updateSettings();
 private:
     LineSettings lineSettings;
     bool editMode;
+    bool lengthTip, widthTip;
     QLineF lineData;
+
+
 
     bool ignoreMove;
     IE_Tool_LineInfoWidget *pInfoWidget;
+
+    _global_ie *_p_ie_global_data;
 private slots:
 
-    void penWidthChanged(qreal width);
 signals:
     void lineChanged();
 };
@@ -102,27 +87,33 @@ class IE_Tool_LineInfoWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit IE_Tool_LineInfoWidget(QWidget *parent=nullptr,
+    explicit IE_Tool_LineInfoWidget(_global_ie *gi, QWidget *parent=nullptr,
                                     LineSettings settings = LineSettings::AllSettings);
     ~IE_Tool_LineInfoWidget();
     void init();
 private:
+    _global_ie *p_ie_global_data;
     LineSettings lineSettings;
     QLabel  *length,
             *penWidth;
     QColor  *penColor,
             *brushColor;
+    QCheckBox *lengthTip, *widthTip;
 signals:
     void penWidthWasChanged(int width);
     void penColorWasChanged(QColor color);
     void brushColorWasChanged(QColor color);
     void penWidthChanged_INSIDE(int width);
     void penColorChanged_INSIDE(QColor color);
+    void lengthTipChecnged(bool value);
+    void widthTipChecnged(bool value);
 public slots:
     void changeLenght(qreal length);
     void changePenWidth(int width);
     void changePenColor(QColor color);
     void changeBrushColor(QColor color);
+    void changeLengthTip(bool value);
+    void changeWidthTip(bool value);
 };
 
 #endif // IELINE_H

@@ -4,22 +4,25 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+    QCoreApplication::setApplicationName("TrichoScience Pro");
+
     app.setOrganizationDomain("tsp.com");
-    app.setApplicationName("TrichoScience.Pro");
+    app.setApplicationName("TrichoSciencePro");
     auto path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (path.isEmpty()) qFatal("Cannot determine settings storage location");
     QDir d(path);
-    if (d.mkpath(d.absolutePath()) && QDir::setCurrent(d.absolutePath()))
+
+    if(!d.exists())
+        d.mkpath(d.absolutePath());
+    if (QDir::setCurrent(d.absolutePath()))
     {
 ////    qDebug() << "settings in" << QDir::currentPath();
-    QFile f{"beta.txt"};
-    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
-      f.write("tested");
+//    QFile f{"settings.txt"};
+//    if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+//      f.write("Hello, World");
     }
+
     PatientManager w;
-
-
-
     w.show();
 
     return app.exec();

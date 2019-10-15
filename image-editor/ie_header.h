@@ -119,12 +119,7 @@ static ToolType convertToolTitleToToolType(QString toolTitle)
 
 enum class ToolSet {AllTools, CallibrationToolSet};
 
-enum class ComputeType {ModelSquare,
-                        SimpleLineCount,
-                        DensityDiameterCount,
-                        HairCount,
-                        TerminalHairCount,
-                        WellusCount};
+
 enum class MarkerType{
     None,
     Colored,

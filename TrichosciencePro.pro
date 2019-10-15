@@ -28,23 +28,6 @@ CONFIG += c++11
 
 SOURCES += \
         TrichoSciencePro.cpp \
-        image-editor/ImageEditor.cpp \
-        image-editor/_global_ie.cpp \
-        image-editor/ieModel.cpp \
-        image-editor/ieView.cpp \
-        image-editor/ie_computeModule.cpp \
-        image-editor/ie_layersTableModel.cpp \
-        image-editor/ie_line_dd.cpp \
-        image-editor/ie_modelLayer.cpp \
-        image-editor/ie_tool.cpp \
-        image-editor/ie_toolCalibration.cpp \
-        image-editor/ie_toolItemDelegate.cpp \
-        image-editor/ie_toolLine.cpp \
-        image-editor/ie_toolMarker.cpp \
-        image-editor/ie_toolRuler.cpp \
-        image-editor/ie_tool_follicularUnit.cpp \
-        image-editor/ie_tool_image.cpp \
-        image-editor/toolController.cpp \
         main.cpp \
         patient-manager/PatientManager.cpp \
         patient-manager/pm_patientRecord.cpp \
@@ -53,24 +36,6 @@ SOURCES += \
 HEADERS += \
         TrichoSciencePro.h \
         _header_tsp.h \
-        image-editor/ImageEditor.h \
-        image-editor/_global_ie.h \
-        image-editor/ieModel.h \
-        image-editor/ieView.h \
-        image-editor/ie_computeModule.h \
-        image-editor/ie_header.h \
-        image-editor/ie_layersTableModel.h \
-        image-editor/ie_line_dd.h \
-        image-editor/ie_modelLayer.h \
-        image-editor/ie_tool.h \
-        image-editor/ie_toolCalibration.h \
-        image-editor/ie_toolItemDelegate.h \
-        image-editor/ie_toolLine.h \
-        image-editor/ie_toolRuler.h \
-        image-editor/ie_tool_follicularUnit.h \
-        image-editor/ie_tool_image.h \
-        image-editor/ie_toolmarker.h \
-        image-editor/toolController.h \
         patient-manager/PatientManager.h \
         patient-manager/pm_patientRecord.h \
         patient-manager/pm_test_patientList.h
@@ -82,3 +47,13 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     image-editor/IE_res.qrc
+
+ICON = image-editor/appLogo.icns
+
+macx {
+ LIBS +=	 -framework AppKit
+}
+
+IMAGE_EDITOR_FOLDER = image-editor/
+
+include($$IMAGE_EDITOR_FOLDER/image-editor.pri)

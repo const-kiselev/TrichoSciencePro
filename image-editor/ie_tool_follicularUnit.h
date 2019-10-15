@@ -23,8 +23,8 @@ public:
     bool deactivateEditMode()           override;
     void makeCompute()                  override {}
     QWidget* getWidgetPtr()             override {return nullptr;}
-    void    read(const QJsonObject &json)           override;
-    void    write(QJsonObject &json)const           override;
+    int    read(const QJsonObject &json)           override;
+    int    write(QJsonObject &json)const           override;
 
 protected:
     virtual void paint(QPainter *painter,
