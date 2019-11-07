@@ -21,15 +21,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 
-SOURCES += \
-    ie_fieldOfView.cpp \
-    ie_fieldOfView_controller.cpp \
+SOURCES +=  \
     main.cpp
 
 HEADERS += \
-    ../_header_tsp.h \
-    ie_fieldOfView.h \
-    ie_fieldOfView_controller.h
+    ../_header_tsp.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -371,11 +371,11 @@ int         IELine::read                (const QJsonObject &json)
 
     setPen(locPen);
 
-    lineData.setLine(json["line_point1_posX"].toDouble(),
-            json["line_point1_posY"].toDouble(),
-            json["line_point2_posX"].toDouble(),
-            json["line_point2_posY"].toDouble()
-            );
+    lineData.setLine(   json["line_point1_posX"].toDouble(),
+                        json["line_point1_posY"].toDouble(),
+                        json["line_point2_posX"].toDouble(),
+                        json["line_point2_posY"].toDouble()
+                    );
     updateSettings();
     return 0;
 }
@@ -413,7 +413,7 @@ QRectF      IELine::boundingRect        () const
 // ------- Widget
 
 IE_Tool_LineInfoWidget::IE_Tool_LineInfoWidget(_global_ie *gi, QWidget *parent,
-                                               LineSettings settings):  QWidget(parent),
+                                               IELine::LineSettings settings):  QWidget(parent),
                                                                         p_ie_global_data(gi),
                                                                         lineSettings(settings)
 
@@ -454,7 +454,7 @@ void IE_Tool_LineInfoWidget::init()
     pHorBoxLayout->addWidget(length);
     pVertBoxLayout->addItem(pHorBoxLayout);
 
-    if(lineSettings & LineSettings::PenColor)
+    if(lineSettings & IELine::LineSettings::PenColor)
     {
         pHorBoxLayout = new QHBoxLayout(this);
         pHorBoxLayout->addWidget(new QLabel("Цвет обводки:", this));
@@ -492,7 +492,7 @@ void IE_Tool_LineInfoWidget::init()
         });
     }
 
-    if(lineSettings & LineSettings::PenWidth)
+    if(lineSettings & IELine::LineSettings::PenWidth)
     {
         penWidth->show();
         QSlider *pWidthSlider = new QSlider(Qt::Horizontal, this);
@@ -510,14 +510,14 @@ void IE_Tool_LineInfoWidget::init()
         pVertBoxLayout->addItem(pHorBoxLayout);
     }
 
-    if(lineSettings & LineSettings::WidthTip)
+    if(lineSettings & IELine::LineSettings::WidthTip)
     {
         widthTip->show();
         connect(widthTip, &QCheckBox::stateChanged, [this](int value){emit this->widthTipChecnged(value);});
         pVertBoxLayout->addWidget(widthTip);
     }
 
-    if(lineSettings & LineSettings::LengthTip)
+    if(lineSettings & IELine::LineSettings::LengthTip)
     {
         lengthTip->show();
         connect(lengthTip, &QCheckBox::stateChanged, [this](int value){emit this->lengthTipChecnged(value);});

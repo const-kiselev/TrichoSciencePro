@@ -117,7 +117,7 @@ static ToolType convertToolTitleToToolType(QString toolTitle)
     if(toolTitle == "DensityAndDiameter") return ToolType::DensityAndDiameter;
 }
 
-enum class ToolSet {AllTools, CallibrationToolSet};
+enum class ToolSet {AllTools, CallibrationToolSet, Trichoscopy_hairDencity, Trichoscopy_Simple};
 
 
 enum class MarkerType{
@@ -204,6 +204,33 @@ struct ModelPatientData
     int patientID;
 
 };
+
+enum class IEM_type
+{
+    None,
+    Trichoscopy_hairDencity,
+    Trichoscopy_patterns
+
+};
+
+static QString getTSP_JSON_IEM_type(IEM_type ieType)
+{
+    switch(ieType)
+    {
+    case IEM_type::Trichoscopy_hairDencity:
+        return QString("Trichoscopy_hairDencity");
+    case IEM_type::Trichoscopy_patterns:
+        return QString("Trichoscopy_patterns");
+    }
+}
+
+static IEM_type getIEM_type(QString str)
+{
+    if(str == "Trichoscopy_hairDencity")
+        return IEM_type::Trichoscopy_hairDencity;
+    if(str == "Trichoscopy_patterns")
+        return IEM_type::Trichoscopy_patterns;
+}
 
 
 #endif // IE_HEADER_H

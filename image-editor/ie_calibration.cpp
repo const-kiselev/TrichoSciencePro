@@ -104,7 +104,7 @@ void IE_ToolCalibration::modelItemsControl()
         if((*currItem)->getToolType() == ToolType::Ruler)
         {   if(prevLine!=layersList.end())
             {
-                pModel->eraseLayer(prevLine);
+                pModel->removeLayer(prevLine);
                 layersList.erase(prevLine);
             }
             prevLine = currItem;

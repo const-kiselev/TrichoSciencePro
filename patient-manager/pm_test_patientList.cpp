@@ -282,6 +282,7 @@ void PM_test_patientList::runImageEditorNew()
     patientDataTmp.patient_UID = currentPatientCard.UID;
     patientDataTmp.patient_fullName = currentPatientCard.fullName;
     patientDataTmp.modelDir = "data/patients/"+QString().number(currentPatientCard.UID);
+    patientDataTmp.ie_type = IE_ProfileType::Trichoscopy;
     emit needToRunNewImageEditor(patientDataTmp);
 }
 

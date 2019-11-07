@@ -14,6 +14,14 @@
 #include <QPixmap>
 
 
+
+//! \brief Класс инструмена "Изображение"
+//!
+//! Стоит отбратить внимание, что использование данных о трех директориях не просто так.
+//! desDir — директория назначения
+//! destParentDir — директория родителя, который должен знать, где находится изображение.
+//! То есть происходит вычитание из desDir destParentDir и получаем относительный путь или полный путь.
+//! tmpDir — директория для временного хранения.
 class IE_Tool_Image:public QObject, public QGraphicsPixmapItem, public ie_tool
 {
     Q_OBJECT
@@ -23,18 +31,23 @@ public:
                             QString destParentDir,
                             QString tmpDir,
                             QString originalFilePath = "",
-                            ToolType tt=ToolType::Image);
+                            ToolType tt=ToolType::Image,
+                            QString dirToOpenInDialog = QStandardPaths::writableLocation(
+                                                            QStandardPaths::DocumentsLocation)
+                            );
 
     ~IE_Tool_Image() override;
 
     void setDirs(QString destDir,
                  QString destParentDir,
-                 QString tmpDir);
+                 QString tmpDir
+                );
 
-    int loadImage(QString filePath);
+    int loadImage(QString filePath, QString dirToOpenInDialog = QStandardPaths::writableLocation(
+                QStandardPaths::DocumentsLocation));
 
     void mouseFirstPress(QPointF point) override {}
-    int mouseMove(QPointF point)        override {}
+    int  mouseMove(QPointF point)        override {}
     void wheelMode(QWheelEvent *pe)     override {}
     void release(QPointF point)         override {}
 
@@ -45,6 +58,11 @@ public:
     int    read(const QJsonObject &json)           override;
     int    write(QJsonObject &json)const           override;
     QRectF          boundingRect() const                override;
+    QFileInfo getFileInfo() const;
+
+    QFileInfo getOriginalFileInfo() const;
+    void deleteFile();
+
 protected:
 
 
@@ -53,10 +71,10 @@ protected:
                             QWidget *widget)        override;
 private:
     QFile*      _pFile;
-    QFileInfo   _fileInfo;
+    QFileInfo   _fileInfo, m_originalFileInfo;
     QDir        _destDir, _tmpDir, _destParentDir;
 
-    void copyFileToWorkDir();
+//    void copyFileToWorkDir();
 
 };
 

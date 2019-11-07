@@ -15,14 +15,44 @@ int main(int argc, char *argv[])
     QDir d(path);
 
     if(!d.exists())
-        d.mkpath(d.absolutePath());
+        d.mkpath(".");
+    QFile f{"beta-test.txt"};
+
+
     if (QDir::setCurrent(d.absolutePath()))
     {
         ////    qDebug() << "settings in" << QDir::currentPath();
-            QFile f{"beta-test.txt"};
-            if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
-              f.write("version 0.3");
+        if(f.open(QIODevice::ReadOnly))
+        {
+
+            QTextStream stream(&f);
+            QString line = stream.readLine();
+            qDebug() << line;
+            bool ok;
+            double version = line.toDouble(&ok);
+            if(version<0.36)
+            {
+                if(d.cd("data"))
+                {
+                    d.removeRecursively();
+                    d.cdUp();
+                }
+                if(d.cd("tmp"))
+                {
+                    d.removeRecursively();
+                    d.cdUp();
+                }
+
+            }
+
+
+        }
+        f.close();
+        if (f.open(QIODevice::WriteOnly | QIODevice::Truncate))
+            f.write("0.36");
+
     }
+    f.close();
 
     TrichoSciencePro TSP;
     TSP.start();

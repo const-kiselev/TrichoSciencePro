@@ -17,7 +17,12 @@ void TrichoSciencePro::start()
 void TrichoSciencePro::runNewImageEditor(_Model_patientData patientData)
 {
     ImageEditor *pImageEditor = new ImageEditor();
-    pImageEditor->openNew(patientData);
+    if( pImageEditor->openNew(patientData) )
+    {
+        delete pImageEditor;
+        pImageEditor = nullptr;
+        return;
+    }
     connect(pImageEditor, &ImageEditor::wasSaved,
             pPatientManager, &PatientManager::addSavedSession);
     pImageEditor->show();
@@ -32,7 +37,12 @@ void TrichoSciencePro::runNewImageEditor(_Model_patientData patientData)
 void TrichoSciencePro::runSavedImageEditor(_Model_patientData patientData)
 {
     ImageEditor *pImageEditor = new ImageEditor();
-    pImageEditor->open(patientData);
+    if( pImageEditor->open(patientData) )
+    {
+        delete pImageEditor;
+        pImageEditor = nullptr;
+        return;
+    }
     pImageEditor->show();
     connect(pImageEditor, &ImageEditor::wasClosed, [pImageEditor]()
     {

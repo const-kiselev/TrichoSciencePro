@@ -74,6 +74,11 @@ int IE_Tool_FollicularUnit::write(QJsonObject &json) const
 void IE_Tool_FollicularUnit::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painter->setBrush( backgroundColor );
-    painter->drawRect( boundingRect() );
+    painter->drawRect( QGraphicsSimpleTextItem::boundingRect() );
     QGraphicsSimpleTextItem::paint( painter, option, widget );
+}
+
+QRectF IE_Tool_FollicularUnit::boundingRect() const
+{
+    return QGraphicsSimpleTextItem::boundingRect();
 }

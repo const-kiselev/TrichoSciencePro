@@ -18,7 +18,9 @@ SOURCES += \
     $$PWD/ie_toolRuler.cpp \
     $$PWD/ie_tool_follicularUnit.cpp \
     $$PWD/ie_tool_image.cpp \
-    $$PWD/ie_view.cpp
+    $$PWD/ie_view.cpp \
+    $$PWD/ie_fieldOfView.cpp \
+    $$PWD/ie_fieldOfView_controller.cpp
 
 HEADERS += \
     $$PWD/ImageEditor.h \
@@ -39,7 +41,9 @@ HEADERS += \
     $$PWD/ie_tool_follicularUnit.h \
     $$PWD/ie_tool_image.h \
     $$PWD/ie_toolmarker.h \
-    $$PWD/ie_view.h
+    $$PWD/ie_view.h \
+    $$PWD/ie_fieldOfView.h \
+    $$PWD/ie_fieldOfView_controller.h
 
 RESOURCES += \
     $$PWD/IE_res.qrc

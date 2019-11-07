@@ -3,88 +3,156 @@
 
 ImageEditor::ImageEditor():QMainWindow(nullptr)
 {
-    init();
-#ifdef _IE_DEBUG_NEW_MODEL_
-    _Model_patientData patientData;
-    patientData.modelPath = "data/0";
-    patientData.modelDir = "data/0";
-    pModel->initAsNewModel(patientData);
-#endif // _DEBUG_NEW_MODEL_
-#ifdef _IE_DEBUG_OPEN_MODEL_
-    pModel->initWithModel(_Model_patientData());
-#endif // _DEBUG_OPEN_MODEL_
+    m_ieType = IE_ProfileType::None;
+    m_currentTab = 0;
+    QMenuBar *pMenuBar;
+    pMenuBar = new QMenuBar(this);
+    setMenuBar(pMenuBar);
+
 
     /// \todo после профилирования необходимо IE связать с модулем вычислений
-
-    //QWidget *tmpPWidget = new QWidget();
-    //QBoxLayout *pbxLayout = new QBoxLayout(QBoxLayout::LeftToRight);
-    //pbxLayout->addWidget(pView);
-    //pbxLayout->setContentsMargins(0,0,0,0);
-    //tmpPWidget->setLayout(pbxLayout);
-    //setCentralWidget(tmpPWidget);
-
-
 
 }
 
 ImageEditor::~ImageEditor()
 {
-
-//    delete pModel;
-//    pModel = nullptr;
+    foreach (IE_View* ie_view, m_ieViewVec)
+        delete ie_view;
+//    QMainWindow::~QMainWindow();
 }
 
 void ImageEditor::closeEvent(QCloseEvent *)
 {
     close();
-    delete pModel;
-    pModel = nullptr;
-    delete pView;
-    pView = nullptr;
-    pIEToolController = nullptr;
     emit wasClosed();
 }
 
-void ImageEditor::init()
+int ImageEditor::init(IE_ProfileType ie_type)
 {
-    setWindowTitle("TrichoScience Pro :: Редактор изображения");
-    pModel = new IE_Model();
-    pView = new IE_View(pModel);
+    m_ieType = ie_type;
 
-    pIEToolController = pView->getPToolsController();
-    pIEToolController->setToolSetType(ToolSet::AllTools);
-    pModel->setPToolCnt(pIEToolController);
-    connect(pIEToolController, &ToolsController::startUsingNewTool,
-            pModel, &IE_Model::addLayerViaToolCnt);
-    addToolBar(Qt::LeftToolBarArea, pView->getPToolsController());
+    setWindowTitle(getIE_ProfileType(m_ieType)); //! \todo зависит от типа
+
+    m_pTopToolBar = new QToolBar(this);
+
+    switch(m_ieType)
+    {
+    case IE_ProfileType::None:
+    {
+        IE_View * p_ie_view =  new IE_View(new IE_Model());
+        m_ieViewVec.append(p_ie_view);
+        break;
+    }
+    case IE_ProfileType::Trichoscopy:
+    {
+        QTabBar * locTabBar = new QTabBar(this);
+
+        for (int i=0; i<5;i++)
+        {
+            IE_Model * pIE_model = new IE_Model();
+            IE_View * pIEView = new IE_View(pIE_model);
+
+            m_ieViewVec.append(pIEView);
+
+            switch (i)
+            {
+            case 0:
+            {
+                locTabBar->addTab("Трихоскопия");
+                pIEView->setToolCntType(ToolSet::Trichoscopy_hairDencity);
+                break;
+            }
+            case 1:
+            {
+                locTabBar->addTab("Оценка кожи головы");
+                pIEView->setToolCntType(ToolSet::Trichoscopy_Simple);
+                m_ieViewVec[0]->getPModel()->addRelatedModel( pIE_model->getPath() );
+                break;
+            }
+            case 2:
+            {
+                locTabBar->addTab("Оценка корней");
+                pIEView->setToolCntType(ToolSet::Trichoscopy_Simple);
+                m_ieViewVec[0]->getPModel()->addRelatedModel( pIE_model->getPath() );
+                break;
+            }
+            case 3:
+            {
+                locTabBar->addTab("Оценка стержней");
+                pIEView->setToolCntType(ToolSet::Trichoscopy_Simple);
+                m_ieViewVec[0]->getPModel()->addRelatedModel( pIE_model->getPath() );
+                break;
+            }
+            case 4:
+            {
+                locTabBar->addTab("Дерматоскопия новообразований");
+                pIEView->setToolCntType(ToolSet::Trichoscopy_Simple);
+                m_ieViewVec[0]->getPModel()->addRelatedModel( pIE_model->getPath() );
+                break;
+            }
+            }
+
+        }
 
 
-    addDockWidget(Qt::RightDockWidgetArea,pModel->initToolInfoDock());
-   // addDockWidget(Qt::RightDockWidgetArea, pView->initDockDebugWidget());
-    addDockWidget(Qt::RightDockWidgetArea, pModel->initLayersDock());
-   // addDockWidget(Qt::RightDockWidgetArea, pModel->initComputeDock());
-    setCentralWidget(pView);
+        m_pTopToolBar->addWidget(locTabBar);
+        locTabBar->setCurrentIndex(0);
+        connect(locTabBar, &QTabBar::currentChanged, this, &ImageEditor::changeTab);
 
+        break;
+    }
+    case IE_ProfileType::Trichogram:
+    case IE_ProfileType::Phototrichogram:
+    case IE_ProfileType::Simple:
+    case IE_ProfileType::MeasureIndex:
+    case IE_ProfileType::Full:
+    case IE_ProfileType::OnlyImage:
+    {
+        IE_View * pIEView = new IE_View(new IE_Model());
+        m_ieViewVec.append(pIEView);
+        pIEView->setToolCntType(ToolSet::AllTools);
+        break;
+    }
+
+
+    }
+
+    m_pTopToolBar->setMovable(false);
+    this->setUnifiedTitleAndToolBarOnMac(true);
+    addToolBar(Qt::TopToolBarArea, m_pTopToolBar);
+
+    m_currentTab = 0;
+
+    IE_View * pIE_view = m_ieViewVec[m_currentTab];
+    IE_Model * pIE_model = pIE_view->getPModel();
+    ToolsController * pIE_toolCnt = pIE_view->getPToolsController();
+
+    addToolBar(Qt::LeftToolBarArea, pIE_toolCnt);
+    addDockWidget(Qt::RightDockWidgetArea,pIE_toolCnt->getPDock());
+    addDockWidget(Qt::RightDockWidgetArea,pIE_model->getFieldOfViewControllerInfoDock());
+    setCentralWidget(pIE_view);
+    menuInit();
+
+//    changeTab(0);
+    return 0;
 }
 
 void ImageEditor::menuInit()
 {
-  QMenuBar *pMenuBar;
+  QMenuBar *pMenuBar = menuBar();
 
+  pMenuBar->clear();
 
-    #ifdef Q_OS_MAC
-       pMenuBar = new QMenuBar(this);
-    #else
-       pMenuBar = new QMenuBar();
-    #endif
     QMenu *oneMenu = new QMenu("Файл");
 
+    IE_Model * pModel = m_ieViewVec[m_currentTab]->getPModel();
+
     QAction *pActionNewFile = new QAction("Сохранить");
-    connect(pActionNewFile, &QAction::triggered, [this]()
+    connect(pActionNewFile, &QAction::triggered, [this, pModel]()
     {
-        if(!(this->pModel->saveModel()))
+        if(!(pModel->saveModel()))
         {
-            emit this->wasSaved(this->pModel->get_Model_patientData());
+            emit this->wasSaved(pModel->get_Model_patientData());
         }
     });
     oneMenu->addAction(pActionNewFile);
@@ -105,16 +173,16 @@ void ImageEditor::menuInit()
    });
    oneMenu->addAction(pActionNewFile);
    pActionNewFile = new QAction("Настройки");
-   connect(pActionNewFile, &QAction::triggered, [this](){emit(this->pModel->setInputArgs());});
+   connect(pActionNewFile, &QAction::triggered, [pModel](){emit(pModel->setInputArgs());});
    oneMenu->addAction(pActionNewFile);
 
    oneMenu->addSeparator();
 
    pActionNewFile = new QAction("Плотность волос");
-   connect(pActionNewFile, &QAction::triggered, [this](){emit(this->pModel->makeHairDensityComputeWithWidget());});
+   connect(pActionNewFile, &QAction::triggered, [pModel](){emit(pModel->makeHairDensityComputeWithWidget());});
    oneMenu->addAction(pActionNewFile);
    pActionNewFile = new QAction("Диаметр волос");
-   connect(pActionNewFile, &QAction::triggered, [this](){emit(this->pModel->makeHairDiameterComputeWithWidget());});
+   connect(pActionNewFile, &QAction::triggered, [pModel](){emit(pModel->makeHairDiameterComputeWithWidget());});
    oneMenu->addAction(pActionNewFile);
 
    pMenuBar->addAction(oneMenu->menuAction());
@@ -143,28 +211,104 @@ void ImageEditor::menuInit()
    pMenuBar->addAction(oneMenu->menuAction());
 
 
+   oneMenu = new QMenu("Трихоскопия");
+   pActionNewFile = new QAction("Отчет");
+   pActionNewFile->setDisabled(true);
+   oneMenu->addAction(pActionNewFile);
+   pActionNewFile = new QAction("Сохранить отчет");
+   pActionNewFile->setDisabled(true);
+   oneMenu->addAction(pActionNewFile);
+   oneMenu->addSeparator();
+
+   QActionGroup * alignmentGroup = new QActionGroup(this);
+   alignmentGroup->setExclusive(true);
+
+   pActionNewFile = new QAction("Активный раздел:");
+   pActionNewFile->setDisabled(true);
+   oneMenu->addAction(pActionNewFile);
+
+   pActionNewFile = new QAction("Плотность волос");
+   alignmentGroup->addAction(pActionNewFile);
+   pActionNewFile->setCheckable(true);
+   pActionNewFile->setChecked(true);
+   pActionNewFile = new QAction("Оценка кожи головы");
+   pActionNewFile->setCheckable(true);
+//   pActionNewFile->setDisabled(true);
+   alignmentGroup->addAction(pActionNewFile);
+   pActionNewFile = new QAction("Оценка корней");
+   pActionNewFile->setCheckable(true);
+//   pActionNewFile->setDisabled(true);
+   alignmentGroup->addAction(pActionNewFile);
+   pActionNewFile = new QAction("Оценка стержней");
+   pActionNewFile->setCheckable(true);
+//   pActionNewFile->setDisabled(true);
+   alignmentGroup->addAction(pActionNewFile);
+   pActionNewFile = new QAction("Дерматоскопия новообразований");
+   pActionNewFile->setCheckable(true);
+//   pActionNewFile->setDisabled(true);
+   alignmentGroup->addAction(pActionNewFile);
+   oneMenu->addActions(alignmentGroup->actions());
+
+   pMenuBar->addAction(oneMenu->menuAction());
+
+   setMenuBar(pMenuBar);
 }
 
 void        ImageEditor::makeCalibration        ()
 {
-    qDebug() << "getMeasureIndex = " << pModel->getMeasureIndex();
-    IE_ToolCalibration* calib = new IE_ToolCalibration(nullptr, pModel->getMeasureIndex());
+    qDebug() << "getMeasureIndex = " << m_ieViewVec[0]->getPModel()->getMeasureIndex();
+    IE_ToolCalibration* calib = new IE_ToolCalibration(nullptr, m_ieViewVec[0]->getPModel()->getMeasureIndex());
     calib->show();
     connect(calib, &IE_ToolCalibration::saveChangedMeasureIndex,
             [this, calib](){
-        pModel->setMeasureIndex(calib->getMeasureIndex());
+        m_ieViewVec[0]->getPModel()->setMeasureIndex(calib->getMeasureIndex());
     });
 }
 
-void ImageEditor::open(_Model_patientData patientData)
+int ImageEditor::open(_Model_patientData patientData)
 {
-    pModel->initWithModel(patientData);
-    menuInit();
+    //! \todo только при открытии обследования необходимо по-другому обрабатывать.  записывать  связанные модели в TabArray ???
+    m_ieViewVec[0]->getPModel()->initWithModel(patientData);
+    //! инициализация происходит только после прочтения модели. Так как необходим IEM_type и зависимости с другими моделями.
+    return 0;
 }
 
-void ImageEditor::openNew(_Model_patientData patientData)
+int ImageEditor::openNew(_Model_patientData patientData)
 {
-    pModel->initAsNewModel(patientData);
+    init(patientData.ie_type);
+    foreach(IE_View * pView, m_ieViewVec)
+        pView->getPModel()->initAsNewModel(patientData);
+//    int answer = m_ieViewVec[0]->getPModel()->initAsNewModel(patientData);
+//    if(answer)
+//        return answer;
+    return 0;
+}
+
+void ImageEditor::changeTab(int viewIndex)
+{
+    if(viewIndex >= m_ieViewVec.count())
+        return;
+    if(viewIndex < 0)
+        return;
+
+    IE_View * pIE_view = m_ieViewVec[m_currentTab];
+    IE_Model * pIE_model = pIE_view->getPModel();
+    ToolsController * pIE_toolCnt = pIE_view->getPToolsController();
+
+    removeToolBar(pIE_toolCnt);
+    removeDockWidget(pIE_toolCnt->getPDock());
+    removeDockWidget(pIE_model->getFieldOfViewControllerInfoDock());
+
+
+    m_currentTab = viewIndex;
+    pIE_view = m_ieViewVec[m_currentTab];
+    pIE_model = pIE_view->getPModel();
+    pIE_toolCnt = pIE_view->getPToolsController();
+
+    addToolBar(Qt::LeftToolBarArea, pIE_toolCnt);
+    addDockWidget(Qt::RightDockWidgetArea,pIE_toolCnt->getPDock());
+    addDockWidget(Qt::RightDockWidgetArea,pIE_model->getFieldOfViewControllerInfoDock());
+    setCentralWidget(pIE_view);
     menuInit();
 }
 

@@ -2,7 +2,8 @@
 
 IE_ModelLayer::IE_ModelLayer(QGraphicsItem * parent):QGraphicsItem(parent),
                                                 visible(true),
-                                                toolType(ToolType::NoneTool)
+                                                toolType(ToolType::NoneTool),
+                                                layerTitle("")
 
 {
     pTool = dynamic_cast<ie_tool*>(parent);
@@ -11,7 +12,8 @@ IE_ModelLayer::IE_ModelLayer(QGraphicsItem * parent):QGraphicsItem(parent),
 IE_ModelLayer::IE_ModelLayer(ToolType tt,
                              QGraphicsItem *parent):QGraphicsItem(parent),
                                                 visible(true),
-                                                toolType(tt)
+                                                toolType(tt),
+                                                layerTitle("")
 
 {
     pTool = dynamic_cast<ie_tool*>(parent);
@@ -70,13 +72,29 @@ QRectF IE_ModelLayer::boundingRect() const
 
 void IE_ModelLayer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-    parentItem()->paint(painter, option, widget);
+    //parentItem()->paint(painter, option, widget);
+}
+
+QPointF IE_ModelLayer::getPos()
+{
+    return parentItem()->pos();
+}
+
+void IE_ModelLayer::setPos(QPointF pos)
+{
+    parentItem()->setPos(pos);
 }
 
 void IE_ModelLayer::hide()
 {
     visible = false;
     parentItem()->hide();
+}
+
+void IE_ModelLayer::show()
+{
+    visible = true;
+    parentItem()->show();
 }
 void IE_ModelLayer::unhide()
 {
@@ -94,6 +112,10 @@ void IE_ModelLayer::read(const QJsonObject &json)
 {
     parentItem()->setPos(json["posX"].toDouble(), json["posY"].toDouble());
     visible = json["visible"].toBool();
+    if(visible)
+        show();
+    else
+        hide();
     QJsonObject layerData = json["layerData"].toObject();
     pTool->read(layerData);
     toolType = convertToolTitleToToolType(json["typeTitle"].toString());

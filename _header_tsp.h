@@ -15,7 +15,7 @@ enum IE_ProfileType
     OnlyImage
 };
 
-QString getIE_ProfileType(IE_ProfileType pt)
+static QString getIE_ProfileType(IE_ProfileType pt)
 {
     switch (pt) {
     case None: return QString("None");
@@ -30,7 +30,7 @@ QString getIE_ProfileType(IE_ProfileType pt)
     return QString("None");
 }
 
-IE_ProfileType getIE_ProfileType(QString title)
+static IE_ProfileType getIE_ProfileType(QString title)
 {
     if(title == "None")
         return IE_ProfileType::None;

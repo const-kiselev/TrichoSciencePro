@@ -2,11 +2,12 @@
 #define TOOLSCONTROLLER_H
 
 #include <QtWidgets>
-#include "ie_toolLine.h"
+#include "ie_header.h"
 #include "ie_modelLayer.h"
+
+#include "ie_toolLine.h"
 #include "ie_toolmarker.h"
 #include "ie_toolRuler.h"
-#include "ie_header.h"
 #include "ie_line_dd.h"
 #include "ie_tool_follicularUnit.h"
 #include "ie_tool_image.h"
@@ -31,6 +32,8 @@ public:
     QDockWidget* initInfoDock();
 
     void setP_ie_global_data(_global_ie *p_ie_global_data);
+
+    QDockWidget *getPDock() const;
 
 protected:
     virtual void mousePressEvent  (QMouseEvent* pe)override;
@@ -61,6 +64,7 @@ private:
 
 public slots:
     void updateToolInfoDockWidget();
+    void resetPActiveTool();
 
 signals:
     void startUsingNewTool();

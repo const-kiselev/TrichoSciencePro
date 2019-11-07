@@ -2,7 +2,11 @@
 #define IE_FIELDOFVIEW_CONTROLLER_H
 
 #include <QObject>
+#include <QWidget>
 #include <ie_fieldOfView.h>
+
+
+class IE_FieldOfView_ControllerInfoWidget;
 
 /*!
   \brief Контроллер полей зрений.
@@ -27,41 +31,98 @@ public:
         Six = 6
     } quantityMax = Quantity::Six;
 
-
-
-
-    explicit IE_FieldOfView_Controller(QObject *parent = nullptr);
+    explicit IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
+                                       _global_ie * pieg,
+                                       QObject *parent = nullptr
+                                       );
+    ~IE_FieldOfView_Controller();
 
     int                     read(const QJsonObject &json);
     int                     write(QJsonObject &json)const;
+
+
     void init(Quantity q = Quantity::One);
-    void changeQuantity(Quantity){}
+    QDialog::DialogCode makeDialogForSetupAsNew();
+
+    /// \todo реализовать!!!
+    void changeQuantity(Quantity q);
     uint getQuantity() const;
+
     void initDockWidget();
-    QDockWidget * getDockWidget()const;
+    QWidget * getInfoWidget()const;
+
     void setLayerListIterator(){}
     void setMainImageInFV(int fvCode){}
     //!     Запускает соотвествующий процесс релокации/перемещения полей зрения на основе их количества и в случае, если одно изображение заходит за другое.
-    void relocateAllFieldOfView(){}
+    void relocateAllFieldOfView();
     //! Порядковый индекс MainImage из списка слоев типа MainImage соотвествует порядковому индексу поля зрения.
     static Quantity getStandartQuantity(IE_ProfileType profileType);
 signals:
     /// \todo связать с моделью
-    void addLayer();
+    void addNewLayer(IE_ModelLayer* pLayer);
     /// \todo связать с моделью
-    void removeLayer();
+    void removeLayer(QList<IE_ModelLayer*>::iterator iter);
     /// \todo связать с моделью
     /// \warning учесть вызов при различных изменениях связанных с FV
     void boundingRectWasChanged(QRectF);
+    void hideLayer(QList<IE_ModelLayer*>::iterator iter);
+    void layerAction(IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter);
+    void activeFVLayerListWasUpdated(QList<IE_ModelLayer*>);
 
-    QDialog::DialogCode makeDialogForSetupAsNew();
 
 public slots:
     /// \todo связать с моделью
-    QRectF getBoundingRectOfAllFieldOfView() {}
+    QRectF getBoundingRectOfAllFieldOfView();
+    void changeActiveFieldOfView(int index);
+    QList<IE_ModelLayer*> getActiveFieldOfViewLayerList();
+    void checkLayerList();
+
 private:
     uint m_quantityOfFields;
+    int m_activeFVIndex;
     QList<IE_FieldOfView*> m_fieldOfViewList;
+    QList<IE_ModelLayer*>   *layersList;
+    _global_ie *    m_p_ie_global_data;
+    IE_FieldOfView_ControllerInfoWidget * m_pInfoWidget;
+
+    void addFieldOfView(int index);
+    void removeFieldOfView(int index);
+
+
 };
+
+
+class IE_FieldOfView_ControllerInfoWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit IE_FieldOfView_ControllerInfoWidget(QWidget *parent=nullptr);
+    ~IE_FieldOfView_ControllerInfoWidget();
+    void init(int currentFVquantity);
+signals:
+    void quantityWasChanged(IE_FieldOfView_Controller::Quantity q);
+    void activeFVWasChanged(int index);
+    void changeActiveFVMainImage();
+    void removeAllElementsOnActiveFV();
+    void hideAllElementsOnActiveFV();
+    void showAllElementsOnActiveFV();
+    void activeFVNoteWasChanged(QString noteText);
+    void getActiveFVNote();
+public slots:
+    void changeQuantity(IE_FieldOfView_Controller::Quantity q);
+    void changeActiveFV(int index, QString fvNote);
+    void updateActiveFVLayerList(QList<IE_ModelLayer*> layerList);
+
+private:
+    int oldQuantity;
+
+    QComboBox    *pcboQuiantityFV, *pcboActiveFV;
+    QString m_activeFVNote;
+    QListWidget * m_pDockLayersListWidget;
+    void makeChangeActiveFVNoteDialog();
+
+
+};
+
 
 #endif // IE_FIELDOFVIEW_CONTROLLER_H

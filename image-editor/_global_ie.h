@@ -48,12 +48,28 @@ public:
 
     explicit _global_ie(int randomKey, QObject *parent = nullptr);
 
+  QString getModelDirPath() const;
+  void setModelDirPath(const QString &value, int key);
+
+  QString getModelResDirPath() const;
+  void setModelResDirPath(const QString &value, int key);
+
+  QString getTmp_modelDirPath() const;
+  void setTmp_modelDirPath(const QString &value, int key);
+
+  QString getTmp_modelResDirPath() const;
+  void setTmp_modelResDirPath(const QString &value, int key);
+
+  QString getLastSelectedDirByUser() const;
+  void setLastSelectedDirByUser(const QString &value);
+
 private:
   qreal threshold_terminal_wellus,threshold_thinHair_top, threshold_mediumHair_top;
   bool ownerSet;
   int randomKey;
   qreal measureIndex;
   UnitType unitType, measureIndexUnitType;
+  QString modelDirPath, modelResDirPath, tmp_modelDirPath, tmp_modelResDirPath, lastSelectedDirByUser;
 };
 
 

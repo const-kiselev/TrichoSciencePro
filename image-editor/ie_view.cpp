@@ -1,15 +1,12 @@
 #include "ie_view.h"
 
-
-// Задачи:
-// - реализовать блокировку редактирования, пока не создана сцена-модель
-
-
-
 IE_View::IE_View(IE_Model *pInputModel):pModel(pInputModel)
 {
     init();
     sceneChanged();
+    setBackgroundBrush(Qt::NoBrush);
+//    setViewportUpdateMode(QGraphicsView::BoundingRectViewportUpdate);
+
 
 
 
@@ -17,10 +14,23 @@ IE_View::IE_View(IE_Model *pInputModel):pModel(pInputModel)
     //setFixedSize(pModel->sceneRect().width(), pModel->sceneRect().height());
 }
 
-void IE_View::init()
+IE_View::~IE_View()
 {
     if(pModel)
-        _p_ie_global_data = pModel->getPGlobal_data();
+        delete pModel;
+    pModel = nullptr;
+//    delete pToolsController;
+    pToolsController = nullptr;
+}
+
+void IE_View::init()
+{
+    if(!pModel)
+    {
+        qWarning() << "pModel is nullptr.";
+        return;
+    }
+    _p_ie_global_data = pModel->getPGlobal_data();
 
     pDockInfo = nullptr;
     currentScale = 1.0;
@@ -28,25 +38,38 @@ void IE_View::init()
 
     setRenderHint (QPainter::Antialiasing, true ) ;
     centerOn(0,0);
-    setAlignment(Qt::AlignTop | Qt::AlignLeft);
+//    setAlignment(Qt::AlignTop|Qt::AlignLeft);
+    setAlignment(Qt::AlignCenter);
+
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
     pToolsController = new ToolsController(p_ie_global_data());
-    // Связывание м/у сигнала "начало использование нового инструмента" и слотом "добавление нового элемента в модель ч/з контроллер инструментов"
+    //! Связывание м/у сигнала "начало использование нового инструмента" и слотом "добавление нового элемента в модель ч/з контроллер инструментов"
     connect(pToolsController, &ToolsController::zoomSignal,
             this, &IE_View::zoomSlot);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+
+
+    connect(pModel, &IE_Model::boundingRectWasChanged, this, &IE_View::changeCurrentViewRect);
+
+
+    pModel->setPToolCnt(pToolsController);
+
+    connect(pToolsController, &ToolsController::startUsingNewTool,
+            pModel, &IE_Model::addLayerViaToolCnt);
 
 
 }
 
 // ------- EVENTS
 
-void IE_View::resizeEvent(QResizeEvent *event)
+void    IE_View::resizeEvent           (QResizeEvent *event)
 {
     QGraphicsView::resizeEvent(event);
     emit(changedSizeOfView(size().width(), size().height()));
+
 }
-void IE_View::mousePressEvent(QMouseEvent *pe)
+void    IE_View::mousePressEvent       (QMouseEvent *pe)
 {
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
    if(checkTheMousePosViaImageBorder(pe))
@@ -54,14 +77,14 @@ void IE_View::mousePressEvent(QMouseEvent *pe)
    QApplication::sendEvent(pToolsController, pe);
 
 }
-void IE_View::mouseReleaseEvent(QMouseEvent *pe)
+void    IE_View::mouseReleaseEvent     (QMouseEvent *pe)
 {
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
     if(checkTheMousePosViaImageBorder(pe))
         return;
     QApplication::sendEvent(pToolsController, pe);
 }
-void IE_View::mouseMoveEvent(QMouseEvent *pe)
+void    IE_View::mouseMoveEvent        (QMouseEvent *pe)
 {
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
     if(checkTheMousePosViaImageBorder(pe))
@@ -69,22 +92,36 @@ void IE_View::mouseMoveEvent(QMouseEvent *pe)
     QApplication::sendEvent(pToolsController, pe);
     emit(mousePos(pe->pos()));
 }
-void IE_View::wheelEvent(QWheelEvent *pe)
+void    IE_View::wheelEvent            (QWheelEvent *pe)
 {
     QApplication::sendEvent(pToolsController, pe);
 }
 
-_global_ie *IE_View::p_ie_global_data() const
+void    IE_View::drawBackground(QPainter *painter, const QRectF &rect)
+{
+
+}
+
+void    IE_View::drawForeground(QPainter *painter, const QRectF &rect)
+{
+    //! \todo в данном методе необходимо реализовать скртие других ПЗ. Проблема возникает с синхронизацией масштабов. Необходимо при разработке сделать тестовый виджет с данными для отладки.
+}
+
+
+_global_ie *
+        IE_View::p_ie_global_data() const
 {
     return _p_ie_global_data;
 }
 
 
-QDockWidget *IE_View::getPDockDebugInfo() const
+QDockWidget *
+        IE_View::getPDockDebugInfo() const
 {
     return pDockDebugInfo;
 }
-QDockWidget *IE_View::getPDockInfo() const
+QDockWidget *
+        IE_View::getPDockInfo() const
 {
     return pDockInfo;
 }
@@ -94,7 +131,8 @@ QDockWidget *IE_View::getPDockInfo() const
 // -------
 // ------- DockWidgets
 
-QDockWidget * IE_View::initDockDebugWidget()
+QDockWidget *
+        IE_View::initDockDebugWidget()
 {
 
 
@@ -168,7 +206,12 @@ QDockWidget * IE_View::initDockDebugWidget()
     return pDockDebugInfo;
 }
 
-void IE_View::initInfoDock()
+void    IE_View::setToolCntType(ToolSet ts)
+{
+    pToolsController->setToolSetType(ts);
+}
+
+void    IE_View::initInfoDock()
 {
 
 }
@@ -178,7 +221,7 @@ void IE_View::initInfoDock()
 // -------
 // ------- Tool's methods
 
-void IE_View::zoomSlot(float delta, QPointF point)
+void    IE_View::zoomSlot(float delta, QPointF point)
 {
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     static const double scaleFactor = 1.15;
@@ -201,14 +244,20 @@ void IE_View::zoomSlot(float delta, QPointF point)
 // ------- END Tool's methods -------
 
 
-void IE_View::sceneChanged()
+void    IE_View::sceneChanged()
 {
     setScene(pModel);
-    setSceneRect(0, 0, pModel->sceneRect().width(), pModel->sceneRect().height());
+    setSceneRect(pModel->getModelRect());
     fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
 }
 
-void IE_View::resize(int w, int h)
+void    IE_View::changeCurrentViewRect(QRectF rectOfView)
+{
+    setSceneRect(rectOfView);
+//    setFixedSize(rectOfView.width(), rectOfView.height());
+}
+
+void    IE_View::resize(int w, int h)
 {
     QGraphicsView::resize(w,h);
     //fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
@@ -216,20 +265,26 @@ void IE_View::resize(int w, int h)
 
 
     // Проверка на инструмент, у которого необходимо отслеживать выход за границу изображения
-int IE_View::checkTheMousePosViaImageBorder(QMouseEvent *pe)
+int     IE_View::checkTheMousePosViaImageBorder(QMouseEvent *pe)
 { 
     pe->setLocalPos(computeSceneRelativelyPosition(pe->pos()));
     if(pToolsController->getActiveToolType() >= ToolType::checkableTool)
     {
-        QPointF checkMousePressPos = static_cast<QMouseEvent*>(pe)->pos();
-        if(checkMousePressPos.x() < 0)
+//        QPointF checkMousePressPos = ;
+        QRectF checkMousePressRect;
+        checkMousePressRect.setTopLeft(static_cast<QMouseEvent*>(pe)->pos());
+        checkMousePressRect.setWidth(0.1);
+        checkMousePressRect.setHeight(0.1);
+        if(!pModel->getModelRect().intersects(checkMousePressRect))
             return 1;
-        if(checkMousePressPos.y() < 0)
-            return 1;
-        if(checkMousePressPos.x() >= pModel->getImageRect().width())
-            return 1;
-        if(checkMousePressPos.y() >= pModel->getImageRect().height())
-            return 1;
+//        if(checkMousePressPos.x() < 0)
+//            return 1;
+//        if(checkMousePressPos.y() < 0)
+//            return 1;
+//        if(checkMousePressPos.x() >= pModel->getModelRect().width())
+//            return 1;
+//        if(checkMousePressPos.y() >= pModel->getModelRect().height())
+//            return 1;
     }
     return 0;
 }
@@ -246,14 +301,8 @@ ToolsController *IE_View::getPToolsController() const
 {
     return pToolsController;
 }
-IE_Model *IE_View::getPImgModel() const
-{
-    return pModel;
-}
-void IE_View::setPImgModel(IE_Model *value)
-{
-    pModel = value;
-}
+
+
 QString IE_View::getStatusBarInfoDataForUser() const
 {
 
@@ -262,10 +311,7 @@ IE_Model *IE_View::getPModel() const
 {
     return pModel;
 }
-void IE_View::setPModel(IE_Model *value)
-{
-    pModel = value;
-}
 
 
-/// \todo !!!!!! ------- :
+
+

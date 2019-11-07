@@ -30,6 +30,7 @@ protected:
     virtual void paint(QPainter *painter,
                        const QStyleOptionGraphicsItem *option,
                        QWidget *widget) override;
+    virtual QRectF boundingRect() const override;
 private:
     QColor backgroundColor, textColor;
     QString str;

@@ -4,15 +4,7 @@
 #include <QtWidgets>
 #include "ie_tool.h"
 
-enum LineSettings {
-    AllSettings = -1,
-    None = 0,
-    PenColor = (1<<1),
-    BrushColor = (1<<2),
-    PenWidth = (1<<3),
-    WidthTip = (1<<4),
-    LengthTip = (1<<5)
-};
+
 
 class IE_Tool_LineInfoWidget;
 
@@ -20,6 +12,18 @@ class IELine : public QObject, public QGraphicsLineItem, public ie_tool
 {
 Q_OBJECT
 public:
+    enum LineSettings {
+        AllSettings = -1,
+        None = 0,
+        PenColor = (1<<1),
+        BrushColor = (1<<2),
+        PenWidth = (1<<3),
+        WidthTip = (1<<4),
+        LengthTip = (1<<5)
+    };
+
+
+
     explicit        IELine( _global_ie *gi,
                             QObject* parent=nullptr,
                             ToolType tt = ToolType::SimpleLine,
@@ -88,12 +92,12 @@ class IE_Tool_LineInfoWidget : public QWidget
     Q_OBJECT
 public:
     explicit IE_Tool_LineInfoWidget(_global_ie *gi, QWidget *parent=nullptr,
-                                    LineSettings settings = LineSettings::AllSettings);
+                                    IELine::LineSettings settings = IELine::LineSettings::AllSettings);
     ~IE_Tool_LineInfoWidget();
     void init();
 private:
     _global_ie *p_ie_global_data;
-    LineSettings lineSettings;
+    IELine::LineSettings lineSettings;
     QLabel  *length,
             *penWidth;
     QColor  *penColor,

@@ -21,6 +21,7 @@ ToolsController::ToolsController(_global_ie *gi):_p_ie_global_data(gi)
     editModeActive = false;
 
     connect(this, &ToolsController::startUsingNewTool, &ToolsController::updateToolInfoDockWidget);
+    initInfoDock();
 }
 
 
@@ -292,6 +293,12 @@ void ToolsController::updateToolInfoDockWidget()
     pDock->setWidget(pWidg);
 }
 
+void ToolsController::resetPActiveTool()
+{
+    pActiveTool = nullptr;
+    resetEditingMode();
+}
+
 QDockWidget*  ToolsController::initInfoDock()
 {
     pDock = new QDockWidget("Параметры инструмента");
@@ -337,6 +344,11 @@ _global_ie *ToolsController::p_ie_global_data() const
     return _p_ie_global_data;
 }
 
+QDockWidget *ToolsController::getPDock() const
+{
+    return pDock;
+}
+
 void ToolsController::setP_ie_global_data(_global_ie *p_ie_global_data)
 {
     _p_ie_global_data = p_ie_global_data;
@@ -347,6 +359,8 @@ void ToolsController::initToolActions()
     QActionGroup *pActionGroup = new QActionGroup(this);
     QList<ToolType> toolsList;
     switch (toolSetType){
+    case ToolSet::Trichoscopy_hairDencity:
+    case ToolSet::Trichoscopy_Simple:
     case ToolSet::AllTools:
         toolsList   << ToolType::NoneTool
                         << ToolType::SimpleLine
@@ -378,6 +392,7 @@ void ToolsController::initToolActions()
                       << ToolType::Zoom
                       << ToolType::NoneTool;
             break;
+
     }
 
     QAction *pToolAction;
@@ -507,6 +522,7 @@ void ToolsController::initToolActions()
         pToolAction->setCheckable(true);
         pActionGroup->addAction(pToolAction);
     }
+    clear();
     addActions(pActionGroup->actions());
 
 }

@@ -1,21 +1,70 @@
 #include "ie_fieldOfView_controller.h"
 
-IE_FieldOfView_Controller::IE_FieldOfView_Controller(QObject *parent) : QObject(parent), m_quantityOfFields(0)
+IE_FieldOfView_Controller::IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
+                                                     _global_ie * pieg,
+                                                     QObject *parent
+                                                     ) :    QObject(parent),
+                                                            m_quantityOfFields(0),
+                                                            layersList(ll),
+                                                            m_p_ie_global_data(pieg),
+                                                            m_activeFVIndex(-1)
 {
-    //
+    m_pInfoWidget = new IE_FieldOfView_ControllerInfoWidget();
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::quantityWasChanged, [this](Quantity q)
+    {
+        changeQuantity(q);
+    });
+    m_activeFVIndex = -1;
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::activeFVWasChanged, [this](int index)
+    {
+        changeActiveFieldOfView(index);
+    });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::hideAllElementsOnActiveFV, [this]()
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->hideIntersectedLayersWithFv();
+    });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::showAllElementsOnActiveFV, [this]()
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->showIntersectedLayersWithFv();
+    });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::removeAllElementsOnActiveFV, [this]()
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->removeIntersectedLayersWithFv();
+    });
+    connect(this, &IE_FieldOfView_Controller::activeFVLayerListWasUpdated, m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList);
+
+
+}
+
+IE_FieldOfView_Controller::~IE_FieldOfView_Controller()
+{
+    while(!m_fieldOfViewList.isEmpty())
+    {
+        delete m_fieldOfViewList.at(m_fieldOfViewList.size()-1);
+        m_fieldOfViewList.removeAt(m_fieldOfViewList.size()-1);
+    }
 }
 
 int IE_FieldOfView_Controller::read(const QJsonObject &json)
 {
     QJsonArray fvArray = json["fieldOfViewArray"].toArray();
-    changeQuantity( (Quantity)(fvArray.size()+1));
+    if(fvArray.size() < 1 || fvArray.size() == 5 || fvArray.size() > 6)
+    {
+        qWarning() << "Invalid number of field of view = " << fvArray.size();
+        return 1;
+    }
+//    removeAllFieldOfView();
+    init((Quantity)(fvArray.size()));
+    int answer = 0;
     for (int fvIndex = 0; fvIndex < fvArray.size(); ++fvIndex)
     {
         QJsonObject fvObject = fvArray[fvIndex].toObject();
-        IE_FieldOfView * tmp_pfv = new IE_FieldOfView();
-        tmp_pfv->read(fvObject);
-        m_fieldOfViewList.append(tmp_pfv);
+        answer = m_fieldOfViewList.at(fvIndex)->read(fvObject);
+        if(answer)
+            return answer;
     }
+    m_activeFVIndex = 0;
+    changeActiveFieldOfView(m_activeFVIndex);
     return 0;
 }
 
@@ -34,12 +83,42 @@ int IE_FieldOfView_Controller::write(QJsonObject &json) const
 
 void IE_FieldOfView_Controller::init(IE_FieldOfView_Controller::Quantity quantity)
 {
-    m_quantityOfFields = quantity;
-    for(int i = 0; i < m_quantityOfFields; i++)
+    if(m_quantityOfFields)
     {
-        IE_FieldOfView * tmpFV = new IE_FieldOfView();
-        m_fieldOfViewList.append(tmpFV);
+        qWarning() << "Init was done earlier. Redirect to changeQuantity(...).";
+        changeQuantity(quantity);
+        return;
     }
+
+    m_pInfoWidget->init(quantity);
+    m_activeFVIndex = 0;
+    for(int i = 0; i < (int)quantity; i++)
+    {
+        addFieldOfView(i);
+    }
+    changeActiveFieldOfView(m_activeFVIndex);
+}
+
+void IE_FieldOfView_Controller::changeQuantity(IE_FieldOfView_Controller::Quantity q)
+{
+    if( (int)q == m_quantityOfFields )
+        return;
+    //! \todo не забыть разъединить сигнал!?
+    if( (int)q < m_quantityOfFields )
+    {
+        // FV сам удаляет все слои, которые находятся на нем
+        for(int i = m_quantityOfFields-1; i >= (int)q; i--)
+            removeFieldOfView(i);
+    }
+    else
+    {
+        for(int i = m_quantityOfFields; i < (int)q; i++)
+            addFieldOfView(i);
+        makeDialogForSetupAsNew();
+    }
+
+    relocateAllFieldOfView();
+    m_pInfoWidget->changeQuantity((Quantity) m_quantityOfFields);
 }
 
 uint IE_FieldOfView_Controller::getQuantity()const
@@ -47,14 +126,67 @@ uint IE_FieldOfView_Controller::getQuantity()const
     return m_quantityOfFields;
 }
 
-void IE_FieldOfView_Controller::initDockWidget()
+QWidget *IE_FieldOfView_Controller::getInfoWidget()const
 {
-
+    return m_pInfoWidget;
 }
 
-QDockWidget *IE_FieldOfView_Controller::getDockWidget()const
+void IE_FieldOfView_Controller::relocateAllFieldOfView()
 {
+    QPointF followPointF(0,0);
+    qreal highest = 0;
+    switch ((Quantity)m_quantityOfFields)
+    {
+    case Quantity::One:
+    case Quantity::Two:
+    case Quantity::Three:
+    {
+        for(int i = 0; i < m_quantityOfFields; i++)
+        {
+            IE_FieldOfView * pfv = m_fieldOfViewList.at(i);
+            pfv->setPos(followPointF);
+            QRectF layerRect = pfv->getRect();
+            followPointF.setX( followPointF.x() + layerRect.width() );
+        }
+        break;
+    }
+    case Quantity::Four:
+    case Quantity::Six:
+    {
+        for(int i = 0; i < m_quantityOfFields; i++)
+        {
+            IE_FieldOfView * pfv = m_fieldOfViewList.at(i);
+            pfv->setPos(followPointF);
+            QRectF layerRect = pfv->getRect();
+            followPointF.setX( followPointF.x() + layerRect.width() );
+            if((Quantity)m_quantityOfFields == Quantity::Four)
+            {
+                if(i < 2)
+                    if(layerRect.height() > highest)
+                        highest = layerRect.height();
+                if(i == 1)
+                {
+                    followPointF.setY( followPointF.y() + highest );
+                    followPointF.setX(0);
+                }
 
+            }
+            else if((Quantity)m_quantityOfFields == Quantity::Six)
+            {
+                if(i < 3)
+                    if(layerRect.height() > highest)
+                        highest = layerRect.height();
+                if(i == 2)
+                {
+                    followPointF.setY( followPointF.y() + highest );
+                    followPointF.setX(0);
+                }
+            }
+        }
+        break;
+    }
+    }
+    emit boundingRectWasChanged(getBoundingRectOfAllFieldOfView());
 }
 
 QDialog::DialogCode IE_FieldOfView_Controller::makeDialogForSetupAsNew()
@@ -68,7 +200,6 @@ QDialog::DialogCode IE_FieldOfView_Controller::makeDialogForSetupAsNew()
 
     for(int i = 0; i < m_quantityOfFields; i++)
     {
-        //! \bug ОШИБКА БУДЕТ СТО ПРО!!!!!!
         QString fileName = m_fieldOfViewList.at(i)->getMainImageFileInfo().fileName();
         if(fileName.isEmpty())
             fileName = "Выберите изображение";
@@ -77,20 +208,24 @@ QDialog::DialogCode IE_FieldOfView_Controller::makeDialogForSetupAsNew()
         QLabel * pLableFileName = new QLabel(fileName,locPDialog);
         pMainLayout->addWidget(pLableFileName);
         QPushButton * pLoadButton = new QPushButton("Загрузить изображение", locPDialog);
+        pMainLayout->addWidget(pLoadButton);
         connect(pLoadButton, &QPushButton::clicked, [this, i, pLableFileName]()
         {
-            QString filePath =
-                    QFileDialog::getOpenFileName(nullptr,
-                                                 "Выбор изображения",
-                                                 QStandardPaths::writableLocation(
-                                                     QStandardPaths::PicturesLocation),
-                                                 "*.png *.jpg"
-                                                );
-
-            pLableFileName->setText(filePath);
-            m_fieldOfViewList.at(i)->setMainImage(filePath);
+            if(m_fieldOfViewList.at(i)->setMainImage())
+            {
+                QMessageBox::warning(nullptr, "Ошибка", "Не удалось загрузить изображение. Попробуйте еще раз.");
+                return;
+            }
+            pLableFileName->setText(m_fieldOfViewList.at(i)
+                                        ->getMainImageFileInfo().fileName());
         });
     }
+
+    QDialogButtonBox * buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                         | QDialogButtonBox::Cancel,locPDialog);
+    pMainLayout->addWidget(buttonBox);
+    connect(buttonBox, &QDialogButtonBox::accepted, locPDialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, locPDialog, &QDialog::reject);
 
 
     locPDialog->setLayout(pMainLayout);
@@ -101,11 +236,92 @@ QDialog::DialogCode IE_FieldOfView_Controller::makeDialogForSetupAsNew()
 
     if(answer == QDialog::Accepted)
     {
-
+        relocateAllFieldOfView();
     }
     delete locPDialog;
     return (QDialog::DialogCode)answer;
 }
+
+QRectF IE_FieldOfView_Controller::getBoundingRectOfAllFieldOfView()
+{
+    QRectF answer;
+    answer.setTopLeft(QPointF(0,0));
+    answer.setBottomRight(QPointF(0,0));
+    //      находим САМУЮ нижнюю правую точку
+    for(int i = 0; i < m_quantityOfFields; i++)
+    {
+        IE_FieldOfView * pfv = m_fieldOfViewList.at(i);
+        qDebug() << "!!!!!!! " << pfv->getRect();
+        if(pfv->getRect().bottomRight().x() > answer.bottomRight().x())
+            answer.setWidth(pfv->getRect().bottomRight().x());
+        if(pfv->getRect().bottomRight().y() > answer.bottomRight().y())
+            answer.setHeight(pfv->getRect().bottomRight().y());
+    }
+    qDebug() << answer;
+    return answer;
+}
+
+void IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
+{
+    if(index>m_quantityOfFields-1)
+        return;
+    m_activeFVIndex = index;
+    emit boundingRectWasChanged( m_fieldOfViewList.at(index)->getRect() );
+    m_pInfoWidget->changeActiveFV(index, m_fieldOfViewList.at(index)->getNote());
+    checkLayerList();
+}
+
+QList<IE_ModelLayer *> IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
+{
+    if(!m_quantityOfFields)
+        return QList<IE_ModelLayer *>();
+    return m_fieldOfViewList.at(m_activeFVIndex)->getLayers();
+}
+
+void IE_FieldOfView_Controller::checkLayerList()
+{
+    emit activeFVLayerListWasUpdated(getActiveFieldOfViewLayerList());
+}
+
+void IE_FieldOfView_Controller::addFieldOfView(int index)
+{
+    IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, layersList, m_p_ie_global_data);
+    m_fieldOfViewList.append(tmpFV);
+    connect(tmpFV, &IE_FieldOfView::addNewLayer, [this](IE_ModelLayer* pLayer)
+    {
+        emit addNewLayer(pLayer);
+    });
+    connect(tmpFV, &IE_FieldOfView::boundingRectWasCganged, [this]()
+    {
+        emit boundingRectWasChanged(getBoundingRectOfAllFieldOfView());
+    });
+    connect(tmpFV, &IE_FieldOfView::layerAction, [this](IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter)
+    {
+        emit layerAction(action, iter);
+    });
+
+    m_quantityOfFields++;
+}
+
+void IE_FieldOfView_Controller::removeFieldOfView(int index)
+{
+    if(index < 0 || index >= m_quantityOfFields || index >= m_fieldOfViewList.size())
+        return;
+    m_fieldOfViewList.at(index)->removeLayersAndMainImage();
+    delete m_fieldOfViewList.at(index);
+    m_fieldOfViewList.removeAt(index);
+    m_quantityOfFields--;
+
+    if(m_quantityOfFields)
+    {
+        if(m_activeFVIndex == index)
+            m_activeFVIndex = index-1;
+        changeActiveFieldOfView(m_activeFVIndex);
+        m_pInfoWidget->changeQuantity((Quantity)m_quantityOfFields);
+    }
+}
+
+
 
 IE_FieldOfView_Controller::Quantity IE_FieldOfView_Controller::getStandartQuantity(IE_ProfileType profileType)
 {
@@ -119,3 +335,220 @@ IE_FieldOfView_Controller::Quantity IE_FieldOfView_Controller::getStandartQuanti
 }
 
 
+IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget *parent):QWidget(parent)
+{
+    //pcboQuiantityFV = new QComboBox(this);
+    pcboActiveFV = new QComboBox(this);
+    m_pDockLayersListWidget = new QListWidget(this);
+    m_pDockLayersListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+}
+
+IE_FieldOfView_ControllerInfoWidget::~IE_FieldOfView_ControllerInfoWidget()
+{
+    //delete pcboQuiantityFV;
+    delete pcboActiveFV;
+}
+
+void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
+{
+    QVBoxLayout * pVertBoxLayout = new QVBoxLayout(this);
+
+    QHBoxLayout * pHorBoxLayout;
+    QLabel *pLabel;
+    /*
+    {
+        pHorBoxLayout = new QHBoxLayout(this);
+        pLabel = new QLabel("Количество полей зрения:", this);
+
+
+        pLabel->setBuddy(pcboQuiantityFV);
+        QStringList  lst;
+
+        lst << QString().number(IE_FieldOfView_Controller::Quantity::One)
+            << QString().number(IE_FieldOfView_Controller::Quantity::Two)
+            << QString().number(IE_FieldOfView_Controller::Quantity::Three)
+            << QString().number(IE_FieldOfView_Controller::Quantity::Four)
+            << QString().number(IE_FieldOfView_Controller::Quantity::Six);
+        pcboQuiantityFV->addItems(lst);
+        pcboQuiantityFV->setCurrentText(QString().number(currentFVquantity));
+        oldQuantity = pcboQuiantityFV->currentText().toInt();
+
+        pHorBoxLayout->addWidget(pLabel);
+        pHorBoxLayout->addWidget(pcboQuiantityFV);
+        pVertBoxLayout->addItem(pHorBoxLayout);
+
+        connect(pcboQuiantityFV, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
+        {
+            if(index == -1)
+                return;
+//            if(oldQuantity<index+1)
+
+            int n = QMessageBox::warning(nullptr,
+                                         "Предупреждение",
+                                         "Вы точно хотите изменить количество полей зрения?"
+                                         "\nЕсли вы выбрали меньшее количество, то это повлечет "
+                                         "удаление полей зрения (и данных/элементов на них), которые меньше выбранного значения.",
+                                         QMessageBox::Yes | QMessageBox::No,
+                                         QMessageBox::No
+                                         );
+            if(n == QMessageBox::Yes)
+            {
+                emit quantityWasChanged((IE_FieldOfView_Controller::Quantity)pcboQuiantityFV->currentText().toInt());
+                oldQuantity = pcboQuiantityFV->currentText().toInt();
+            }
+            else
+                pcboQuiantityFV->setCurrentText(QString().number(oldQuantity));
+
+        });
+    }*/
+
+
+    {
+        pHorBoxLayout = new QHBoxLayout(this);
+
+        pLabel = new QLabel("Активное поле зрения:", this);
+        pLabel->setBuddy(pcboActiveFV);
+        QStringList  lst;
+        for(int i=0; i < currentFVquantity; i++)
+            lst << QString().number(i+1);
+        pcboActiveFV->addItems(lst);
+        pcboActiveFV->setCurrentIndex(0);
+
+        pHorBoxLayout->addWidget(pLabel);
+        pHorBoxLayout->addWidget(pcboActiveFV);
+        pVertBoxLayout->addItem(pHorBoxLayout);
+
+        connect(pcboActiveFV, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
+        {
+            if(index == -1)
+                return;
+            emit activeFVWasChanged(pcboActiveFV->currentIndex());
+
+        });
+
+        QPushButton * ppbut;
+        {
+
+            ppbut = new QPushButton("Скрыть все элементы в поле зрения", this);
+            pVertBoxLayout->addWidget(ppbut);
+            connect(ppbut, &QPushButton::clicked, [this]()
+            {
+                emit hideAllElementsOnActiveFV();
+            });
+            ppbut = new QPushButton("Отобразить все элементы в поле зрения", this);
+            pVertBoxLayout->addWidget(ppbut);
+            connect(ppbut, &QPushButton::clicked, [this]()
+            {
+                emit showAllElementsOnActiveFV();
+            });
+        }
+        {
+            ppbut = new QPushButton("Удалить все элементы в поле зрения", this);
+            pVertBoxLayout->addWidget(ppbut);
+            connect(ppbut, &QPushButton::clicked, [this]()
+            {
+                int n = QMessageBox::warning(nullptr,
+                                             "Предупреждение",
+                                             "Вы точно хотите удалить все элементы на данном поле зрения?",
+                                             QMessageBox::Yes | QMessageBox::No,
+                                             QMessageBox::No
+                                             );
+                if(n == QMessageBox::Yes)
+                    emit removeAllElementsOnActiveFV();
+            });
+        }
+        {
+            ppbut = new QPushButton("Примечания", this);
+            pVertBoxLayout->addWidget(ppbut);
+            connect(ppbut, &QPushButton::clicked, [this]()
+            {
+                makeChangeActiveFVNoteDialog();
+            });
+        }
+        pVertBoxLayout->addStretch(1);
+        {
+            ppbut = new QPushButton("Изменить изображение", this);
+            pVertBoxLayout->addWidget(ppbut);
+            connect(ppbut, &QPushButton::clicked, [this]()
+            {
+                int n = QMessageBox::warning(nullptr,
+                                             "Предупреждение",
+                                             "Вы уверены, что хотите изменить изобаржение данного поля зрения?"
+                                             "\nЭто повлечет удаление всех инструментов на данном поле зрения.",
+                                             QMessageBox::Yes | QMessageBox::No,
+                                             QMessageBox::No
+                                             );
+                if(n == QMessageBox::Yes)
+                    emit changeActiveFVMainImage();
+
+            });
+        }
+    }
+    pVertBoxLayout->addStretch(1);
+
+    pVertBoxLayout->addWidget(m_pDockLayersListWidget);
+
+    this->setLayout(pVertBoxLayout);
+}
+
+void IE_FieldOfView_ControllerInfoWidget::changeQuantity(IE_FieldOfView_Controller::Quantity q)
+{
+    pcboQuiantityFV->setCurrentText(QString().number(q));
+    QStringList  lst;
+    pcboActiveFV->clear();
+    for(int i=0; i < (int)q; i++)
+        lst << QString().number(i+1);
+    pcboActiveFV->addItems(lst);
+    pcboActiveFV->setCurrentIndex(0);
+    emit activeFVWasChanged(0);
+}
+
+void IE_FieldOfView_ControllerInfoWidget::changeActiveFV(int index, QString fvNote)
+{
+    pcboActiveFV->setCurrentIndex(index);
+    m_activeFVNote = fvNote;
+}
+
+void IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(QList<IE_ModelLayer *> layerList)
+{
+    m_pDockLayersListWidget->clear();
+
+    for (QList<IE_ModelLayer*>::iterator iter = layerList.begin();
+         iter!=layerList.end();iter++
+         )
+        m_pDockLayersListWidget->addItem( IE_ModelLayer::toStr( iter.i->t()->getToolType() ) );
+
+}
+
+void IE_FieldOfView_ControllerInfoWidget::makeChangeActiveFVNoteDialog()
+{
+    QDialog * locPDialog = new QDialog();
+    QVBoxLayout * pMainLayout = new QVBoxLayout(locPDialog);
+
+    QLabel *pLabel = new QLabel("Примечания:",locPDialog);
+    QPlainTextEdit * pPlaintTextEdit = new QPlainTextEdit(m_activeFVNote, locPDialog);
+    pLabel->setBuddy(pPlaintTextEdit);
+
+    pMainLayout->addWidget(pLabel);
+    pMainLayout->addWidget(pPlaintTextEdit);
+
+
+    QDialogButtonBox * buttonBox = new QDialogButtonBox(QDialogButtonBox::Save
+                                         | QDialogButtonBox::Cancel,locPDialog);
+    pMainLayout->addWidget(buttonBox);
+    connect(buttonBox, &QDialogButtonBox::accepted, locPDialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, locPDialog, &QDialog::reject);
+
+    locPDialog->setLayout(pMainLayout);
+    locPDialog->setModal(true);
+
+    locPDialog->show();
+    int answer =  locPDialog->exec();
+    if(answer == QDialog::Accepted)
+    {
+        m_activeFVNote = pPlaintTextEdit->toPlainText();
+        emit activeFVNoteWasChanged(m_activeFVNote);
+    }
+    delete locPDialog;
+
+}

@@ -1,46 +1,48 @@
 #include "ie_tool_image.h"
 
-IE_Tool_Image::IE_Tool_Image(): QObject(nullptr),
-                                QGraphicsPixmapItem(nullptr),
-                                ie_tool (),
-                                _destDir(""),
-                                _tmpDir(""),
-                                _destParentDir("")
+        IE_Tool_Image::IE_Tool_Image(): QObject(nullptr),
+                                        QGraphicsPixmapItem(nullptr),
+                                        ie_tool (),
+                                        _destDir(""),
+                                        _tmpDir(""),
+                                        _destParentDir("")
 {
 
 }
 
-IE_Tool_Image::IE_Tool_Image(QString destDir,
-                             QString destParentDir,
-                             QString tmpDir,
-                             QString originalFilePath,
-                             ToolType tt):  QObject(nullptr),
-                                            QGraphicsPixmapItem(nullptr),
-                                            ie_tool (),
-                                            _destDir(destDir),
-                                            _tmpDir(tmpDir),
-                                            _destParentDir(destParentDir)
+        IE_Tool_Image::IE_Tool_Image(QString destDir,
+                                     QString destParentDir,
+                                     QString tmpDir,
+                                     QString originalFilePath,
+                                     ToolType tt,
+                                     QString dirToOpenInDialog
+                                     ): QObject(nullptr),
+                                        QGraphicsPixmapItem(nullptr),
+                                        ie_tool (),
+                                        _destDir(destDir),
+                                        _tmpDir(tmpDir),
+                                        _destParentDir(destParentDir)
 {
-    loadImage(originalFilePath);
+    loadImage(originalFilePath, dirToOpenInDialog);
 }
 
 
 
-IE_Tool_Image::~IE_Tool_Image()
+        IE_Tool_Image::~IE_Tool_Image()
 {
     /// \todo  удаление временного изображения
 //    if(QFile::exists(_fileInfo.filePath()))
     //        QFile::remove(_fileInfo.filePath());
 }
 
-void IE_Tool_Image::setDirs(QString destDir, QString destParentDir, QString tmpDir)
+void    IE_Tool_Image::setDirs(QString destDir, QString destParentDir, QString tmpDir)
 {
     _destDir = destDir;
     _tmpDir = tmpDir;
     _destParentDir = destParentDir;
 }
 
-int IE_Tool_Image::read(const QJsonObject &json)
+int     IE_Tool_Image::read(const QJsonObject &json)
 {
     QString filePath = QString("%1/%2").arg(_destParentDir.path()).arg(json["filePath"].toString());
     filePath = QDir::cleanPath(filePath);
@@ -52,17 +54,19 @@ int IE_Tool_Image::read(const QJsonObject &json)
     else
     {
         qWarning() << filePath << " doesn't exist !";
-        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Не удалось найти изображение %1.").arg(filePath));
+        QMessageBox::warning(nullptr, "Application",
+                             QString("Ошибка. Не удалось найти изображение %1.").arg(filePath));
         return 1;
     }
     return 0;
 }
 
-int IE_Tool_Image::write(QJsonObject &json) const
+int     IE_Tool_Image::write(QJsonObject &json)const
 {
     json["typeTitle"] = getToolTitle(ToolType::Image);
     json["fileName"]  = _fileInfo.fileName();
-    QString destFilePath = QString("%1/%2").arg(_destDir.path()).arg(_fileInfo.fileName());
+    QString destFilePath = QString("%1/%2") .arg(_destDir.path())
+                                            .arg(_fileInfo.fileName());
 
     // Проверка на совпадение пути файла и нового файла.
     if(_fileInfo.filePath() != destFilePath)
@@ -75,7 +79,11 @@ int IE_Tool_Image::write(QJsonObject &json) const
             json["filePath"] = _fileInfo.absoluteFilePath();
             QMessageBox::warning(nullptr,
                                  "Application",
-                                 QString("Не удалось скопировать изображение %1. Из-за этого при экспорте может произойти потеря данных. Пожалуйста, проверьте, что изображение доступно для копирования и не защищенно.").arg(_fileInfo.absoluteFilePath()));
+                                 QString("Не удалось скопировать изображение %1. Из-за этого при экспорте"
+                                         " может произойти потеря данных. Пожалуйста, проверьте, что"
+                                         " изображение доступно для копирования и не защищенно.")
+                                 .arg(_fileInfo.absoluteFilePath())
+                                 );
             return 1;
         }
     }
@@ -84,8 +92,9 @@ int IE_Tool_Image::write(QJsonObject &json) const
     int destParentDirPathSize = _destParentDir.path().size();
     if(ind!=-1)
     {
-        json["filePath"] = QDir::cleanPath(QString("%1/%2") .arg(_destDir.absolutePath().mid(ind + destParentDirPathSize+1 ))
-                                                            .arg(_fileInfo.fileName())
+        json["filePath"] = QDir::cleanPath(QString("%1/%2")
+                                            .arg(_destDir.absolutePath().mid(ind + destParentDirPathSize+1 ))
+                                            .arg(_fileInfo.fileName())
                                            );
     }
     else
@@ -96,26 +105,53 @@ int IE_Tool_Image::write(QJsonObject &json) const
 
 }
 
-QRectF IE_Tool_Image::boundingRect() const
+QRectF  IE_Tool_Image::boundingRect() const
 {
     return QGraphicsPixmapItem::boundingRect();
 }
 
-void IE_Tool_Image::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void    IE_Tool_Image::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     QGraphicsPixmapItem::paint(painter, option, widget);
 }
 
-int IE_Tool_Image::loadImage(QString filePath)
+QFileInfo
+        IE_Tool_Image::getOriginalFileInfo() const
 {
-    while(!QFile::exists(filePath))
-    {
+    return m_originalFileInfo;
+}
+
+void    IE_Tool_Image::deleteFile()
+{
+    QFile tmpFile(_destDir.filePath(_fileInfo.fileName()));
+    if( tmpFile.exists() )
+        tmpFile.remove();
+    tmpFile.setFileName( _tmpDir.filePath( _fileInfo.fileName() ) );
+    if( tmpFile.exists() )
+        tmpFile.remove();
+}
+
+QFileInfo
+        IE_Tool_Image::getFileInfo() const
+{
+    return _fileInfo;
+}
+
+int     IE_Tool_Image::loadImage(QString filePath, QString dirToOpenInDialog)
+{
+    if(filePath.isEmpty())
         filePath = QFileDialog::getOpenFileName(nullptr,
                                                 "Выбор изображения",
-                                                QStandardPaths::displayName(
-                                                QStandardPaths::DocumentsLocation )
+                                                dirToOpenInDialog,
+                                                "*.png *.jpg"
                                                 );
+
+    if(!QFile::exists(filePath))
+    {
+        qDebug() << "There is no such file: " << filePath;
+        return 1;
     }
+    m_originalFileInfo.setFile(filePath);
     _fileInfo.setFile(filePath);
 
 

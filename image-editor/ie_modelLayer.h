@@ -5,10 +5,16 @@
 #include "ie_tool.h"
 #include "ie_header.h"
 
+
+//! \todo добавить статичную функцию, которая возвращает строковый список наименования слоев.
 class IE_ModelLayer :public QGraphicsItem
 {
-
 public:
+    enum Action{
+        Show,
+        Hide,
+        Remove
+    };
     IE_ModelLayer(QGraphicsItem *parent = nullptr);
     IE_ModelLayer(ToolType tt, QGraphicsItem *parent = nullptr);
 //    explicit IE_ModelLayer(ToolType tt, QGraphicsItem *pLayerGraphicsItem);
@@ -22,7 +28,11 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                      QWidget *widget) override;
 
+    QPointF getPos();
+    void setPos(QPointF pos);
+
     void hide();
+    void show();
     void unhide();
 
     ie_tool* getToolPtr();
@@ -34,6 +44,7 @@ private:
     ie_tool* pTool;
     bool visible;
     ToolType toolType;
+    QString layerTitle;
     //QGraphicsItem *pLayerGraphicsItem;
 };
 

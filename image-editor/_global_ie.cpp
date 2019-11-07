@@ -1,5 +1,7 @@
 #include "_global_ie.h"
 
+#include <QStandardPaths>
+
 _global_ie::_global_ie(int rk, QObject *parent)
     :   QObject (parent),
         ownerSet(true),
@@ -10,6 +12,86 @@ _global_ie::_global_ie(int rk, QObject *parent)
     threshold_terminal_wellus = 0.04;
     threshold_thinHair_top = 0.06;
     threshold_mediumHair_top = 0.08;
+    modelDirPath
+            = modelResDirPath
+            = tmp_modelDirPath
+            = tmp_modelResDirPath = "";
+    lastSelectedDirByUser = QStandardPaths::writableLocation(
+                QStandardPaths::DocumentsLocation);
+}
+
+QString _global_ie::getModelDirPath() const
+{
+    return modelDirPath;
+}
+
+void _global_ie::setModelDirPath(const QString &value, int key)
+{
+    if(!ownerSet)
+        return;
+    if(key == randomKey)
+    {
+        modelDirPath = value;
+        emit changed();
+    }
+}
+
+QString _global_ie::getModelResDirPath() const
+{
+    return modelResDirPath;
+}
+
+void _global_ie::setModelResDirPath(const QString &value, int key)
+{
+    if(!ownerSet)
+        return;
+    if(key == randomKey)
+    {
+        modelResDirPath = value;
+        emit changed();
+    }
+}
+
+QString _global_ie::getTmp_modelDirPath() const
+{
+    return tmp_modelDirPath;
+}
+
+void _global_ie::setTmp_modelDirPath(const QString &value, int key)
+{
+    if(!ownerSet)
+        return;
+    if(key == randomKey)
+    {
+        tmp_modelDirPath = value;
+        emit changed();
+    }
+}
+
+QString _global_ie::getTmp_modelResDirPath() const
+{
+    return tmp_modelResDirPath;
+}
+
+void _global_ie::setTmp_modelResDirPath(const QString &value, int key)
+{
+    if(!ownerSet)
+        return;
+    if(key == randomKey)
+    {
+        tmp_modelResDirPath = value;
+        emit changed();
+    }
+}
+
+QString _global_ie::getLastSelectedDirByUser() const
+{
+    return lastSelectedDirByUser;
+}
+
+void _global_ie::setLastSelectedDirByUser(const QString &value)
+{
+    lastSelectedDirByUser = value;
 }
 
 qreal _global_ie::getMeasureIndex() const
