@@ -42,6 +42,7 @@ public:
 
 
     void init(Quantity q = Quantity::One);
+    QDialog::DialogCode makeInitDialog();
     QDialog::DialogCode makeDialogForSetupAsNew();
 
     /// \todo реализовать!!!
@@ -79,6 +80,7 @@ public slots:
 
 private:
     uint m_quantityOfFields;
+    bool m_inited;
     int m_activeFVIndex;
     QList<IE_FieldOfView*> m_fieldOfViewList;
     QList<IE_ModelLayer*>   *layersList;
@@ -108,6 +110,8 @@ signals:
     void showAllElementsOnActiveFV();
     void activeFVNoteWasChanged(QString noteText);
     void getActiveFVNote();
+
+    void makeInit();
 public slots:
     void changeQuantity(IE_FieldOfView_Controller::Quantity q);
     void changeActiveFV(int index, QString fvNote);
@@ -117,6 +121,7 @@ private:
     int oldQuantity;
 
     QComboBox    *pcboQuiantityFV, *pcboActiveFV;
+    QPushButton * pInitBut;
     QString m_activeFVNote;
     QListWidget * m_pDockLayersListWidget;
     void makeChangeActiveFVNoteDialog();

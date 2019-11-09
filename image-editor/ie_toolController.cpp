@@ -359,8 +359,8 @@ void ToolsController::initToolActions()
     QActionGroup *pActionGroup = new QActionGroup(this);
     QList<ToolType> toolsList;
     switch (toolSetType){
-    case ToolSet::Trichoscopy_hairDencity:
-    case ToolSet::Trichoscopy_Simple:
+    case ToolSet::HairDencity:
+    case ToolSet::Simple:
     case ToolSet::AllTools:
         toolsList   << ToolType::NoneTool
                         << ToolType::SimpleLine

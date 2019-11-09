@@ -25,8 +25,13 @@ signals:
     void wasSaved(_Model_patientData patientData);
 
 public slots:
+    /**
+    *   Открытие и чтение сохраненной модели.
+    *   @see _Model_patientData
+    *   в параметре @param patientData необходимы данные о пациенте: patient_fullName
+    */
     int open(_Model_patientData patientData);
-    int openNew(_Model_patientData patientData);
+    int makeNew(_Model_patientData patientData);
     //! \todo   реализовать
     //!         Выполняет смену активного виджета
     void changeTab(int viewIndex);
@@ -38,10 +43,14 @@ private:
     IE_ProfileType m_ieType;
     QToolBar *m_pTopToolBar;
     QVector<IE_View*> m_ieViewVec;
+    QStackedWidget  m_stackedWidget;
     int m_currentTab;
 
     int     init(IE_ProfileType ie_type);
+    int     initModelsAsNew(_Model_patientData patientData);
+    int     initModels(_Model_patientData patientData);
     void    menuInit();
+    void    clearIEViewVec();
 
 private slots:
     void makeCalibration();

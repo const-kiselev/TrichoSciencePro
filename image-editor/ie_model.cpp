@@ -84,6 +84,8 @@ int         IE_Model::saveModel              ()
             ? saveDoc.toJson()
             : saveDoc.toBinaryData());
         saveFile.close();
+        _modelData.printAllData();
+        emit wasSaved();
         return 0;
 }
 
@@ -168,6 +170,15 @@ int         IE_Model::read                   (const QJsonObject &json)
         }
 
     m_pFieldOfViewCnt->read(json);
+
+    if(json.contains("relatedModelsArray"))
+    {
+        m_relatedModelList.clear();
+        QJsonArray relatedModelsArray = json["relatedModelsArray"].toArray();
+        for (int i=0; i < relatedModelsArray.size(); i++)
+            m_relatedModelList.push_back(relatedModelsArray.at(i).toString());
+    }
+
     return 0;
 }
 
@@ -176,7 +187,7 @@ int         IE_Model::write                  (QJsonObject &json) const
     _modelData.write(json);
     json["measureIndex"] = __global_data->getMeasureIndex();
     //! \todo Добавить пороги!
-    QJsonArray layerArray;
+    QJsonArray layerArray,  relatedModelsArray;
     foreach(IE_ModelLayer* layer, layersList)
     {
         QJsonObject layerObject;
@@ -184,36 +195,60 @@ int         IE_Model::write                  (QJsonObject &json) const
         layerArray.append(layerObject);
     }
     json["layerArray"] = layerArray;
-
+    if(!m_relatedModelList.isEmpty())
+    {
+        foreach(QString str, m_relatedModelList)
+            relatedModelsArray.push_back(QJsonValue(str));
+        json["relatedModelsArray"] = relatedModelsArray;
+    }
     m_pFieldOfViewCnt->write(json);
     return 0;
 }
 
-int         IE_Model::initAsNewModel         (_Model_patientData patientData)
+int         IE_Model::initAsNewModel         (_Model_patientData patientData, IEM_type iem_type, bool dialog)
 {
     _modelData.initNew(patientData);
+    _modelData.setIem_type(iem_type);
+
+    switch (iem_type)
+    {
+    case IEM_type::HairDencity:
+    {
+        pToolCnt->setToolSetType(ToolSet::HairDencity);
+        break;
+    }
+    case IEM_type::TrichoscopyPatterns:
+    case IEM_type::AssessmentOfScalp:
+    case IEM_type::AssessmentOfHairRoots:
+    case IEM_type::AssessmentOfHairRods:
+    case IEM_type::DermatoscopyOfNeoplasms:
+    {
+        pToolCnt->setToolSetType(ToolSet::Simple);
+        break;
+    }
+    }
+
 
     if (!_modelData.getTmpDir().exists()) {
         _modelData.getTmpDir().mkpath(".");
     }
     _modelData.getTmpDir().mkpath("./res");
 
-    if(makeDialogForSetupModelAsNew() != QDialog::Accepted)
+    if(dialog)
     {
-        qDebug() << "makeDialogForSetupModelAsNew() was rejected.";
-        return 1;
-    }
+        if(makeDialogForSetupModelAsNew() != QDialog::Accepted)
+        {
+            qDebug() << "makeDialogForSetupModelAsNew() was rejected.";
+            return 1;
+        }
 
-    if( m_pFieldOfViewCnt->makeDialogForSetupAsNew() != QDialog::Accepted)
-    {
-        qDebug() << "m_pFieldOfViewCnt->makeDialogForSetupAsNew() was rejected.";
-        return 1;
+        if( m_pFieldOfViewCnt->makeDialogForSetupAsNew() != QDialog::Accepted)
+        {
+            qDebug() << "m_pFieldOfViewCnt->makeDialogForSetupAsNew() was rejected.";
+            return 1;
+        }
     }
     return 0;
-
-    //! \todo загрузить !!!!!!
-
-    //setMainImage("");
 }
 
 /*void        TSPImageEditorModel::initWithModel(QString modelFilePath)
@@ -264,6 +299,25 @@ int         IE_Model::initWithModel          (_Model_patientData patientData)
 
     _modelData.init(patientData);
     read(jsonObj);
+
+    switch (_modelData.getIem_type())
+    {
+    case IEM_type::HairDencity:
+    {
+        pToolCnt->setToolSetType(ToolSet::HairDencity);
+        break;
+    }
+    case IEM_type::TrichoscopyPatterns:
+    case IEM_type::AssessmentOfScalp:
+    case IEM_type::AssessmentOfHairRoots:
+    case IEM_type::AssessmentOfHairRods:
+    case IEM_type::DermatoscopyOfNeoplasms:
+    {
+        pToolCnt->setToolSetType(ToolSet::Simple);
+        break;
+    }
+    }
+
     return 0;
 }
 
@@ -372,6 +426,11 @@ QStringList IE_Model::getRelatedModelList() const
 QString IE_Model::getPath()
 {
     return __global_data->getModelDirPath();
+}
+
+IEM_type IE_Model::getIEM_type()
+{
+    return _modelData.getIem_type();
 }
 
 // ------- END GETTERS and SETTERS
@@ -931,7 +990,10 @@ IE_ModelData::IE_ModelData()
 
 void IE_ModelData::initNew(_Model_patientData patientData)
 {
-    model_ID = QDateTime::currentDateTime().toTime_t();
+    model_ID = QDateTime::currentDateTime().toTime_t()- 1560000000;
+    model_ID*=1000;
+    model_ID+=(QTime::currentTime().msec())%1000;
+    qDebug() << model_ID;
     init(patientData);
     modelDir = QString("%1/%2/%3") .arg(patientData.modelDir)
             .arg(IE_MODEL_DIR_NAME)
@@ -946,6 +1008,7 @@ void IE_ModelData::init(_Model_patientData patientData)
     patientFullName = patientData.patient_fullName;
     modelDir = patientData.modelDir;
     profile = patientData.ie_type;
+    m_iem_type = IEM_type::None;
     if(QFile::exists(patientData.modelPath))
     {
         modelDir = patientData.modelPath;
@@ -996,8 +1059,10 @@ int IE_ModelData::read(const QJsonObject &json)
     model_ID = json["model_ID"].toString().toUInt();
     patientUID = json["patient_UID"].toString().toUInt();
     profile = getIE_ProfileType(json["ie_type"].toString());
+    m_iem_type = getIEM_type( json["iem_type"].toString() );
 
     update();
+    return 0;
 }
 
 int IE_ModelData::write(QJsonObject &json) const
@@ -1007,6 +1072,8 @@ int IE_ModelData::write(QJsonObject &json) const
     json["patient_UID"] = QString().number(patientUID);
     json["patient_fullName"] = patientFullName;
     json["ie_type"] = getIE_ProfileType(profile);
+    json["iem_type"] = getTSP_JSON_IEM_type(m_iem_type);
+    return 0;
 }
 
 void IE_ModelData::printAllData()
@@ -1031,6 +1098,16 @@ void IE_ModelData::setModel_ID(const uint &value)
 {
     model_ID = value;
     update();
+}
+
+IEM_type IE_ModelData::getIem_type() const
+{
+    return m_iem_type;
+}
+
+void IE_ModelData::setIem_type(const IEM_type &iem_type)
+{
+    m_iem_type = iem_type;
 }
 
 uint IE_ModelData::getPatientUID() const

@@ -17,7 +17,7 @@ void TrichoSciencePro::start()
 void TrichoSciencePro::runNewImageEditor(_Model_patientData patientData)
 {
     ImageEditor *pImageEditor = new ImageEditor();
-    if( pImageEditor->openNew(patientData) )
+    if( pImageEditor->makeNew(patientData) )
     {
         delete pImageEditor;
         pImageEditor = nullptr;

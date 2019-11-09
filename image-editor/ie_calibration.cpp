@@ -119,7 +119,7 @@ void IE_ToolCalibration::modelItemsControl()
 void IE_ToolCalibration::openImage()
 {
 
-    pModel->initAsNewModel(_Model_patientData());
+    pModel->initAsNewModel(_Model_patientData(), IEM_type::None);
 }
 
 qreal IE_ToolCalibration::calculateMeasure(int measureLenght)

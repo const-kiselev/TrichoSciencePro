@@ -16,6 +16,7 @@ IE_View::IE_View(IE_Model *pInputModel):pModel(pInputModel)
 
 IE_View::~IE_View()
 {
+    qDebug() << "~IE_View()";
     if(pModel)
         delete pModel;
     pModel = nullptr;

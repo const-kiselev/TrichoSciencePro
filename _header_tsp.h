@@ -3,6 +3,8 @@
 
 #include <QString>
 
+
+//! Определяет отображение редактора изображения
 enum IE_ProfileType
 {
     None = 0,

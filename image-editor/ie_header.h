@@ -117,7 +117,7 @@ static ToolType convertToolTitleToToolType(QString toolTitle)
     if(toolTitle == "DensityAndDiameter") return ToolType::DensityAndDiameter;
 }
 
-enum class ToolSet {AllTools, CallibrationToolSet, Trichoscopy_hairDencity, Trichoscopy_Simple};
+enum class ToolSet {AllTools, CallibrationToolSet, HairDencity, Simple};
 
 
 enum class MarkerType{
@@ -208,8 +208,12 @@ struct ModelPatientData
 enum class IEM_type
 {
     None,
-    Trichoscopy_hairDencity,
-    Trichoscopy_patterns
+    HairDencity,
+    TrichoscopyPatterns,
+    AssessmentOfScalp,
+    AssessmentOfHairRoots,
+    AssessmentOfHairRods,
+    DermatoscopyOfNeoplasms
 
 };
 
@@ -217,20 +221,54 @@ static QString getTSP_JSON_IEM_type(IEM_type ieType)
 {
     switch(ieType)
     {
-    case IEM_type::Trichoscopy_hairDencity:
-        return QString("Trichoscopy_hairDencity");
-    case IEM_type::Trichoscopy_patterns:
-        return QString("Trichoscopy_patterns");
+    case IEM_type::HairDencity:
+        return QString("HairDencity");
+    case IEM_type::TrichoscopyPatterns:
+        return QString("TrichoscopyPatterns");
+    case IEM_type::AssessmentOfScalp:
+        return QString("AssessmentOfScalp");
+    case IEM_type::AssessmentOfHairRoots:
+        return QString("AssessmentOfHairRoots");
+    case IEM_type::AssessmentOfHairRods:
+        return QString("AssessmentOfHairRods");
+    case IEM_type::DermatoscopyOfNeoplasms:
+        return QString("DermatoscopyOfNeoplasms");
     }
 }
 
 static IEM_type getIEM_type(QString str)
 {
-    if(str == "Trichoscopy_hairDencity")
-        return IEM_type::Trichoscopy_hairDencity;
-    if(str == "Trichoscopy_patterns")
-        return IEM_type::Trichoscopy_patterns;
+    if(str == "HairDencity")
+        return IEM_type::HairDencity;
+    if(str == "TrichoscopyPatterns")
+        return IEM_type::TrichoscopyPatterns;
+    if(str == "AssessmentOfScalp")
+        return IEM_type::AssessmentOfScalp;
+    if(str == "AssessmentOfHairRoots")
+        return IEM_type::AssessmentOfHairRoots;
+    if(str == "AssessmentOfHairRods")
+        return IEM_type::AssessmentOfHairRods;
+    if(str == "DermatoscopyOfNeoplasms")
+        return IEM_type::DermatoscopyOfNeoplasms;
 }
 
+static QString UI_getIEM_type_title(IEM_type ieType)
+{
+    switch(ieType)
+    {
+    case IEM_type::HairDencity:
+        return QString("Плотность волос");
+    case IEM_type::TrichoscopyPatterns:
+        return QString("Трихоскопические паттерны");
+    case IEM_type::AssessmentOfScalp:
+        return QString("Оценка кожи головы");
+    case IEM_type::AssessmentOfHairRoots:
+        return QString("Оценка корней");
+    case IEM_type::AssessmentOfHairRods:
+        return QString("Оценка стержней волос");
+    case IEM_type::DermatoscopyOfNeoplasms:
+        return QString("Дерматоскопия новообразований");
+    }
+}
 
 #endif // IE_HEADER_H

@@ -61,10 +61,22 @@ public:
 
     uint getModel_ID() const;
     void setModel_ID(const uint &value);
+    IEM_type getIem_type() const;
+    void setIem_type(const IEM_type &iem_type);
+
 signals:
     void updated();
 private:
-    IE_ProfileType          profile;
+    IE_ProfileType          profile;    /** Тип редактора изображения. К примеру, в трихосопии
+                                            находится раздел "плотность волос", этот же раздел
+                                            может находится в другом редакторе, но при этом, сам
+                                            тип модели не меняется. Это нужно только для отображения.
+                                        */
+    IEM_type                m_iem_type; /** Тип модели. Определяет набор инструментов, и параметры,
+                                            которые необходимы.
+                                            Точки определения типа: создание объекта (инициалиазция
+                                            модели???), чтение модели.
+                                        */
     QString patientFullName; //     ФИО
 
     QDir    modelDir, // директория модели. Новая создается в папке IE_MODEL_RES_DIR_NAME
@@ -88,8 +100,6 @@ class IE_Model : public QGraphicsScene
 public:
                             IE_Model();
                             ~IE_Model();
-    int                     saveModel();
-    int                     saveModelAsImage();
 
     int                     read(const QJsonObject &json);
     int                     write(QJsonObject &json)const;
@@ -109,6 +119,7 @@ public:
     QDockWidget *           getFieldOfViewControllerInfoDock() const;
     QStringList             getRelatedModelList() const;
     QString                 getPath();
+    IEM_type                getIEM_type();
 
     void                    addRelatedModel(QString path);
 
@@ -134,11 +145,14 @@ signals:
     void                    measureIndexChanged(qreal measure);
     void                    layerListWasChanged();
     void                    boundingRectWasChanged(QRectF boundingRect);
+    void                    wasSaved();
 
 
 public slots:
-    int                     initAsNewModel(_Model_patientData patientData);
+    int                     initAsNewModel(_Model_patientData patientData, IEM_type iem_type, bool dialog = false);
     int                     initWithModel(_Model_patientData patientData);
+    int                     saveModel();
+    int                     saveModelAsImage();
     void                    save(QString modelFilePath);
     void                    close(QString modelFilePath);
 
@@ -175,8 +189,6 @@ private:
     _global_ie              * __global_data;
 
     int globalDataKey; // ключ владения глобальным объектом
-
-    IEM_type                m_type; //! Точки определения типа: создание объекта (инициалиазция модели???), чтение модели.
 
     QDialog::DialogCode makeDialogForSetupModelAsNew();
 
