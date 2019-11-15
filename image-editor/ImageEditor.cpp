@@ -122,9 +122,6 @@ int ImageEditor::initModelsAsNew(_Model_patientData patientData)
         relatePatienData = patientData;
         for (int i=0; i<6;i++)
         {
-            QTime dieTime= QTime::currentTime().addMSecs(10);
-               while (QTime::currentTime() < dieTime)
-                   QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
             IE_Model * pIE_model = new IE_Model();
             IE_View * pIEView = new IE_View(pIE_model);
 

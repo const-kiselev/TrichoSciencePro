@@ -6,7 +6,7 @@
 
 //#include <QWidget>
 #include <QtWidgets>
-#include "pm_patientRecord.h"
+#include "pm_patientRecordCnt.h"
 #include "../_header_tsp.h"
 
 class PM_test_patientList: public QWidget

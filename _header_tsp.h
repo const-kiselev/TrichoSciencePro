@@ -2,6 +2,7 @@
 #define HEADER_TSP_H
 
 #include <QString>
+#include <QDebug>
 
 
 //! Определяет отображение редактора изображения
@@ -53,19 +54,17 @@ static IE_ProfileType getIE_ProfileType(QString title)
     return IE_ProfileType::None;
 }
 
-struct _Model_patientData
+struct TSP_PatientData
 {
-    QString patient_fullName, doctor_fullName, modelDir, modelPath;
+    QString patient_fullName, doctor_fullName, modelDir, modelPath, patient_nameAlias;
     uint patient_ID, patient_UID, doctor_ID, model_ID;
-    IE_ProfileType ie_type;
-//    int editorVersion;
-    _Model_patientData()
+    TSP_PatientData()
     {
         patient_fullName = doctor_fullName = modelPath = "Empty";
         patient_ID = patient_UID = doctor_ID = model_ID = 0;
         modelDir="";
-        ie_type = IE_ProfileType::None;
     }
 };
+
 
 #endif // _HEADER_TSP_H

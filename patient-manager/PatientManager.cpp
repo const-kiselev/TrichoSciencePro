@@ -4,18 +4,22 @@ PatientManager::PatientManager(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle("TrichoScience Pro :: Менеджер пациентов");
-    pTestPatientList = new PM_test_patientList();
-    connect(pTestPatientList, &PM_test_patientList::needToRunNewImageEditor,
-            this, &PatientManager::needToRunNewImageEditor);
-    connect(pTestPatientList, &PM_test_patientList::needToRunSavedImageEditor,
-            this, &PatientManager::needToRunSavedImageEditor);
-    setCentralWidget(pTestPatientList);
-    setMenuBar(pTestPatientList->getMenuBar());
-
 
 }
 
 PatientManager::~PatientManager()
 {
 
+}
+
+int PatientManager::init()
+{
+    m_pPatientIndexCnt = new PM_PatientIndexCnt();
+    if(m_pPatientIndexCnt->init())
+        return 1;
+    m_pPatientIndexCntWidget = m_pPatientIndexCnt->getMainWidget();
+
+    setCentralWidget(m_pPatientIndexCntWidget);
+
+    return 0;
 }

@@ -27,13 +27,17 @@ CONFIG += c++11
 SOURCES += \
     PatientManager.cpp \
     main.cpp \
-    pm_patientRecord.cpp \
+    pm_medicalRecord.cpp \
+    pm_patient.cpp \
+    pm_patientIndexCnt.cpp \
     pm_test_patientList.cpp
 
 HEADERS += \
     ../_header_tsp.h \
     PatientManager.h \
-    pm_patientRecord.h \
+    pm_medicalRecord.h \
+    pm_patient.h \
+    pm_patientIndexCnt.h \
     pm_test_patientList.h
 
 # Default rules for deployment.

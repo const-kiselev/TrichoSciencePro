@@ -251,11 +251,6 @@ int         IE_Model::initAsNewModel         (_Model_patientData patientData, IE
     return 0;
 }
 
-/*void        TSPImageEditorModel::initWithModel(QString modelFilePath)
-{
-
-}*/
-
 int         IE_Model::initWithModel          (_Model_patientData patientData)
 {
 
@@ -327,32 +322,6 @@ QRectF      IE_Model::getModelRect           () const
 {
     return modelRect;
 }
-
-/*int         IE_Model::setMainImage           (QString imageFilePath)
-{
-    IE_Tool_Image *pToolImage_mainImage = new IE_Tool_Image(QString("%1/%2").arg(_modelData.modelDir.path())
-                                                                            .arg(_modelData.resDir.path()),
-                                                            _modelData.modelDir.path(),
-                                                            QString("%1/%2").arg(_modelData.tmpDir.path())
-                                                                            .arg(IE_MODEL_RES_DIR_NAME),
-                                                            imageFilePath,
-                                                            ToolType::MainImage
-                                                            );
-    pToolImage_mainImage->setPos(0,0);
-
-    pMainImageLayer = new IE_ModelLayer(ToolType::MainImage, pToolImage_mainImage);
-
-    imageRect = pToolImage_mainImage->boundingRect();
-
-    for (QList<IE_ModelLayer*>::iterator iter = layersList.begin();iter!=layersList.end();iter++)
-        if((*iter)->getToolType() == ToolType::MainImage)
-            iter = layersList.erase(iter);
-
-    addLayer(pMainImageLayer);
-
-    return 1;
-}*/
-
 
 qreal       IE_Model::getMeasureIndex        () const
 {
@@ -990,10 +959,12 @@ IE_ModelData::IE_ModelData()
 
 void IE_ModelData::initNew(_Model_patientData patientData)
 {
+    QTime dieTime= QTime::currentTime().addMSecs(10);
+       while (QTime::currentTime() < dieTime)
+           QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     model_ID = QDateTime::currentDateTime().toTime_t()- 1560000000;
     model_ID*=1000;
     model_ID+=(QTime::currentTime().msec())%1000;
-    qDebug() << model_ID;
     init(patientData);
     modelDir = QString("%1/%2/%3") .arg(patientData.modelDir)
             .arg(IE_MODEL_DIR_NAME)

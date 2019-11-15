@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "pm_test_patientList.h"
 #include "../_header_tsp.h"
+#include "pm_patientIndexCnt.h"
 
 class PatientManager : public QMainWindow
 {
@@ -11,16 +11,21 @@ class PatientManager : public QMainWindow
 public:
     PatientManager(QWidget *parent = nullptr);
     ~PatientManager();
-private:
-    PM_test_patientList *pTestPatientList;
+
+    int init();
+
+
 signals:
 
     void needToRunNewImageEditor(_Model_patientData patientData);
     void needToRunSavedImageEditor(_Model_patientData patientData);
 public slots:
 
-    void addSavedSession(_Model_patientData patientData)
-    {emit pTestPatientList->addSavedSession(patientData);}
+
+
+private:
+    QWidget         * m_pPatientIndexCntWidget;
+    PM_PatientIndexCnt * m_pPatientIndexCnt;
 };
 
 #endif // MAINWINDOW_H
