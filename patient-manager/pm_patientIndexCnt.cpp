@@ -10,6 +10,8 @@
 PM_PatientIndexCnt::PM_PatientIndexCnt(QDir workDir, QObject *parent): QObject(parent), m_workDir(workDir)
 {
     m_pStackedWidget = new QStackedWidget();
+
+    m_pPatientListWidget = nullptr;
 }
 
 PM_PatientIndexCnt::~PM_PatientIndexCnt()
@@ -142,7 +144,42 @@ QWidget *PM_PatientIndexCnt::getMainWidget()
 
 QList<PM_PatientIndex> PM_PatientIndexCnt::search(QString str)
 {
+    //! желательно переделать и делать поиску по каждому слову поисковой фразы
+    //! Алгоритм поиска:
+    //! - проверяется, является ли строка числом. Если является, то происходит поиск среди "id" and "uid".
+    //! - далее, проверется существование подстроки в строке "fullName" and "nameAlias". Если в фразе есть
+    //! пробел, то берется первое слово.
 
+    open();
+
+    if(str.isEmpty())
+        return m_patientIndexList;
+
+    QList<PM_PatientIndex> patientList;
+    QString currentStr = str;
+
+    bool ok;
+    uint id = str.toUInt(&ok);
+    if(ok)
+    {
+        foreach(PM_PatientIndex patientIndexElem,m_patientIndexList)
+            if(patientIndexElem.id == id || patientIndexElem.uid == id)
+                patientList.append(patientIndexElem);
+    }
+
+    bool answer = true;
+    while(answer)
+    {
+        foreach(PM_PatientIndex patientIndexElem,m_patientIndexList)
+        {
+            if( patientIndexElem.fullName.contains(str, Qt::CaseInsensitive) || patientIndexElem.alias.contains(str, Qt::CaseInsensitive) )
+                patientList.append(patientIndexElem);
+        }
+        if( str.contains(" ") )
+            str = str.split(" ").at(0);
+        else answer = false;
+    }
+    return patientList;
 }
 
 QWidget *PM_PatientIndexCnt::initSearchWidget()
@@ -153,8 +190,28 @@ QWidget *PM_PatientIndexCnt::initSearchWidget()
     pvbLayout->addWidget(pSearchLineEdit);
     QPushButton * pButton = new QPushButton("Поиск", pWidget);
 
-    connect(pButton, &QPushButton::clicked, [this, pSearchLineEdit]()
-    {
 
+    connect(pButton, &QPushButton::clicked, [this, pSearchLineEdit, pvbLayout]()
+    {
+        QStringList patientListForWidget;
+        QList<PM_PatientIndex> listResult = search(pSearchLineEdit->text());
+        QString tmp;
+        foreach(PM_PatientIndex elem, listResult)
+            patientListForWidget.append( QString("%1\tid: %2\tuid: %3").arg(elem.alias).arg(elem.id).arg(elem.uid) );
+
+        if(!m_pPatientListWidget)
+        {
+            m_pPatientListWidget = new QListWidget();
+            pvbLayout->addWidget(m_pPatientListWidget);
+
+            connect(m_pPatientListWidget, &QListWidget::currentTextChanged, [this](QString text)
+            {
+                int uidPos = text.indexOf("uid: ");
+                uint uid = text.mid(uidPos+5).toUInt();
+                emit openPatientWitUID(uid);
+            });
+        }
+        m_pPatientListWidget->clear();
+        m_pPatientListWidget->addItems(patientListForWidget);
     });
 }

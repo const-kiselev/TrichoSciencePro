@@ -26,6 +26,7 @@ public:
         pd.patient_ID = m_patient_ID;
         pd.patient_UID = m_patient_UID;
         pd.patient_fullName = m_patient_fullName;
+        return pd;
     }
     //! \todo переписать генератор сокращения имени
     QString getNameAlias()

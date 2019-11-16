@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QDir>
 #include <QStackedWidget>
+#include <QListWidget>
 
 #include "pm_patient.h"
 
@@ -81,13 +82,15 @@ public:
 
 signals:
     void PatinetIndexWasChanged();
+    void openPatientWitUID(uint patientUID);
 
 public slots:
     QList<PM_PatientIndex> search(QString str);
 private:
     QList<PM_PatientIndex> m_patientIndexList;
     QDir m_workDir;
-    QWidget * m_pSeacrhWidget, * m_pPatientWidget;
+    QWidget * m_pSeacrhWidget;  //! виджет поиска
+    QListWidget        * m_pPatientListWidget; //! виджет со списком найденных пациентов
     QStackedWidget * m_pStackedWidget;
 
     QWidget * initSearchWidget();

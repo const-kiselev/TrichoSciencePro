@@ -10,16 +10,14 @@ PM_MedicalRecordCnt::PM_MedicalRecordCnt(QObject *parent) : QObject(parent)
 
 TSP_PatientData PM_MedicalRecordCnt::getTSP_PatientData(QDir patientDir)
 {
+    PM_MedicalRecord mr;
     QJsonObject medicalRecordJsonObj;
     if(readMedicalRecord(patientDir, medicalRecordJsonObj))
     {
-
+        return mr.getPatientData();
     }
-
-    PM_MedicalRecord mr;
     mr.read(medicalRecordJsonObj);
-
-    return;
+    return mr.getPatientData();
 }
 
 uint PM_MedicalRecordCnt::getUIDFromDirName(QDir patientDir)
@@ -32,6 +30,7 @@ QString PM_MedicalRecordCnt::getFileName(QDir patientDir)
     return QString("medicalRecord_%1.json").arg( getUIDFromDirName(patientDir) );
 }
 
+// static
 int PM_MedicalRecordCnt::readMedicalRecord(const QDir patientDir, QJsonObject &json)
 {
     QFile medicalRecordFile;
