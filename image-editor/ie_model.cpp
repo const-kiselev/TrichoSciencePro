@@ -44,7 +44,7 @@
 
             IE_Model::~IE_Model   ()
 {
-    if(_modelData.getTmpDir().exists())
+    if(_modelData.getTmpDir().exists() && _modelData.getTmpDir() != _modelData.getModelDir())
         _modelData.getTmpDir().removeRecursively();
 //    QGraphicsScene::~QGraphicsScene();
 }
@@ -71,11 +71,13 @@ int         IE_Model::saveModel              ()
             ? filePAth
             : QStringLiteral("model.dat"));
 
-        if (!saveFile.open(QIODevice::WriteOnly)) {
-            qWarning("Couldn't open save file.");
+        if (!saveFile.open(QIODevice::WriteOnly))
+        {
+            QMessageBox::warning(nullptr, "Application", QString("Ошибка. Не удалось сохранить модель, так как невозможно создать файл для записи %1 .").arg( filePAth));
+            qWarning("Couldn't open file for writing.");
             return 1;
         }
-
+        _modelData.setSaveDateTime(QDateTime::currentDateTime());
         QJsonObject jsonObj;
         jsonObj["TSP_docType"] = "TSP_JSON_IE_model";
         write(jsonObj);
@@ -84,7 +86,6 @@ int         IE_Model::saveModel              ()
             ? saveDoc.toJson()
             : saveDoc.toBinaryData());
         saveFile.close();
-        _modelData.printAllData();
         emit wasSaved();
         return 0;
 }
@@ -205,10 +206,11 @@ int         IE_Model::write                  (QJsonObject &json) const
     return 0;
 }
 
-int         IE_Model::initAsNewModel         (_Model_patientData patientData, IEM_type iem_type, bool dialog)
+int         IE_Model::initAsNewModel         (TSP_PatientData patientData, IEM_type iem_type, IE_ProfileType ie_type, bool dialog)
 {
     _modelData.initNew(patientData);
     _modelData.setIem_type(iem_type);
+    _modelData.setProfile(ie_type);
 
     switch (iem_type)
     {
@@ -251,12 +253,12 @@ int         IE_Model::initAsNewModel         (_Model_patientData patientData, IE
     return 0;
 }
 
-int         IE_Model::initWithModel          (_Model_patientData patientData)
+int         IE_Model::initWithModel          (TSP_PatientData patientData)
 {
 
-    if(patientData.modelPath == "Empty")
+    if(patientData.modelFilePath == "Empty")
     {
-        patientData.modelPath = QFileDialog::getOpenFileName(nullptr,
+        patientData.modelFilePath = QFileDialog::getOpenFileName(nullptr,
                                                              "Выбор модели изображения",
                                                              __global_data->getLastSelectedDirByUser(),
                                                              QString("*%1.%2")  .arg(IE_MODEL_FILE_NAME_POSTFIX)
@@ -266,15 +268,15 @@ int         IE_Model::initWithModel          (_Model_patientData patientData)
     }
 
     QFile modelFile;
-    modelFile.setFileName(patientData.modelPath);
+    modelFile.setFileName(patientData.modelFilePath);
     if(!modelFile.exists())
     {
-        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не существует.").arg(patientData.modelPath));
+        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не существует.").arg(patientData.modelFilePath));
         return 1;
     }
     if(!modelFile.open(QIODevice::ReadOnly))
     {
-        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не удается прочитать.").arg(patientData.modelPath));
+        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не удается прочитать.").arg(patientData.modelFilePath));
         qWarning("Couldn't open file.");
         return 1;
     }
@@ -286,7 +288,7 @@ int         IE_Model::initWithModel          (_Model_patientData patientData)
 
     if(jsonObj["TSP_docType"] != "TSP_JSON_IE_model")
     {
-        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не является моделью изображения.").arg(patientData.modelPath));
+        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Файл %1 не является моделью изображения.").arg(patientData.modelFilePath));
         qWarning() << modelFile.fileName() << "isn't TSP_JSON_IE_model.";
 //        patientBaseFile.rename("data/patients/!!!patientBase_ERROR.json");
         return 1;
@@ -360,11 +362,16 @@ QList<IE_ModelLayer *>
     return layersList;
 }
 
-
-_Model_patientData
-            IE_Model::get_Model_patientData()
+IE_ProfileType IE_Model::getIE_ProfileType() const
 {
-    return _modelData.to_Model_patientData();
+    return _modelData.getProfile();
+}
+
+
+TSP_PatientData
+            IE_Model::get_TSP_patientData()
+{
+    return _modelData.to_TSP_patientData();
 }
 IE_ModelLayer *
             IE_Model::getLayerByListIndex    (int listIndex)
@@ -957,7 +964,7 @@ IE_ModelData::IE_ModelData()
     profile = IE_ProfileType::None;
 }
 
-void IE_ModelData::initNew(_Model_patientData patientData)
+void IE_ModelData::initNew(TSP_PatientData patientData)
 {
     QTime dieTime= QTime::currentTime().addMSecs(10);
        while (QTime::currentTime() < dieTime)
@@ -969,20 +976,21 @@ void IE_ModelData::initNew(_Model_patientData patientData)
     modelDir = QString("%1/%2/%3") .arg(patientData.modelDir)
             .arg(IE_MODEL_DIR_NAME)
             .arg(model_ID);
+    m_createDateTime = QDateTime::currentDateTime();
     update();
 }
 
-void IE_ModelData::init(_Model_patientData patientData)
+void IE_ModelData::init(TSP_PatientData patientData)
 {
     patientID = patientData.patient_ID;
     patientUID = patientData.patient_UID;
     patientFullName = patientData.patient_fullName;
     modelDir = patientData.modelDir;
-    profile = patientData.ie_type;
+//    profile = patientData.ie_type;
     m_iem_type = IEM_type::None;
-    if(QFile::exists(patientData.modelPath))
+    if(QFile::exists(patientData.modelFilePath))
     {
-        modelDir = patientData.modelPath;
+        modelDir = patientData.modelFilePath;
         modelDir.cdUp();
     }
 }
@@ -1005,15 +1013,15 @@ QString IE_ModelData::getPath()
 
 }
 
-_Model_patientData IE_ModelData::to_Model_patientData()
+TSP_PatientData IE_ModelData::to_TSP_patientData()
 {
-    _Model_patientData answer;
+    TSP_PatientData answer;
     answer.modelDir = modelDir.path();
     answer.model_ID = model_ID;
     answer.patient_ID = patientID;
     answer.patient_UID = patientUID;
     answer.patient_fullName = patientFullName;
-    answer.ie_type = profile;
+//    answer.ie_type = profile;
     return answer;
 }
 
@@ -1031,6 +1039,8 @@ int IE_ModelData::read(const QJsonObject &json)
     patientUID = json["patient_UID"].toString().toUInt();
     profile = getIE_ProfileType(json["ie_type"].toString());
     m_iem_type = getIEM_type( json["iem_type"].toString() );
+    m_createDateTime = QDateTime::fromString( json["createDateTime"].toString(), Qt::DateFormat::ISODate );
+    m_saveDateTime = QDateTime::fromString( json["saveDateTime"].toString(), Qt::DateFormat::ISODate );
 
     update();
     return 0;
@@ -1044,6 +1054,9 @@ int IE_ModelData::write(QJsonObject &json) const
     json["patient_fullName"] = patientFullName;
     json["ie_type"] = getIE_ProfileType(profile);
     json["iem_type"] = getTSP_JSON_IEM_type(m_iem_type);
+    json["createDateTime"] = m_createDateTime.toString(Qt::DateFormat::ISODate);
+    json["saveDateTime"] = m_saveDateTime.toString(Qt::DateFormat::ISODate);
+    json["alias"] = "";
     return 0;
 }
 
@@ -1079,6 +1092,21 @@ IEM_type IE_ModelData::getIem_type() const
 void IE_ModelData::setIem_type(const IEM_type &iem_type)
 {
     m_iem_type = iem_type;
+}
+
+QDateTime IE_ModelData::getSaveDateTime() const
+{
+    return m_saveDateTime;
+}
+
+void IE_ModelData::setSaveDateTime(const QDateTime &saveDateTime)
+{
+    m_saveDateTime = saveDateTime;
+}
+
+QDateTime IE_ModelData::getCreateDateTime() const
+{
+    return m_createDateTime;
 }
 
 uint IE_ModelData::getPatientUID() const

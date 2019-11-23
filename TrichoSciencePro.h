@@ -18,8 +18,8 @@ private:
 signals:
 
 private slots:
-    void runNewImageEditor(_Model_patientData patientData);
-    void runSavedImageEditor(_Model_patientData patientData);
+    void runImageEditor(TSP_PatientData patientData, IE_ProfileType ie_type);
+//    void runSavedImageEditor(TSP_PatientData patientData);
 };
 
 #endif // TRICHOSCIENCEPRO_H

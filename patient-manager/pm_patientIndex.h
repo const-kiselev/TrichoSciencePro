@@ -11,10 +11,14 @@
 
 
 
-struct PM_PatientIndex
+class PM_PatientIndex
 {
+public:
     QString fullName, alias;
     uint id, uid;
+
+    friend bool operator ==(const PM_PatientIndex& left, const PM_PatientIndex& right);
+
     PM_PatientIndex()
     {
         fullName = alias = "";
@@ -29,7 +33,10 @@ struct PM_PatientIndex
     }
     PM_PatientIndex(TSP_PatientData pd)
     {
-        PM_PatientIndex(pd.patient_fullName, pd.patient_nameAlias, pd.patient_ID, pd.patient_UID);
+        this->fullName = pd.patient_fullName;
+        this->alias = pd.patient_nameAlias;
+        this->id = pd.patient_ID;
+        this->uid = pd.patient_UID;
     }
     int    read(const QJsonObject &json)
     {
@@ -65,15 +72,11 @@ public:
 //    void addPatientDialog();
 
 //    void deletePatient();
-    void checkDirs(); //! функция проверки доступных директорий и формирование и сохранение нового индекса пациентов
-
-
-
 
     int    read(const QJsonObject &json);
     int    write(QJsonObject &json)const;
 
-    QStringList getPatinetTitleList();
+    QList<QMenu*> getAvailableActions();
 
     int save();
     int open();
@@ -81,17 +84,25 @@ public:
     QWidget * getMainWidget();
 
 signals:
-    void PatinetIndexWasChanged();
-    void openPatientWitUID(uint patientUID);
+    void patinetIndexWasChanged();
+    void needToRunImageEditor(TSP_PatientData patientData, IE_ProfileType ie_type);
+
+    void availableActionsWasChanged();
 
 public slots:
     QList<PM_PatientIndex> search(QString str);
+    int addPatient_Dialog();
+    void checkDirs(); //! функция проверки доступных директорий и формирование и сохранение нового индекса пациентов
+    void openPatientWidget(uint patientUID);
+
 private:
     QList<PM_PatientIndex> m_patientIndexList;
     QDir m_workDir;
     QWidget * m_pSeacrhWidget;  //! виджет поиска
     QListWidget        * m_pPatientListWidget; //! виджет со списком найденных пациентов
     QStackedWidget * m_pStackedWidget;
+    PM_Patient     * m_pCurrentPatient;
+
 
     QWidget * initSearchWidget();
 

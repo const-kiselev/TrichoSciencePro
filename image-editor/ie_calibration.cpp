@@ -109,7 +109,7 @@ void IE_ToolCalibration::modelItemsControl()
             }
             prevLine = currItem;
 
-            line = static_cast<QGraphicsLineItem*>((QGraphicsItem*)(prevLine.i->t()->parentItem()));
+            line = static_cast<QGraphicsLineItem*>( (QGraphicsItem*)(prevLine.i->t()->parentItem()) );
         }
     }
 
@@ -119,7 +119,7 @@ void IE_ToolCalibration::modelItemsControl()
 void IE_ToolCalibration::openImage()
 {
 
-    pModel->initAsNewModel(_Model_patientData(), IEM_type::None);
+    pModel->initAsNewModel(TSP_PatientData(), IEM_type::None, IE_ProfileType::MeasureIndex);
 }
 
 qreal IE_ToolCalibration::calculateMeasure(int measureLenght)

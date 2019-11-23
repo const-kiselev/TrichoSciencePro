@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include "../_header_tsp.h"
-#include "pm_patientIndexCnt.h"
+#include "pm_patientIndex.h"
 
 class PatientManager : public QMainWindow
 {
@@ -17,11 +17,8 @@ public:
 
 signals:
 
-    void needToRunNewImageEditor(_Model_patientData patientData);
-    void needToRunSavedImageEditor(_Model_patientData patientData);
+    void needToRunImageEditor(TSP_PatientData patientData, IE_ProfileType ie_type);
 public slots:
-
-
 
 private:
     QWidget         * m_pPatientIndexCntWidget;

@@ -25,19 +25,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-    PatientManager.cpp \
     main.cpp \
+    PatientManager.cpp \
+    pm_documentIndex.cpp \
     pm_medicalRecord.cpp \
     pm_patient.cpp \
-    pm_patientIndexCnt.cpp \
+    pm_patientIndex.cpp \
+    pm_patientWidget.cpp \
     pm_test_patientList.cpp
 
 HEADERS += \
     ../_header_tsp.h \
     PatientManager.h \
+    pm_documentIndex.h \
     pm_medicalRecord.h \
     pm_patient.h \
-    pm_patientIndexCnt.h \
+    pm_patientIndex.h \
+    pm_patientWidget.h \
     pm_test_patientList.h
 
 # Default rules for deployment.

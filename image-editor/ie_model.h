@@ -21,9 +21,9 @@ class IE_ModelData: public QObject
 public:
     IE_ModelData();
 
-    void initNew(_Model_patientData patientData);
+    void initNew(TSP_PatientData patientData);
 
-    void init(_Model_patientData patientData);
+    void init(TSP_PatientData patientData);
 
     void update();
 
@@ -37,10 +37,10 @@ public:
 #endif
     QString getPath();
 
-    _Model_patientData to_Model_patientData();
+    TSP_PatientData to_TSP_patientData();
 
     int    read(const QJsonObject &json);
-    int    write(QJsonObject &json)const;
+    int    write(QJsonObject &json) const;
     void printAllData();
 
     IE_ProfileType getProfile() const;
@@ -64,6 +64,11 @@ public:
     IEM_type getIem_type() const;
     void setIem_type(const IEM_type &iem_type);
 
+    QDateTime getSaveDateTime() const;
+    void setSaveDateTime(const QDateTime &saveDateTime);
+
+    QDateTime getCreateDateTime() const;
+
 signals:
     void updated();
 private:
@@ -86,6 +91,8 @@ private:
     uint    patientID,
             patientUID, // присваивается ЕДИНОЖДЫ !!!
             model_ID;
+
+    QDateTime m_createDateTime, m_saveDateTime;
 };
 
 /*!
@@ -114,7 +121,8 @@ public:
     QList<IE_ModelLayer * > :: const_iterator
                             getLayersListIter() const;
     QList<IE_ModelLayer * > getLayersList() const;
-    _Model_patientData      get_Model_patientData();
+    TSP_PatientData         get_TSP_patientData();
+    IE_ProfileType          getIE_ProfileType()const;
     _global_ie *            getPGlobal_data() const;
     QDockWidget *           getFieldOfViewControllerInfoDock() const;
     QStringList             getRelatedModelList() const;
@@ -149,8 +157,8 @@ signals:
 
 
 public slots:
-    int                     initAsNewModel(_Model_patientData patientData, IEM_type iem_type, bool dialog = false);
-    int                     initWithModel(_Model_patientData patientData);
+    int                     initAsNewModel(TSP_PatientData patientData, IEM_type iem_type, IE_ProfileType ie_type , bool dialog = false);
+    int                     initWithModel(TSP_PatientData patientData);
     int                     saveModel();
     int                     saveModelAsImage();
     void                    save(QString modelFilePath);

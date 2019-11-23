@@ -8,48 +8,54 @@ TrichoSciencePro::TrichoSciencePro(QObject *parent) : QObject(parent)
 void TrichoSciencePro::start()
 {
     pPatientManager = new PatientManager();
+    if(pPatientManager->init())
+        return;
 
-    connect(pPatientManager, &PatientManager::needToRunNewImageEditor, this, &TrichoSciencePro::runNewImageEditor);
-    connect(pPatientManager, &PatientManager::needToRunSavedImageEditor, this, &TrichoSciencePro::runSavedImageEditor);
+    connect(pPatientManager, &PatientManager::needToRunImageEditor, this, &TrichoSciencePro::runImageEditor);
     pPatientManager->show();
 }
 
-void TrichoSciencePro::runNewImageEditor(_Model_patientData patientData)
+void TrichoSciencePro::runImageEditor(TSP_PatientData patientData, IE_ProfileType ie_type)
 {
-    ImageEditor *pImageEditor = new ImageEditor();
-    if( pImageEditor->makeNew(patientData) )
+    if(!patientData.modelDir.isEmpty())
     {
-        delete pImageEditor;
-        pImageEditor = nullptr;
-        return;
+        ImageEditor *pImageEditor = new ImageEditor();
+            if( pImageEditor->open(patientData) )
+            {
+                delete pImageEditor;
+                pImageEditor = nullptr;
+                return;
+            }
+            pImageEditor->show();
+            connect(pImageEditor, &ImageEditor::wasClosed, [pImageEditor]()
+            {
+                pImageEditor->close();
+                pImageEditor->deleteLater();
+                //delete pImageEditor;
+            });
     }
-    connect(pImageEditor, &ImageEditor::wasSaved,
-            pPatientManager, &PatientManager::addSavedSession);
-    pImageEditor->show();
-    connect(pImageEditor, &ImageEditor::wasClosed, [pImageEditor]()
+    else
     {
-        pImageEditor->close();
-        pImageEditor->deleteLater();
-        //delete pImageEditor;
-    });
+        ImageEditor *pImageEditor = new ImageEditor();
+        if( pImageEditor->makeNew(patientData, ie_type) )
+        {
+            delete pImageEditor;
+            pImageEditor = nullptr;
+            return;
+        }
+        pImageEditor->show();
+        connect(pImageEditor, &ImageEditor::wasClosed, [pImageEditor]()
+        {
+            pImageEditor->close();
+            pImageEditor->deleteLater();
+            //delete pImageEditor;
+        });
+    }
 }
 
-void TrichoSciencePro::runSavedImageEditor(_Model_patientData patientData)
-{
-    ImageEditor *pImageEditor = new ImageEditor();
-    if( pImageEditor->open(patientData) )
-    {
-        delete pImageEditor;
-        pImageEditor = nullptr;
-        return;
-    }
-    pImageEditor->show();
-    connect(pImageEditor, &ImageEditor::wasClosed, [pImageEditor]()
-    {
-        pImageEditor->close();
-        pImageEditor->deleteLater();
-        //delete pImageEditor;
-    });
-}
+//void TrichoSciencePro::runSavedImageEditor(TSP_PatientData patientData)
+//{
+//
+//}
 
 

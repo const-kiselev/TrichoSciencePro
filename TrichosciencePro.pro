@@ -29,16 +29,21 @@ CONFIG += c++11
 SOURCES += \
         TrichoSciencePro.cpp \
         main.cpp \
-        patient-manager/PatientManager.cpp \
-        patient-manager/pm_patientRecord.cpp \
-        patient-manager/pm_test_patientList.cpp
+    patient-manager/PatientManager.cpp \
+    patient-manager/pm_documentIndex.cpp \
+    patient-manager/pm_medicalRecord.cpp \
+    patient-manager/pm_patient.cpp \
+    patient-manager/pm_patientIndex.cpp
+
 
 HEADERS += \
         TrichoSciencePro.h \
         _header_tsp.h \
-        patient-manager/PatientManager.h \
-        patient-manager/pm_patientRecord.h \
-        patient-manager/pm_test_patientList.h
+    patient-manager/PatientManager.h \
+    patient-manager/pm_documentIndex.h \
+    patient-manager/pm_medicalRecord.h \
+    patient-manager/pm_patient.h \
+    patient-manager/pm_patientIndex.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

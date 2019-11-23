@@ -22,7 +22,7 @@ public:
 
 signals:
     void wasClosed();
-    void wasSaved(_Model_patientData patientData);
+    void wasSaved(TSP_PatientData patientData);
 
 public slots:
     /**
@@ -30,8 +30,8 @@ public slots:
     *   @see _Model_patientData
     *   в параметре @param patientData необходимы данные о пациенте: patient_fullName
     */
-    int open(_Model_patientData patientData);
-    int makeNew(_Model_patientData patientData);
+    int open(TSP_PatientData patientData);
+    int makeNew(TSP_PatientData patientData, IE_ProfileType ie_type);
     //! \todo   реализовать
     //!         Выполняет смену активного виджета
     void changeTab(int viewIndex);
@@ -47,8 +47,8 @@ private:
     int m_currentTab;
 
     int     init(IE_ProfileType ie_type);
-    int     initModelsAsNew(_Model_patientData patientData);
-    int     initModels(_Model_patientData patientData);
+    int     initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_type);
+    int     initModels(TSP_PatientData patientData);
     void    menuInit();
     void    clearIEViewVec();
 

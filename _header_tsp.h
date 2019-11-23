@@ -56,13 +56,13 @@ static IE_ProfileType getIE_ProfileType(QString title)
 
 struct TSP_PatientData
 {
-    QString patient_fullName, doctor_fullName, modelDir, modelPath, patient_nameAlias;
+    QString patient_fullName, doctor_fullName, modelDir, modelFilePath, patientDir, patient_nameAlias;
     uint patient_ID, patient_UID, doctor_ID, model_ID;
     TSP_PatientData()
     {
-        patient_fullName = doctor_fullName = modelPath = "Empty";
+        patient_fullName = doctor_fullName = modelFilePath = "Empty";
         patient_ID = patient_UID = doctor_ID = model_ID = 0;
-        modelDir="";
+        modelDir=patientDir="";
     }
 };
 

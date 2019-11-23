@@ -104,12 +104,12 @@ int ImageEditor::init(IE_ProfileType ie_type)
     return 0;
 }
 
-int ImageEditor::initModelsAsNew(_Model_patientData patientData)
+int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_type)
 {
-
+    patientData.modelDir = patientData.patientDir;
     clearIEViewVec();
 
-    m_ieType = patientData.ie_type;
+    m_ieType = ie_type;
     switch(m_ieType)
     {
     case IE_ProfileType::None:
@@ -118,7 +118,7 @@ int ImageEditor::initModelsAsNew(_Model_patientData patientData)
     }
     case IE_ProfileType::Trichoscopy:
     {
-        _Model_patientData relatePatienData = patientData;
+        TSP_PatientData relatePatienData = patientData;
         relatePatienData = patientData;
         for (int i=0; i<6;i++)
         {
@@ -129,53 +129,52 @@ int ImageEditor::initModelsAsNew(_Model_patientData patientData)
             {
             case 0:
             {
-                pIE_model->initAsNewModel(patientData, IEM_type::HairDencity);
-//                relatePatienData.modelPath = pIE_model->getPGlobal_data()->getModelResDirPath();
+                pIE_model->initAsNewModel(patientData, IEM_type::HairDencity, ie_type);
                 relatePatienData.modelDir = pIE_model->getPGlobal_data()->getModelResDirPath();
                 break;
             }
             case 1:
             {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::TrichoscopyPatterns);
+                pIE_model->initAsNewModel(relatePatienData, IEM_type::TrichoscopyPatterns, ie_type);
                 m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
                                                               .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_Model_patientData().model_ID)
+                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
                                                             );
                 break;
             }
             case 2:
             {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfScalp);
+                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfScalp, ie_type);
                 m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
                                                               .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_Model_patientData().model_ID)
+                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
                                                             );
                 break;
             }
             case 3:
             {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRoots);
+                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRoots, ie_type);
                 m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
                                                               .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_Model_patientData().model_ID)
+                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
                                                             );
                 break;
             }
             case 4:
             {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRods);
+                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRods, ie_type);
                 m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
                                                               .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_Model_patientData().model_ID)
+                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
                                                             );
                 break;
             }
             case 5:
             {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::DermatoscopyOfNeoplasms);
+                pIE_model->initAsNewModel(relatePatienData, IEM_type::DermatoscopyOfNeoplasms, ie_type);
                 m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
                                                               .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_Model_patientData().model_ID)
+                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
                                                             );
                 break;
             }
@@ -196,19 +195,19 @@ int ImageEditor::initModelsAsNew(_Model_patientData patientData)
     {
         IE_Model * pIE_model = new IE_Model();
         IE_View * pIEView = new IE_View(pIE_model);
-        pIE_model->initAsNewModel(patientData, IEM_type::HairDencity);
+        pIE_model->initAsNewModel(patientData, IEM_type::HairDencity, ie_type);
         m_ieViewVec.push_front(pIEView);
         break;
     }
 
 
     }
-    init(patientData.ie_type);
+    init(ie_type);
 
     return 0;
 }
 
-int ImageEditor::initModels(_Model_patientData patientData)
+int ImageEditor::initModels(TSP_PatientData patientData)
 {
     clearIEViewVec();
 
@@ -224,13 +223,13 @@ int ImageEditor::initModels(_Model_patientData patientData)
     if(!m_ieViewVec[0]->getPModel()->getRelatedModelList().isEmpty())
     {
         QStringList relatedModelList = m_ieViewVec[0]->getPModel()->getRelatedModelList();
-        foreach(QString modelPath, relatedModelList)
+        foreach(QString modelFilePath, relatedModelList)
         {
             IE_Model * pIE_model = new IE_Model();
             IE_View * pIEView = new IE_View(pIE_model);
 
-            _Model_patientData relatedPatientData = patientData;
-            patientData.modelPath = modelPath;
+            TSP_PatientData relatedPatientData = patientData;
+            patientData.modelFilePath = modelFilePath;
             if(pIE_model->initWithModel(patientData))
                 delete pIEView;
             else
@@ -238,8 +237,8 @@ int ImageEditor::initModels(_Model_patientData patientData)
         }
     }
 
-    patientData.ie_type = m_ieViewVec[0]->getPModel()->get_Model_patientData().ie_type;
-    init(patientData.ie_type);
+    IE_ProfileType ie_type = m_ieViewVec[0]->getPModel()->getIE_ProfileType();
+    init(ie_type);
     return 0;
 }
 
@@ -258,7 +257,7 @@ void ImageEditor::menuInit()
     {
         if(!(pModel->saveModel()))
         {
-            emit this->wasSaved(pModel->get_Model_patientData());
+            emit this->wasSaved(pModel->get_TSP_patientData());
         }
     });
     oneMenu->addAction(pActionNewFile);
@@ -382,7 +381,7 @@ void ImageEditor::makeCalibration        ()
     });
 }
 
-int ImageEditor::open(_Model_patientData patientData)
+int ImageEditor::open(TSP_PatientData patientData)
 {
     initModels(patientData);
     //! \todo только при открытии обследования необходимо по-другому обрабатывать.  записывать  связанные модели в TabArray ???
@@ -391,9 +390,9 @@ int ImageEditor::open(_Model_patientData patientData)
     return 0;
 }
 
-int ImageEditor::makeNew(_Model_patientData patientData)
+int ImageEditor::makeNew(TSP_PatientData patientData, IE_ProfileType ie_type)
 {
-    initModelsAsNew(patientData);
+    initModelsAsNew(patientData, ie_type);
     return 0;
 }
 
