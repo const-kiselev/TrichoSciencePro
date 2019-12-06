@@ -220,11 +220,17 @@ int         IE_Model::initAsNewModel         (TSP_PatientData patientData, IEM_t
         break;
     }
     case IEM_type::TrichoscopyPatterns:
+    {
+        m_pImageBaseCnt = new IE_ImageBaseCnt();
+        pToolCnt->setToolSetType(ToolSet::Simple);
+        break;
+    }
     case IEM_type::AssessmentOfScalp:
     case IEM_type::AssessmentOfHairRoots:
     case IEM_type::AssessmentOfHairRods:
     case IEM_type::DermatoscopyOfNeoplasms:
     {
+
         pToolCnt->setToolSetType(ToolSet::Simple);
         break;
     }
@@ -305,6 +311,11 @@ int         IE_Model::initWithModel          (TSP_PatientData patientData)
         break;
     }
     case IEM_type::TrichoscopyPatterns:
+    {
+        m_pImageBaseCnt = new IE_ImageBaseCnt();
+        pToolCnt->setToolSetType(ToolSet::Simple);
+        break;
+    }
     case IEM_type::AssessmentOfScalp:
     case IEM_type::AssessmentOfHairRoots:
     case IEM_type::AssessmentOfHairRods:
@@ -407,6 +418,13 @@ QString IE_Model::getPath()
 IEM_type IE_Model::getIEM_type()
 {
     return _modelData.getIem_type();
+}
+
+QDockWidget *IE_Model::getImageBaseDockWidget()
+{
+    if(!m_pImageBaseCnt)
+        return new QDockWidget();
+    return m_pImageBaseCnt->getDockWidgetWithAllImages();
 }
 
 // ------- END GETTERS and SETTERS

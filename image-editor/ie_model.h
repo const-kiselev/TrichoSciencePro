@@ -4,6 +4,7 @@
 #include <QtWidgets>
 #include "ie_report.h"
 #include "ie_fieldOfView_controller.h"
+#include "ie_imageBase.h"
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QBarSeries>
@@ -20,11 +21,8 @@ class IE_ModelData: public QObject
     Q_OBJECT
 public:
     IE_ModelData();
-
     void initNew(TSP_PatientData patientData);
-
     void init(TSP_PatientData patientData);
-
     void update();
 
 #ifdef QT_DEBUG
@@ -128,6 +126,7 @@ public:
     QStringList             getRelatedModelList() const;
     QString                 getPath();
     IEM_type                getIEM_type();
+    QDockWidget *           getImageBaseDockWidget();
 
     void                    addRelatedModel(QString path);
 
@@ -157,7 +156,11 @@ signals:
 
 
 public slots:
-    int                     initAsNewModel(TSP_PatientData patientData, IEM_type iem_type, IE_ProfileType ie_type , bool dialog = false);
+    int                     initAsNewModel (TSP_PatientData patientData,
+                                            IEM_type iem_type,
+                                            IE_ProfileType ie_type,
+                                            bool dialog = false
+                                            );
     int                     initWithModel(TSP_PatientData patientData);
     int                     saveModel();
     int                     saveModelAsImage();
@@ -196,6 +199,8 @@ private:
 
     _global_ie              * __global_data;
 
+    IE_ImageBaseCnt         * m_pImageBaseCnt;
+
     int globalDataKey; // ключ владения глобальным объектом
 
     QDialog::DialogCode makeDialogForSetupModelAsNew();
@@ -204,10 +209,6 @@ private slots:
     void                    layersController();
     void                    selectedLayer(int row);
 };
-
-
-
-
 
 
 

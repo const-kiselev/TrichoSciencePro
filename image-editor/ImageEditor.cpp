@@ -31,6 +31,8 @@ void ImageEditor::closeEvent(QCloseEvent *)
 int ImageEditor::init(IE_ProfileType ie_type)
 {
     m_ieType = ie_type;
+    if(!m_ieViewVec.count())
+        return 1;
 
     setWindowTitle(getIE_ProfileType(m_ieType)); //! \todo зависит от типа
 
@@ -57,6 +59,14 @@ int ImageEditor::init(IE_ProfileType ie_type)
             pIE_toolCnt->getPDock()->hide();
             addDockWidget(Qt::RightDockWidgetArea,pIE_model->getFieldOfViewControllerInfoDock());
             pIE_model->getFieldOfViewControllerInfoDock()->hide();
+
+            switch (pIE_model->getIEM_type())
+            {
+                case IEM_type::TrichoscopyPatterns:
+                    addDockWidget(Qt::RightDockWidgetArea, pIE_model->getImageBaseDockWidget());
+                    pIE_model->getImageBaseDockWidget()->hide();
+                    break;
+            }
 
         }
 
@@ -202,7 +212,9 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
 
 
     }
-    init(ie_type);
+    int answer = init(ie_type);
+    if(answer)
+        return answer;
 
     return 0;
 }
@@ -238,7 +250,9 @@ int ImageEditor::initModels(TSP_PatientData patientData)
     }
 
     IE_ProfileType ie_type = m_ieViewVec[0]->getPModel()->getIE_ProfileType();
-    init(ie_type);
+    int answer = init(ie_type);
+    if(answer)
+        return answer;
     return 0;
 }
 
@@ -383,7 +397,9 @@ void ImageEditor::makeCalibration        ()
 
 int ImageEditor::open(TSP_PatientData patientData)
 {
-    initModels(patientData);
+    int answer = initModels(patientData);
+    if(answer)
+        return answer;
     //! \todo только при открытии обследования необходимо по-другому обрабатывать.  записывать  связанные модели в TabArray ???
 
     //! инициализация происходит только после прочтения модели. Так как необходим IEM_type и зависимости с другими моделями.
@@ -392,7 +408,9 @@ int ImageEditor::open(TSP_PatientData patientData)
 
 int ImageEditor::makeNew(TSP_PatientData patientData, IE_ProfileType ie_type)
 {
-    initModelsAsNew(patientData, ie_type);
+    int answer = initModelsAsNew(patientData, ie_type);
+    if(answer)
+        return answer;
     return 0;
 }
 
@@ -410,6 +428,12 @@ void ImageEditor::changeTab(int viewIndex)
     pIE_toolCnt->hide();
     pIE_toolCnt->getPDock()->hide();
     pIE_model->getFieldOfViewControllerInfoDock()->hide();
+    switch (pIE_model->getIEM_type())
+    {
+        case IEM_type::TrichoscopyPatterns:
+            pIE_model->getImageBaseDockWidget()->hide();
+            break;
+    }
 
 
     m_currentTab = viewIndex;
@@ -422,6 +446,12 @@ void ImageEditor::changeTab(int viewIndex)
     pIE_toolCnt->show();
     pIE_toolCnt->getPDock()->show();
     pIE_model->getFieldOfViewControllerInfoDock()->show();
+    switch (pIE_model->getIEM_type())
+    {
+        case IEM_type::TrichoscopyPatterns:
+            pIE_model->getImageBaseDockWidget()->show();
+            break;
+    }
 
 
     menuInit();

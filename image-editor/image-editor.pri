@@ -5,6 +5,10 @@ SOURCES += \
     $$PWD/_global_ie.cpp \
     $$PWD/ie_calibration.cpp \
     $$PWD/ie_compute.cpp \
+    $$PWD/ie_imageBase.cpp \
+    $$PWD/ie_imageBase_treeItem.cpp \
+    $$PWD/ie_imageBase_treeModel.cpp \
+    $$PWD/ie_imageBase_widget.cpp \
     $$PWD/ie_layersTableModel.cpp \
     $$PWD/ie_line_dd.cpp \
     $$PWD/ie_model.cpp \
@@ -28,6 +32,10 @@ HEADERS += \
     $$PWD/ie_calibration.h \
     $$PWD/ie_compute.h \
     $$PWD/ie_header.h \
+    $$PWD/ie_imageBase.h \
+    $$PWD/ie_imageBase_treeItem.h \
+    $$PWD/ie_imageBase_treeModel.h \
+    $$PWD/ie_imageBase_widget.h \
     $$PWD/ie_layersTableModel.h \
     $$PWD/ie_line_dd.h \
     $$PWD/ie_model.h \

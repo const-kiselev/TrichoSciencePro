@@ -361,37 +361,49 @@ void ToolsController::initToolActions()
     switch (toolSetType){
     case ToolSet::HairDencity:
     case ToolSet::Simple:
-    case ToolSet::AllTools:
+    {
         toolsList   << ToolType::NoneTool
-                        << ToolType::SimpleLine
-                        << ToolType::DensityAndDiameter
-                        << ToolType::Zoom
-                        << ToolType::Marker_FollicularUnit
-                        << ToolType::Ruler
+                    << ToolType::SimpleLine
+                    << ToolType::DensityAndDiameter
+                    << ToolType::Zoom
+                    << ToolType::Marker_FollicularUnit
+                    << ToolType::Ruler;
 
-                        << ToolType::PeripilarSign_SpikyHair
-                        << ToolType::PeripilarSign_ExclamationHair
-                        << ToolType::PeripilarSign_BrokenHair
-                        << ToolType::PeripilarSign_CadaverizedHair
-                        << ToolType::PeripilarSign_YellowDot
-                        << ToolType::PeripilarSign_RedDot
-                        << ToolType::PeripilarSign_WhiteDot
-                        << ToolType::PeripilarSign_Hyperpigmentation
+        break;
+    }
+    case ToolSet::AllTools:
+    {
+        toolsList   << ToolType::NoneTool
+                    << ToolType::SimpleLine
+                    << ToolType::DensityAndDiameter
+                    << ToolType::Zoom
+                    << ToolType::Marker_FollicularUnit
+                    << ToolType::Ruler
 
-                        << ToolType::RootType_Anagen
-                        << ToolType::RootType_DysplasticAnagen
-                        << ToolType::RootType_BrokenAnagen
-                        << ToolType::RootType_AnagenWithPapilla
-                        << ToolType::RootType_Telogen
-                        << ToolType::RootType_Catagen
-                        << ToolType::RootType_Dystrophic;
+                    << ToolType::PeripilarSign_SpikyHair
+                    << ToolType::PeripilarSign_ExclamationHair
+                    << ToolType::PeripilarSign_BrokenHair
+                    << ToolType::PeripilarSign_CadaverizedHair
+                    << ToolType::PeripilarSign_YellowDot
+                    << ToolType::PeripilarSign_RedDot
+                    << ToolType::PeripilarSign_WhiteDot
+                    << ToolType::PeripilarSign_Hyperpigmentation
 
-            break;
-        case ToolSet::CallibrationToolSet:
-            toolsList << ToolType::Ruler
-                      << ToolType::Zoom
-                      << ToolType::NoneTool;
-            break;
+                    << ToolType::RootType_Anagen
+                    << ToolType::RootType_DysplasticAnagen
+                    << ToolType::RootType_BrokenAnagen
+                    << ToolType::RootType_AnagenWithPapilla
+                    << ToolType::RootType_Telogen
+                    << ToolType::RootType_Catagen
+                    << ToolType::RootType_Dystrophic;
+
+        break;
+    }
+    case ToolSet::CallibrationToolSet:
+        toolsList << ToolType::Ruler
+                  << ToolType::Zoom
+                  << ToolType::NoneTool;
+        break;
 
     }
 
