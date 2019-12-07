@@ -36,7 +36,12 @@ QDockWidget *IE_ImageBaseCnt::getDockWidgetWithAllImages()
     return m_allImagesDockWidget;
 }
 
-int IE_ImageBaseCnt::setUserChoice(const QJsonObject &json)
+bool IE_ImageBaseCnt::containsImageBaseUserChoice(const QJsonObject &json)
+{
+    return IE_IB_treeModel::containsImageBaseUserChoice(json);
+}
+
+int IE_ImageBaseCnt::readUserChoice(const QJsonObject &json, int index)
 {
     //! Установка данных выбора пользователя из массива-объекта `imageBaseUserChoiceArray`
     //!
@@ -44,7 +49,31 @@ int IE_ImageBaseCnt::setUserChoice(const QJsonObject &json)
     if(!m_pTreeModel)
         return 1;
 
-    return m_pTreeModel->setUserChoice(json);
+    return m_pTreeModel->readUserChoice(json, index);
+}
+
+int IE_ImageBaseCnt::setUserChoiceListSize(int size)
+{
+    if(!m_pTreeModel)
+        return 1;
+    return m_pTreeModel->setUserChoiseListSize(size);
+}
+
+int IE_ImageBaseCnt::writeUserChoice(QJsonObject &json, int index) const
+{
+    if(!m_pTreeModel)
+        return 1;
+
+
+    return m_pTreeModel->writeUserChoice(json, index);
+}
+
+int IE_ImageBaseCnt::setCurrentUserChoiceList(int num)
+{
+    if(!m_pTreeModel)
+        return 1;
+     m_pTreeModel->setCurrentUserChoiceList(num);
+     return 0;
 }
 
 int IE_ImageBaseCnt::read(const QJsonObject &json)

@@ -9,6 +9,7 @@ IE_IB_treeModel::IE_IB_treeModel(const QDir workDir, QObject *parent)
     : QAbstractItemModel(parent), m_workDir(workDir)
 {
     rootItem = new IE_IB_treeItem({"","","", "","",""});
+    m_currentUserChoiceVector = -1;
 }
 
 
@@ -25,44 +26,85 @@ int IE_IB_treeModel::setImageBaseData(const QJsonObject &json)
     return 0;
 }
 
-int IE_IB_treeModel::setUserChoice(const QJsonObject &json)
+int IE_IB_treeModel::readUserChoice(const QJsonObject &json, int index)
 {
-    if(!json["imageBaseUserChoiceArray"].isArray())
+    if(index >= m_userChoice.size())
         return 1;
+    if(!json["imageBaseUserChoiceArray"].isArray())
+        return 0;
+
     QSet<QString> * typeSet = new QSet<QString>;
+
 
     QJsonArray ucArray = json["imageBaseUserChoiceArray"].toArray();
     for(int i=0, ucArraySize = ucArray.size(); i<ucArraySize; i++)
     {
         QString ucType = ucArray.at(i).toString();
-        IE_IB_treeItem * pCurrentRoot = rootItem;
-        int lastFound = ucType.indexOf("_");
-        while( lastFound != -1 )
-        {
+        typeSet->insert(ucType);
+//        IE_IB_treeItem * pCurrentRoot = rootItem;
+//        int lastFound = ucType.indexOf("_");
+//        while( lastFound != -1 )
+//        {
 
-            QString preType = ucType.left( lastFound - 1 );
-            for( int childIndex = 0, childCount = pCurrentRoot->childCount();
-                 childIndex < childCount; childIndex++)
-            {
-                if( !pCurrentRoot->child(childIndex)->data(0).toString()
-                        .compare( preType, Qt::CaseInsensitive )
-                        )
-                {
-                    pCurrentRoot = pCurrentRoot->child(childIndex);
-                    if( !pCurrentRoot->childCount() ) // искомый тип
-                    {
-                        lastFound = -1;
-                        *typeSet << ucType;
-                    }
-                    else
-                        lastFound = ucType.indexOf("_", lastFound);
-                    break;
-                }
-            }
-        }
+//            QString preType = ucType.left( lastFound - 1 );
+//            for( int childIndex = 0, childCount = pCurrentRoot->childCount();
+//                 childIndex < childCount; childIndex++)
+//            {
+//                if( !pCurrentRoot->child(childIndex)->data(0).toString()
+//                        .compare( preType, Qt::CaseInsensitive )
+//                        )
+//                {
+//                    pCurrentRoot = pCurrentRoot->child(childIndex);
+//                    if( !pCurrentRoot->childCount() ) // искомый тип
+//                    {
+//                        lastFound = -1;
+//                        *typeSet << ucType;
+//                    }
+//                    else
+//                        lastFound = ucType.indexOf("_", lastFound);
+//                    break;
+//                }
+//            }
+//        }
     }
-    m_userChoice << typeSet;
-   return 0;
+    if(index == -1)
+        m_userChoice << typeSet;
+    else
+        m_userChoice.replace(index, typeSet);
+
+    return 0;
+}
+
+int IE_IB_treeModel::writeUserChoice(QJsonObject &json, int index) const
+{
+    if(!m_userChoice.size() || index >= m_userChoice.size())
+        return 1;
+
+
+    QSet<QString>::const_iterator setIter = m_userChoice.at(index)->constBegin();
+    QJsonArray ucArray;
+    while (setIter != m_userChoice.at(index)->constEnd())
+    {
+           ucArray.append(*setIter);
+           qDebug() << *setIter;
+           ++setIter;
+    }
+
+    json["imageBaseUserChoiceArray"] = ucArray;
+    return 0;
+}
+
+int IE_IB_treeModel::setUserChoiseListSize(int i)
+{
+    if( i ==  m_userChoice.size())
+        return true;
+    if(i < m_userChoice.size())
+        while(i!= m_userChoice.size())
+            m_userChoice.removeLast();
+    else
+        while(i!= m_userChoice.size())
+            m_userChoice << new QSet<QString>;
+    return true;
 }
 
 
@@ -81,22 +123,22 @@ bool IE_IB_treeModel::setData(const QModelIndex &index, const QVariant &value, i
     {
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
 
+        if(m_currentUserChoiceVector == -1)
+            return -1;
+
         if( value.toBool() )
         {
-            m_userChoice.at(m_currentUserChoiceVector)->insert(item->data(0).toString());
+            m_userChoice.at(m_currentUserChoiceVector)->insert( item->data(0).toString() );
         }
         else
         {
-
+            m_userChoice.at(m_currentUserChoiceVector)->remove( item->data(0).toString() );
         }
 
-        if( m_userChoice.at(m_currentUserChoiceVector).contains(item->data(0).toString()) )
-            return true;
-        else
-            return false;
+        return true;
 
 
-        return item->setData(5, value);
+//        return item->setData(5, value);
     }
     default:
         return false;
@@ -115,6 +157,11 @@ QPixmap* IE_IB_treeModel::getImage(const QModelIndex &index)
     QPixmap * pPix = m_smallImages.find(  data(index, SMALL_IMAGE_ROLE).toString() ).value();
     return pPix;
     return new QPixmap();
+}
+
+bool IE_IB_treeModel::containsImageBaseUserChoice(const QJsonObject &json)
+{
+    return json["imageBaseUserChoiceArray"].isArray();
 }
 
 void IE_IB_treeModel::setCurrentUserChoiceList(int i)
@@ -139,7 +186,11 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
     case Qt::CheckStateRole:
     {
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
-        if( m_userChoice.at(m_currentUserChoiceVector).contains(item->data(0).toString()) )
+
+        if(m_currentUserChoiceVector == -1)
+            return false;
+
+        if( m_userChoice.at(m_currentUserChoiceVector)->contains(item->data(0).toString()) )
             return true;
         else
             return false;

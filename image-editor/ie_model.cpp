@@ -36,6 +36,7 @@
         modelRect = rectF;
         emit boundingRectWasChanged(modelRect);
         pToolCnt->resetPActiveTool();
+
 //        setSceneRect(modelRect);
     });
     connect(m_pFieldOfViewCnt, &IE_FieldOfView_Controller::layerAction,this, &IE_Model::layerAction);
@@ -177,7 +178,7 @@ int         IE_Model::read                   (const QJsonObject &json)
         m_relatedModelList.clear();
         QJsonArray relatedModelsArray = json["relatedModelsArray"].toArray();
         for (int i=0; i < relatedModelsArray.size(); i++)
-            m_relatedModelList.push_back(relatedModelsArray.at(i).toString());
+            m_relatedModelList.push_back(QString("%1/%2").arg(_modelData.getModelDir().path()).arg(relatedModelsArray.at(i).toString()) );
     }
 
     return 0;
@@ -199,7 +200,7 @@ int         IE_Model::write                  (QJsonObject &json) const
     if(!m_relatedModelList.isEmpty())
     {
         foreach(QString str, m_relatedModelList)
-            relatedModelsArray.push_back(QJsonValue(str));
+            relatedModelsArray.push_back(QJsonValue(str.replace(_modelData.getModelDir().path()+"/","")));
         json["relatedModelsArray"] = relatedModelsArray;
     }
     m_pFieldOfViewCnt->write(json);
@@ -221,7 +222,7 @@ int         IE_Model::initAsNewModel         (TSP_PatientData patientData, IEM_t
     }
     case IEM_type::TrichoscopyPatterns:
     {
-        m_pImageBaseCnt = new IE_ImageBaseCnt();
+        m_pFieldOfViewCnt->initImageBase();
         pToolCnt->setToolSetType(ToolSet::Simple);
         break;
     }
@@ -312,7 +313,7 @@ int         IE_Model::initWithModel          (TSP_PatientData patientData)
     }
     case IEM_type::TrichoscopyPatterns:
     {
-        m_pImageBaseCnt = new IE_ImageBaseCnt();
+        m_pFieldOfViewCnt->initImageBase();
         pToolCnt->setToolSetType(ToolSet::Simple);
         break;
     }
@@ -422,9 +423,7 @@ IEM_type IE_Model::getIEM_type()
 
 QDockWidget *IE_Model::getImageBaseDockWidget()
 {
-    if(!m_pImageBaseCnt)
-        return new QDockWidget();
-    return m_pImageBaseCnt->getDockWidgetWithAllImages();
+        m_pFieldOfViewCnt->getImageBaseDockWidget();
 }
 
 // ------- END GETTERS and SETTERS

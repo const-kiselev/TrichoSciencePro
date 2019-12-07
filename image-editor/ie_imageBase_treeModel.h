@@ -24,7 +24,9 @@ public:
         ~IE_IB_treeModel();
 
         int setImageBaseData(const QJsonObject &json);
-        int setUserChoice(const QJsonObject &json);
+        int readUserChoice(const QJsonObject &json, int index = -1);
+        int writeUserChoice(QJsonObject &json, int index) const;
+        int setUserChoiseListSize(int i);
 
         QVariant data(const QModelIndex &index, int role) const override;
         Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -43,9 +45,12 @@ public:
 
         QPixmap *getImage(const QModelIndex & index);
 
+        static bool containsImageBaseUserChoice(const QJsonObject &json);
+
 signals:
 public slots:
         void setCurrentUserChoiceList(int i);
+
 
     private:
         void setupModelData(const QJsonArray &jsonArray, IE_IB_treeItem *parent);

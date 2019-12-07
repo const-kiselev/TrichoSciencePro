@@ -25,7 +25,8 @@ SOURCES +=  \
     main.cpp
 
 HEADERS += \
-    ../_header_tsp.h
+    ../_header_tsp.h \
+    ie_fieldOfView_infoWidget.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

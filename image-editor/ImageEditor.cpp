@@ -63,6 +63,8 @@ int ImageEditor::init(IE_ProfileType ie_type)
             switch (pIE_model->getIEM_type())
             {
                 case IEM_type::TrichoscopyPatterns:
+                    if(!pIE_model->getImageBaseDockWidget())
+                        break;
                     addDockWidget(Qt::RightDockWidgetArea, pIE_model->getImageBaseDockWidget());
                     pIE_model->getImageBaseDockWidget()->hide();
                     break;
@@ -130,7 +132,7 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
     {
         TSP_PatientData relatePatienData = patientData;
         relatePatienData = patientData;
-        for (int i=0; i<6;i++)
+        for (int i=0; i<2;i++)
         {
             IE_Model * pIE_model = new IE_Model();
             IE_View * pIEView = new IE_View(pIE_model);
@@ -152,42 +154,42 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
                                                             );
                 break;
             }
-            case 2:
-            {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfScalp, ie_type);
-                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
-                                                              .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
-                                                            );
-                break;
-            }
-            case 3:
-            {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRoots, ie_type);
-                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
-                                                              .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
-                                                            );
-                break;
-            }
-            case 4:
-            {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRods, ie_type);
-                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
-                                                              .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
-                                                            );
-                break;
-            }
-            case 5:
-            {
-                pIE_model->initAsNewModel(relatePatienData, IEM_type::DermatoscopyOfNeoplasms, ie_type);
-                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
-                                                              .arg(pIE_model->getPath())
-                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
-                                                            );
-                break;
-            }
+//            case 2:
+//            {
+//                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfScalp, ie_type);
+//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                                                              .arg(pIE_model->getPath())
+//                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
+//                                                            );
+//                break;
+//            }
+//            case 3:
+//            {
+//                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRoots, ie_type);
+//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                                                              .arg(pIE_model->getPath())
+//                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
+//                                                            );
+//                break;
+//            }
+//            case 4:
+//            {
+//                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRods, ie_type);
+//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                                                              .arg(pIE_model->getPath())
+//                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
+//                                                            );
+//                break;
+//            }
+//            case 5:
+//            {
+//                pIE_model->initAsNewModel(relatePatienData, IEM_type::DermatoscopyOfNeoplasms, ie_type);
+//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                                                              .arg(pIE_model->getPath())
+//                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
+//                                                            );
+//                break;
+//            }
 
             }
             m_ieViewVec.push_back(pIEView);
@@ -431,7 +433,8 @@ void ImageEditor::changeTab(int viewIndex)
     switch (pIE_model->getIEM_type())
     {
         case IEM_type::TrichoscopyPatterns:
-            pIE_model->getImageBaseDockWidget()->hide();
+            if(pIE_model->getImageBaseDockWidget())
+                pIE_model->getImageBaseDockWidget()->hide();
             break;
     }
 
@@ -449,6 +452,7 @@ void ImageEditor::changeTab(int viewIndex)
     switch (pIE_model->getIEM_type())
     {
         case IEM_type::TrichoscopyPatterns:
+        if(pIE_model->getImageBaseDockWidget())
             pIE_model->getImageBaseDockWidget()->show();
             break;
     }

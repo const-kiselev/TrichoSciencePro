@@ -44,15 +44,15 @@ public:
     //!     связанного инструмента, то изображение остается.
     //! синхронизация со списоком собственных инструментов
     //! проверка изображений и соотсветвующее преобразование больших изображений в размер 512х512 с сохранением соотношения
-
+    static bool containsImageBaseUserChoice(const QJsonObject &json);
 
 signals:
 
 public slots:
-    int setUserChoice(const QJsonObject &json);
-    int setUserChoiceSize(uint size);
-    int getUserChoiceJSONArray(const QJsonObject &json) const;
-    int setCurrentUserChoiceList(uint num);
+    int readUserChoice(const QJsonObject &json, int index = -1);
+    int setUserChoiceListSize(int size);
+    int writeUserChoice(QJsonObject &json, int index) const;
+    int setCurrentUserChoiceList(int num);
 private:
     QDir m_workDir;
     IE_IB_treeModel * m_pTreeModel;

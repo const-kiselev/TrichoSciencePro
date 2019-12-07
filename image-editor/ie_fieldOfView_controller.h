@@ -2,8 +2,9 @@
 #define IE_FIELDOFVIEW_CONTROLLER_H
 
 #include <QObject>
-#include <QWidget>
+
 #include <ie_fieldOfView.h>
+#include "ie_imageBase.h"
 
 
 class IE_FieldOfView_ControllerInfoWidget;
@@ -42,6 +43,9 @@ public:
 
 
     void init(Quantity q = Quantity::One);
+    int initImageBase();
+    QDockWidget *getImageBaseDockWidget();
+
     QDialog::DialogCode makeInitDialog();
     QDialog::DialogCode makeDialogForSetupAsNew();
 
@@ -58,6 +62,8 @@ public:
     void relocateAllFieldOfView();
     //! Порядковый индекс MainImage из списка слоев типа MainImage соотвествует порядковому индексу поля зрения.
     static Quantity getStandartQuantity(IE_ProfileType profileType);
+    int getActiveFVIndex() const;
+
 signals:
     /// \todo связать с моделью
     void addNewLayer(IE_ModelLayer* pLayer);
@@ -86,13 +92,14 @@ private:
     QList<IE_ModelLayer*>   *layersList;
     _global_ie *    m_p_ie_global_data;
     IE_FieldOfView_ControllerInfoWidget * m_pInfoWidget;
+    IE_ImageBaseCnt         * m_pImageBaseCnt;
+
 
     void addFieldOfView(int index);
     void removeFieldOfView(int index);
 
 
 };
-
 
 class IE_FieldOfView_ControllerInfoWidget : public QWidget
 {
@@ -102,7 +109,7 @@ public:
     ~IE_FieldOfView_ControllerInfoWidget();
     void init(int currentFVquantity);
 signals:
-    void quantityWasChanged(IE_FieldOfView_Controller::Quantity q);
+    void quantityWasChanged(int q);
     void activeFVWasChanged(int index);
     void changeActiveFVMainImage();
     void removeAllElementsOnActiveFV();
@@ -113,7 +120,7 @@ signals:
 
     void makeInit();
 public slots:
-    void changeQuantity(IE_FieldOfView_Controller::Quantity q);
+    void changeQuantity(int q);
     void changeActiveFV(int index, QString fvNote);
     void updateActiveFVLayerList(QList<IE_ModelLayer*> layerList);
 
@@ -128,6 +135,7 @@ private:
 
 
 };
+
 
 
 #endif // IE_FIELDOFVIEW_CONTROLLER_H

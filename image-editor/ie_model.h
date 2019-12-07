@@ -4,7 +4,7 @@
 #include <QtWidgets>
 #include "ie_report.h"
 #include "ie_fieldOfView_controller.h"
-#include "ie_imageBase.h"
+
 
 #include <QtCharts/QChartView>
 #include <QtCharts/QBarSeries>
@@ -199,7 +199,6 @@ private:
 
     _global_ie              * __global_data;
 
-    IE_ImageBaseCnt         * m_pImageBaseCnt;
 
     int globalDataKey; // ключ владения глобальным объектом
 

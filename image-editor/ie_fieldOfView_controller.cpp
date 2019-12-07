@@ -1,19 +1,21 @@
 #include "ie_fieldOfView_controller.h"
+#include "ie_fieldOfView_infoWidget.h"
 
 IE_FieldOfView_Controller::IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
                                                      _global_ie * pieg,
                                                      QObject *parent
                                                      ) :    QObject(parent),
                                                             m_quantityOfFields(0),
-                                                            layersList(ll),
-                                                            m_p_ie_global_data(pieg),
+                                                            m_inited(false),
                                                             m_activeFVIndex(-1),
-                                                            m_inited(false)
+                                                            layersList(ll),
+                                                            m_p_ie_global_data(pieg)
 {
+    m_pImageBaseCnt = nullptr;
     m_pInfoWidget = new IE_FieldOfView_ControllerInfoWidget();
-    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::quantityWasChanged, [this](Quantity q)
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::quantityWasChanged, [this](int q)
     {
-        changeQuantity(q);
+        changeQuantity((Quantity)q);
     });
     m_activeFVIndex = -1;
     connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::activeFVWasChanged, [this](int index)
@@ -66,8 +68,16 @@ int IE_FieldOfView_Controller::read(const QJsonObject &json)
         answer = m_fieldOfViewList.at(fvIndex)->read(fvObject);
         if(answer)
             return answer;
+
+        if(IE_ImageBaseCnt::containsImageBaseUserChoice(fvObject))
+        {
+            initImageBase();
+            m_pImageBaseCnt->readUserChoice(fvObject, fvIndex);
+        }
     }
     m_activeFVIndex = 0;
+    if(m_pImageBaseCnt)
+        m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
     changeActiveFieldOfView(m_activeFVIndex);
     return 0;
 }
@@ -75,10 +85,13 @@ int IE_FieldOfView_Controller::read(const QJsonObject &json)
 int IE_FieldOfView_Controller::write(QJsonObject &json) const
 {
     QJsonArray fvArray;
+    int i = 0;
     foreach (IE_FieldOfView * pfv, m_fieldOfViewList)
     {
         QJsonObject fvObject;
         pfv->write(fvObject);
+        if(m_pImageBaseCnt)
+            m_pImageBaseCnt->writeUserChoice(fvObject, i++);
         fvArray.append(fvObject);
     }
     json["fieldOfViewArray"] = fvArray;
@@ -102,6 +115,24 @@ void IE_FieldOfView_Controller::init(IE_FieldOfView_Controller::Quantity quantit
     }
     changeActiveFieldOfView(m_activeFVIndex);
     m_inited = true;
+    if(m_pImageBaseCnt)
+        m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
+}
+
+int IE_FieldOfView_Controller::initImageBase()
+{
+    if(m_pImageBaseCnt)
+        return 0;
+    m_pImageBaseCnt = new IE_ImageBaseCnt();
+    m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
+    return 0;
+}
+
+QDockWidget *IE_FieldOfView_Controller::getImageBaseDockWidget()
+{
+    if(!m_pImageBaseCnt)
+        return nullptr;
+    return m_pImageBaseCnt->getDockWidgetWithAllImages();
 }
 
 QDialog::DialogCode IE_FieldOfView_Controller::makeInitDialog()
@@ -170,6 +201,8 @@ void IE_FieldOfView_Controller::changeQuantity(IE_FieldOfView_Controller::Quanti
 
     relocateAllFieldOfView();
     m_pInfoWidget->changeQuantity((Quantity) m_quantityOfFields);
+    if(m_pImageBaseCnt)
+        m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
 }
 
 uint IE_FieldOfView_Controller::getQuantity()const
@@ -314,12 +347,14 @@ QRectF IE_FieldOfView_Controller::getBoundingRectOfAllFieldOfView()
 
 void IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
 {
-    if(index>m_quantityOfFields-1)
+    if(index > ((int)m_quantityOfFields)-1)
         return;
     m_activeFVIndex = index;
     emit boundingRectWasChanged( m_fieldOfViewList.at(index)->getRect() );
     m_pInfoWidget->changeActiveFV(index, m_fieldOfViewList.at(index)->getNote());
     checkLayerList();
+    if(m_pImageBaseCnt)
+        m_pImageBaseCnt->setCurrentUserChoiceList(index);
 }
 
 QList<IE_ModelLayer *> IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
@@ -332,6 +367,11 @@ QList<IE_ModelLayer *> IE_FieldOfView_Controller::getActiveFieldOfViewLayerList(
 void IE_FieldOfView_Controller::checkLayerList()
 {
     emit activeFVLayerListWasUpdated(getActiveFieldOfViewLayerList());
+}
+
+int IE_FieldOfView_Controller::getActiveFVIndex() const
+{
+    return m_activeFVIndex;
 }
 
 void IE_FieldOfView_Controller::addFieldOfView(int index)
@@ -555,12 +595,12 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
     this->setLayout(pVertBoxLayout);
 }
 
-void IE_FieldOfView_ControllerInfoWidget::changeQuantity(IE_FieldOfView_Controller::Quantity q)
+void IE_FieldOfView_ControllerInfoWidget::changeQuantity(int q)
 {
     pcboQuiantityFV->setCurrentText(QString().number(q));
     QStringList  lst;
     pcboActiveFV->clear();
-    for(int i=0; i < (int)q; i++)
+    for(int i=0; i < q; i++)
         lst << QString().number(i+1);
     pcboActiveFV->addItems(lst);
     pcboActiveFV->setCurrentIndex(0);

@@ -1,0 +1,8 @@
+#ifndef IE_FIELDOFVIEW_INFOWIDGET_H
+#define IE_FIELDOFVIEW_INFOWIDGET_H
+
+#include <ie_fieldOfView.h>
+
+
+
+#endif // IE_FIELDOFVIEW_INFOWIDGET_H
