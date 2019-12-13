@@ -22,10 +22,13 @@ public:
                                  QObject *parent = nullptr
                                 );
         ~IE_IB_treeModel();
-
+        //! методо задания данных из файла с данными об иерархии изображений и дополнительной информации к элементам иерархии
         int setImageBaseData(const QJsonObject &json);
+        //! методо считывает из JSONobject массив элементов, которые выбрал пользователь.
         int readUserChoice(const QJsonObject &json, int index = -1);
+        //! методо записывает в JSONobject массив элементов, которые выбрал пользователь.
         int writeUserChoice(QJsonObject &json, int index) const;
+        //! методо задания количества списков выбора пользователя. Каждый список закрпелен за определенным FV.
         int setUserChoiseListSize(int i);
 
         QVariant data(const QModelIndex &index, int role) const override;
@@ -44,7 +47,8 @@ public:
         int write(QJsonObject &json)const;
 
         QPixmap *getImage(const QModelIndex & index);
-
+        //! метод проверяет, существует ли база изображений.
+        //! \todo если нет, то должно происходить копирование из папки ПРИЛОЖЕНИЯ со статичными файлами-примерами.
         static bool containsImageBaseUserChoice(const QJsonObject &json);
 
 signals:

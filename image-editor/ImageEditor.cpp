@@ -60,7 +60,7 @@ int ImageEditor::init(IE_ProfileType ie_type)
             addDockWidget(Qt::RightDockWidgetArea,pIE_model->getFieldOfViewControllerInfoDock());
             pIE_model->getFieldOfViewControllerInfoDock()->hide();
 
-            switch (pIE_model->getIEM_type())
+            switch ( pIE_model->getIEM_type() )
             {
                 case IEM_type::TrichoscopyPatterns:
                     if(!pIE_model->getImageBaseDockWidget())

@@ -117,7 +117,6 @@ int IE_IB_treeModel::columnCount(const QModelIndex &parent) const
 
 bool IE_IB_treeModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-
     switch (role) {
     case Qt::CheckStateRole:
     {
@@ -181,7 +180,7 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
     {
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
 
-        return item->data(index.column());
+        return item->data(1);
     }
     case Qt::CheckStateRole:
     {
@@ -190,18 +189,20 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
         if(m_currentUserChoiceVector == -1)
             return false;
 
+        if( item->childCount() )
+            return QVariant();
+
         if( m_userChoice.at(m_currentUserChoiceVector)->contains(item->data(0).toString()) )
             return true;
         else
             return false;
-//        return item->data(5);
     }
     case SMALL_IMAGE_ROLE:
     {
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
 
-//        return item->data(4).toString();;
-        return QVariant();
+        return item->data(4).toString();
+//        return QVariant();
     }
     default:
         return QVariant();

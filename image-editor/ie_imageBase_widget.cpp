@@ -53,8 +53,6 @@ IE_IB_listView::IE_IB_listView(): QListView()
 //        if(currentRoot.parent().isValid())
             changeRootIndex( currentRoot.parent() );
     });
-
-
 }
 
 void IE_IB_listView::setDataModel(QAbstractItemModel *model)
@@ -114,6 +112,11 @@ QRect Delegate::GetCheckboxRect(const QStyleOptionViewItem &option) const
     return r;
 }
 
+QRect Delegate::getImageSize(const QStyleOptionViewItem &option) const
+{
+
+}
+
 bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
 
@@ -137,13 +140,13 @@ bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyl
 
 void Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
-    painter->save();
+//    painter->save();
 
 
     QStyleOptionViewItem opt(option);
     initStyleOption(&opt, index);
-    QStyleOptionButton cbOpt;
-    cbOpt.rect = GetCheckboxRect(opt);
+    QStyleOptionButton checkBoxOpt;
+    checkBoxOpt.rect = GetCheckboxRect(opt);
 
     const QPalette &palette(opt.palette);
     const QRect &rect(opt.rect);
@@ -152,44 +155,57 @@ void Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option, cons
                               palette.highlight().color() :
                               palette.light().color());
 
+    QVariant variantResult = index.data( CHECK_ROLE );
 
-    bool isChecked = index.data( CHECK_ROLE ).toBool();
-    if (isChecked)
+
+    if( !variantResult.isNull() )
     {
-        cbOpt.state |= QStyle::State_On;
+        bool isChecked = index.data( CHECK_ROLE ).toBool();
+        if (isChecked)
+            checkBoxOpt.state |= QStyle::State_On;
+        else
+            checkBoxOpt.state |= QStyle::State_Off;
+        checkBoxOpt.state |= QStyle::State_Enabled;
+        QApplication::style()->drawControl(QStyle::CE_CheckBox, &checkBoxOpt, painter);
+
     }
-    else
-    {
-        cbOpt.state |= QStyle::State_Off;
-    }
-
-    QVariant enabled = index.data(Qt::ItemIsEnabled);
-    if(enabled.isNull() || enabled.toBool() )
-    {
-        cbOpt.state |= QStyle::State_Enabled;
-    }
-
-
-
 
 
     QRect rec(option.rect);
-    rec.setX(cbOpt.rect.right());
-    painter->setFont(opt.font);
-    painter->setPen( Qt::black );
+    rec.setX(checkBoxOpt.rect.right());
 
 
 
-    QApplication::style()->drawControl(QStyle::CE_CheckBox, &cbOpt, painter);
+//    painter->setFont(opt.font);
+//    painter->setPen( Qt::black );
+
+
+
 
     QModelIndex ind = index;
 
-    painter->drawText(rec, Qt::TextWordWrap, ind.data().toString());
     QString imagePath = index.data(100).toString();
     if(!imagePath.isEmpty())
     {
-        painter->drawImage(rec, QImage( index.data( 100 ).toString()) );
+        QImage img(index.data( 100 ).toString());
+        QImage img2( img.scaledToWidth(rec.width()) );
+        rec.setHeight( img2.height() );
+        painter->drawImage( rec, img2 );
     }
-    painter->restore();
+    painter->drawText( rec, Qt::TextWordWrap, ind.data().toString() );
+//    painter->restore();
 
+}
+
+QSize Delegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+    QString imagePath = index.data(100).toString();
+    if(!imagePath.isEmpty())
+    {
+        QImage img(index.data( 100 ).toString());
+        QImage img2( img.scaledToWidth(option.rect.width() ) );
+        return img2.size();
+    }
+    else
+        return QStyledItemDelegate::sizeHint(option, index);
 }

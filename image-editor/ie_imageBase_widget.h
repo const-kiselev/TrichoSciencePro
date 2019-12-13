@@ -21,17 +21,18 @@ class Delegate : public QStyledItemDelegate
 public:
     const int CHECK_ROLE = Qt::CheckStateRole;
 
-        // dont't let the default QStyledItemDelegate create the true/false combobox
         QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
 
         QRect GetCheckboxRect(const QStyleOptionViewItem &option)const;
+        QRect getImageSize(const QStyleOptionViewItem &option)const;
 
 
         // click event
         bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
 
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+        QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 private:
 };
 
