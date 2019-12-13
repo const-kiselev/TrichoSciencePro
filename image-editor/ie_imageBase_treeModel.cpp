@@ -41,31 +41,6 @@ int IE_IB_treeModel::readUserChoice(const QJsonObject &json, int index)
     {
         QString ucType = ucArray.at(i).toString();
         typeSet->insert(ucType);
-//        IE_IB_treeItem * pCurrentRoot = rootItem;
-//        int lastFound = ucType.indexOf("_");
-//        while( lastFound != -1 )
-//        {
-
-//            QString preType = ucType.left( lastFound - 1 );
-//            for( int childIndex = 0, childCount = pCurrentRoot->childCount();
-//                 childIndex < childCount; childIndex++)
-//            {
-//                if( !pCurrentRoot->child(childIndex)->data(0).toString()
-//                        .compare( preType, Qt::CaseInsensitive )
-//                        )
-//                {
-//                    pCurrentRoot = pCurrentRoot->child(childIndex);
-//                    if( !pCurrentRoot->childCount() ) // искомый тип
-//                    {
-//                        lastFound = -1;
-//                        *typeSet << ucType;
-//                    }
-//                    else
-//                        lastFound = ucType.indexOf("_", lastFound);
-//                    break;
-//                }
-//            }
-//        }
     }
     if(index == -1)
         m_userChoice << typeSet;
