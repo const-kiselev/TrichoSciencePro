@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QDir>
+#include <QAbstractProxyModel>
 
 class IE_IB_treeItem;
 
@@ -68,5 +69,7 @@ public slots:
 
         QVector< QSet<QString>* > m_userChoice;
 };
+
+
 
 #endif // IE_IB_TREEMODEL_H

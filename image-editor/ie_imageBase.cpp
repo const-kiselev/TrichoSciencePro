@@ -56,7 +56,10 @@ int IE_ImageBaseCnt::setUserChoiceListSize(int size)
 {
     if(!m_pTreeModel)
         return 1;
-    return m_pTreeModel->setUserChoiseListSize(size);
+    int answer = m_pTreeModel->setUserChoiseListSize(size);
+    if(m_allImagesDockWidget)
+        m_allImagesDockWidget->repaint();
+    return answer;
 }
 
 int IE_ImageBaseCnt::writeUserChoice(QJsonObject &json, int index) const

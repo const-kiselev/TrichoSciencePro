@@ -10,11 +10,12 @@
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QDockWidget>
+#include <QComboBox>
+#include <QStandardItem>
+#include <QAbstractProxyModel>
 
 
 #include <QStyledItemDelegate>
-
-
 
 class Delegate : public QStyledItemDelegate
 {
@@ -29,6 +30,12 @@ public:
         QRect getImageSize(const QStyleOptionViewItem &option)const;
 
 
+        void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override
+        {
+
+             editor->setGeometry(option.widget->rect());
+        }
+
         // click event
         bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
@@ -38,6 +45,101 @@ private:
 };
 
 
+
+
+class SortProxy : public QAbstractProxyModel
+{
+    Q_OBJECT
+
+public:
+    SortProxy(QObject *parent = 0) : QAbstractProxyModel(parent), hideThem(false)
+    {
+        fixModel();
+    }
+
+    int rowCount(const QModelIndex &parent) const
+    {
+        QModelIndex sourceParent;
+        if (parent.isValid())
+            sourceParent = mapToSource(parent);
+        int count = 0;
+        QMapIterator<QPersistentModelIndex, QPersistentModelIndex> it(proxySourceParent);
+        while (it.hasNext()) {
+            it.next();
+            if (it.value() == sourceParent)
+                count++;
+        }
+        return count;
+    }
+
+    int columnCount(const QModelIndex &) const
+    {
+        return 1;
+    }
+
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const
+    {
+        QModelIndex sourceParent;
+        if (parent.isValid())
+            sourceParent = mapToSource(parent);
+        QMapIterator<QPersistentModelIndex, QPersistentModelIndex> it(proxySourceParent);
+        while (it.hasNext()) {
+            it.next();
+            if (it.value() == sourceParent && it.key().row() == row &&
+                it.key().column() == column)
+                return it.key();
+        }
+        return QModelIndex();
+    }
+
+    QModelIndex parent(const QModelIndex &child) const
+    {
+        QModelIndex mi = proxySourceParent.value(child);
+        if (mi.isValid())
+            return mapFromSource(mi);
+        return QModelIndex();
+    }
+
+    QModelIndex mapToSource(const QModelIndex &proxyIndex) const
+    {
+        if (!proxyIndex.isValid())
+            return QModelIndex();
+        return mapping.key(proxyIndex);
+    }
+
+    QModelIndex mapFromSource(const QModelIndex &sourceIndex) const
+    {
+        if (!sourceIndex.isValid())
+            return QModelIndex();
+        return mapping.value(sourceIndex);
+    }
+
+public slots:
+        void hideEverythingButA1AndChildren()
+        {
+            hideThem = !hideThem;
+            // Now we set up the proxy <-> source mappings
+            emit layoutAboutToBeChanged();
+            fixModel();
+            emit layoutChanged();
+        }
+
+private:
+    void fixModel();
+    void fillListFromTreeModel(QModelIndex ind);
+    QList<QStandardItem*> m_list;
+
+    QMap<QPersistentModelIndex, QPersistentModelIndex> mapping;
+    QMap<QPersistentModelIndex, QPersistentModelIndex> proxySourceParent;
+    bool hideThem;
+};
+
+
+
+
+
+
+
 class IE_IB_listView: public QListView
 {
     Q_OBJECT
@@ -45,21 +147,34 @@ public:
     explicit IE_IB_listView();
     void setDataModel(QAbstractItemModel * model);
     QList<QAction*> getActionList() const;
-    QPushButton *getPushButtonGoBack() const;
+
+    void resizeEvent(QResizeEvent *e)
+    {
+        if(model() != Q_NULLPTR){
+            model()->layoutChanged();
+        }
+        QListView::resizeEvent(e);
+    }
+
+    friend class IE_IB_widget;
 
 signals:
 
 public slots:
+    void showSelectedItems();
 private:
     QAbstractItemModel * m_Model;
     QModelIndex m_currentIndex;
     QList<QAction*> m_actionList;
-    QPushButton * m_pushButtonGoBack;
+    QPushButton * m_pushButton_goBack,
+                * m_pushButton_showSelected,
+                * m_pushButton_makeCorrelation;
+    bool m_isSelectedItemsViewActive;
+    SortProxy * m_pProxyModel;
     void changeCurrentParent(const QModelIndex &index);
 
-
-
 private slots:
+    QList<QStandardItem *> list;
     void changeRootIndex(const QModelIndex &index);
 };
 

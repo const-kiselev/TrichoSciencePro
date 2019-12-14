@@ -71,14 +71,21 @@ int IE_IB_treeModel::writeUserChoice(QJsonObject &json, int index) const
 
 int IE_IB_treeModel::setUserChoiseListSize(int i)
 {
+
     if( i ==  m_userChoice.size())
         return true;
     if(i < m_userChoice.size())
         while(i!= m_userChoice.size())
+        {
+            if(m_currentUserChoiceVector == m_userChoice.size() - 1)
+                m_currentUserChoiceVector--;
             m_userChoice.removeLast();
+        }
     else
         while(i!= m_userChoice.size())
             m_userChoice << new QSet<QString>;
+
+    emit dataChanged( index(0,0), index(rowCount(), columnCount()) );
     return true;
 }
 
@@ -162,7 +169,7 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
 
         if(m_currentUserChoiceVector == -1)
-            return false;
+            return QVariant();
 
         if( item->childCount() )
             return QVariant();
@@ -372,3 +379,4 @@ int IE_IB_treeModel::loadImage(QHash<QString, QPixmap *> &imageHash, QString pat
 //    imageHash.insert(key, pimg);
     return 0;
 }
+
