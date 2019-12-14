@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QMouseEvent>
 #include <QPushButton>
+#include <QDockWidget>
 
 
 #include <QStyledItemDelegate>
@@ -29,7 +30,7 @@ public:
 
 
         // click event
-        bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index);
+        bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index) override;
 
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
         QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;

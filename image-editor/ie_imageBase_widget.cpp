@@ -19,18 +19,16 @@ m_pListView = nullptr;
 int IE_IB_widget::init()
 {
     m_pListView = new IE_IB_listView();
-
-
-    QVBoxLayout * pvbLayout = new QVBoxLayout(this);
-    m_pListView->setParent(this);
-    pvbLayout->addWidget(m_pListView);
+    QVBoxLayout * pvbl = new QVBoxLayout(this);
+//    m_pListView->setParent(this);
+    pvbl->addWidget(m_pListView);
 
     QDialogButtonBox * pButtonBox = new QDialogButtonBox();
     pButtonBox->addButton(m_pListView->getPushButtonGoBack(), QDialogButtonBox::ButtonRole::NoRole);
-    pButtonBox->setParent(m_pListView);
-    pvbLayout->addWidget(pButtonBox);
-
-    setLayout(pvbLayout);
+    pButtonBox->setParent(this);
+//    pvbl->addItem(pvbl);
+    pvbl->addWidget(pButtonBox);
+//    setLayout(pvbl);
     return 0;
 }
 
@@ -119,7 +117,6 @@ QRect Delegate::getImageSize(const QStyleOptionViewItem &option) const
 
 bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
 {
-
     if (event->type() == QEvent::MouseButtonRelease)
     {
         QMouseEvent* pME = static_cast<QMouseEvent*>(event);

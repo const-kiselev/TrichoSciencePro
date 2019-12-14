@@ -423,7 +423,7 @@ IEM_type IE_Model::getIEM_type()
 
 QDockWidget *IE_Model::getImageBaseDockWidget()
 {
-        m_pFieldOfViewCnt->getImageBaseDockWidget();
+        return m_pFieldOfViewCnt->getImageBaseDockWidget();
 }
 
 // ------- END GETTERS and SETTERS

@@ -52,7 +52,6 @@ int ImageEditor::init(IE_ProfileType ie_type)
             IE_Model * pIE_model = pIEView->getPModel();
             ToolsController * pIE_toolCnt = pIEView->getPToolsController();
             locTabBar->addTab(UI_getIEM_type_title(pIE_model->getIEM_type()));
-
             addToolBar(Qt::LeftToolBarArea, pIE_toolCnt);
             pIE_toolCnt->hide();
             addDockWidget(Qt::RightDockWidgetArea,pIE_toolCnt->getPDock());
@@ -63,11 +62,13 @@ int ImageEditor::init(IE_ProfileType ie_type)
             switch ( pIE_model->getIEM_type() )
             {
                 case IEM_type::TrichoscopyPatterns:
+            {
                     if(!pIE_model->getImageBaseDockWidget())
                         break;
                     addDockWidget(Qt::RightDockWidgetArea, pIE_model->getImageBaseDockWidget());
                     pIE_model->getImageBaseDockWidget()->hide();
                     break;
+            }
             }
 
         }
