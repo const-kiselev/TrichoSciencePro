@@ -1,8 +1,15 @@
 #include "tsp_test.h"
 
+#include <QResource>
+
 TSP_test::TSP_test(QWidget *parent)
     : QMainWindow(parent)
 {
+//    QDir res(":/imageBase/resources/imageBase/");
+//    qDebug() << res.entryList();
+
+
+
     m_pImageBase = new IE_ImageBaseCnt(QDir("/Users/const/Library/Application Support/TrichoSciencePro/data/imageBase"));
     m_pImageBase->getDockWidgetWithAllImages()->show();
     m_pImageBase->setUserChoiceListSize(1);

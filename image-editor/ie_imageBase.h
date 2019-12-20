@@ -26,7 +26,8 @@ public:
                         * FILE_NAME_RULE,
                         * FILE_NAME,
                         * FILE_EXTENSION,
-                        * TSP_docTypeVALUE;
+                        * TSP_docTypeVALUE,
+                        * RES_IMAGE_BASE_FOLDER_PATH;
     const QString FULL_FILE_NAME;
 
     explicit IE_ImageBaseCnt(QDir workDir = QDir( STD_DIR ), QObject *parent = nullptr);
@@ -64,6 +65,7 @@ private:
     int write(QJsonObject &json)const;
     int open();
     int save();
+    int makeDuplicateOfImageBaseFolderInRes();
 
 
 };

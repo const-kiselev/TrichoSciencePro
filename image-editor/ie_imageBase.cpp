@@ -6,12 +6,15 @@
 #include <QVBoxLayout>
 #include <QTreeView>
 #include <QListView>
+#include <QResource>
+#include <QStack>
 
 const char * IE_ImageBaseCnt::STD_DIR = "data/imageBase";
 const char * IE_ImageBaseCnt::FILE_NAME_RULE = "%1%2";
 const char * IE_ImageBaseCnt::FILE_NAME = "imageBase";
 const char * IE_ImageBaseCnt::FILE_EXTENSION = ".json";
 const char * IE_ImageBaseCnt::TSP_docTypeVALUE = "TSP_JSON_imageBase";
+const char * IE_ImageBaseCnt::RES_IMAGE_BASE_FOLDER_PATH = ":/imageBase/resources/imageBase";
 
 IE_ImageBaseCnt::IE_ImageBaseCnt(QDir workDir, QObject *parent) : QObject(parent),
     FULL_FILE_NAME(QString(FILE_NAME_RULE).arg(FILE_NAME).arg(FILE_EXTENSION)),
@@ -23,7 +26,7 @@ IE_ImageBaseCnt::IE_ImageBaseCnt(QDir workDir, QObject *parent) : QObject(parent
     open();
 }
 
-QDockWidget *IE_ImageBaseCnt::getDockWidgetWithAllImages()
+QDockWidget*IE_ImageBaseCnt::getDockWidgetWithAllImages()
 {
     if(!m_allImagesDockWidget)
     {
@@ -38,7 +41,7 @@ QDockWidget *IE_ImageBaseCnt::getDockWidgetWithAllImages()
     return m_allImagesDockWidget;
 }
 
-int IE_ImageBaseCnt::makeCorellation(QStringList layerTitlesList)
+int         IE_ImageBaseCnt::makeCorellation(QStringList layerTitlesList)
 {
 //    if( !m_allImagesDockWidget )
     m_pTreeModel->makeCorellation_selectedImagesAndTools(layerTitlesList);
@@ -47,12 +50,12 @@ int IE_ImageBaseCnt::makeCorellation(QStringList layerTitlesList)
     return 0;
 }
 
-bool IE_ImageBaseCnt::containsImageBaseUserChoice(const QJsonObject &json)
+bool        IE_ImageBaseCnt::containsImageBaseUserChoice(const QJsonObject &json)
 {
     return IE_IB_treeModel::containsImageBaseUserChoice(json);
 }
 
-int IE_ImageBaseCnt::readUserChoice(const QJsonObject &json, int index)
+int         IE_ImageBaseCnt::readUserChoice(const QJsonObject &json, int index)
 {
     //! Установка данных выбора пользователя из массива-объекта `imageBaseUserChoiceArray`
     //!
@@ -63,7 +66,7 @@ int IE_ImageBaseCnt::readUserChoice(const QJsonObject &json, int index)
     return m_pTreeModel->readUserChoice(json, index);
 }
 
-int IE_ImageBaseCnt::setUserChoiceListSize(int size)
+int         IE_ImageBaseCnt::setUserChoiceListSize(int size)
 {
     if(!m_pTreeModel)
         return 1;
@@ -73,7 +76,7 @@ int IE_ImageBaseCnt::setUserChoiceListSize(int size)
     return answer;
 }
 
-int IE_ImageBaseCnt::writeUserChoice(QJsonObject &json, int index) const
+int         IE_ImageBaseCnt::writeUserChoice(QJsonObject &json, int index) const
 {
     if(!m_pTreeModel)
         return 1;
@@ -82,7 +85,7 @@ int IE_ImageBaseCnt::writeUserChoice(QJsonObject &json, int index) const
     return m_pTreeModel->writeUserChoice(json, index);
 }
 
-int IE_ImageBaseCnt::setCurrentUserChoiceList(int num)
+int         IE_ImageBaseCnt::setCurrentUserChoiceList(int num)
 {
     if(!m_pTreeModel)
         return 1;
@@ -90,7 +93,7 @@ int IE_ImageBaseCnt::setCurrentUserChoiceList(int num)
      return 0;
 }
 
-int IE_ImageBaseCnt::read(const QJsonObject &json)
+int         IE_ImageBaseCnt::read(const QJsonObject &json)
 {
     if(m_pTreeModel)
         delete m_pTreeModel;
@@ -99,14 +102,14 @@ int IE_ImageBaseCnt::read(const QJsonObject &json)
     return 0;
 }
 
-int IE_ImageBaseCnt::write(QJsonObject &json) const
+int         IE_ImageBaseCnt::write(QJsonObject &json) const
 {
     if(m_pTreeModel)
         m_pTreeModel->write(json);
     return 0;
 }
 
-int IE_ImageBaseCnt::open()
+int         IE_ImageBaseCnt::open()
 {
     QFile imageBaseFile;
     imageBaseFile.setFileName( m_workDir.filePath( FULL_FILE_NAME ) );
@@ -149,10 +152,19 @@ int IE_ImageBaseCnt::open()
      return read(jsonDoc);
 }
 
-int IE_ImageBaseCnt::save()
+int         IE_ImageBaseCnt::save()
 {
     if( !m_workDir.exists() )
+    {
         m_workDir.mkpath(".");
+        //копирование ресурсов приложения в папку пользователя
+        int ans = makeDuplicateOfImageBaseFolderInRes();
+        if(ans)
+            return ans;
+    }
+
+
+
 
     QFile imageBaseFile;
     imageBaseFile.setFileName( m_workDir.filePath( FULL_FILE_NAME ) );
@@ -168,5 +180,44 @@ int IE_ImageBaseCnt::save()
     QJsonDocument saveDoc(pimageBaseObj);
     imageBaseFile.write(saveDoc.toJson());
     imageBaseFile.close();
+    return 0;
+}
+
+int IE_ImageBaseCnt::makeDuplicateOfImageBaseFolderInRes()
+{
+    QDir imageBaseRes(RES_IMAGE_BASE_FOLDER_PATH);
+    if(!imageBaseRes.exists())
+    {
+        qDebug() << RES_IMAGE_BASE_FOLDER_PATH << " folder in resources does not exist. Please, reinstall application.";
+        return 1;
+    }
+    QStack<QString> stack;
+    stack.push(imageBaseRes.path());
+
+
+    while( !stack.isEmpty() )
+    {
+        QString currentDirPath = stack.pop();
+        if(currentDirPath == "." || currentDirPath == "..")
+            continue;
+        QDir currentDir = currentDirPath;
+
+        QDir destDir = m_workDir.path() + currentDir.path().replace(RES_IMAGE_BASE_FOLDER_PATH, "");
+        if( !destDir.exists() )
+            destDir.mkpath(".");
+        QStringList fileList = currentDir.entryList(QDir::Files);
+        foreach(QString fileName, fileList)
+            QFile::copy( currentDir.filePath( fileName ),
+                         destDir.filePath(fileName) );
+
+        QStringList folderList = currentDir.entryList(QDir::Dirs);
+        foreach(QString folderName, folderList)
+        {
+            if(folderName == "." || folderName == "..")
+                continue;
+            stack.push( currentDir.filePath(folderName) );
+        }
+
+    }
     return 0;
 }

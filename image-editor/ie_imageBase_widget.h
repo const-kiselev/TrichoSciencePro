@@ -13,9 +13,12 @@
 #include <QComboBox>
 #include <QStandardItem>
 #include <QAbstractProxyModel>
+#include <QLabel>
 
 
 #include <QStyledItemDelegate>
+
+class IE_IB_listView;
 
 class Delegate : public QStyledItemDelegate
 {
@@ -41,7 +44,10 @@ public:
 
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
         QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+        friend class IE_IB_listView;
 private:
+        QMap<QString, *> *m_pSmallImages;
 };
 
 
@@ -98,7 +104,11 @@ private:
     bool m_isSelectedItemsViewActive;
     QList<QModelIndex> indexList;
     SortProxy * m_pProxyModel;
+
+    QMap<QString, *> m_smallImages;
+
     void changeCurrentParent(const QModelIndex &index);
+    void loadImageForCurrentRoot();
 
 private slots:
     void changeRootIndex(const QModelIndex &index);

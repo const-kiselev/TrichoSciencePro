@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QAction>
 #include <QLabel>
+#include <QImageReader>
 
 // ------------- IE_IB_widget
         IE_IB_widget::IE_IB_widget(QWidget *parent) : QWidget(parent)
@@ -56,6 +57,7 @@ IE_IB_listView::IE_IB_listView(): QListView()
     m_pProxyModel = nullptr;
 
     QAbstractItemDelegate * delegate = new Delegate();
+    ((Delegate*)delegate)->m_pSmallImages = &m_smallImages;
     connect(this, &IE_IB_listView::doubleClicked,this, &IE_IB_listView::changeRootIndex);
     setItemDelegate(delegate);
 
@@ -118,7 +120,34 @@ void IE_IB_listView::showSelectedItems()
     {
         setModel(m_Model);
         m_pushButton_showSelected->setText("Выбранные");
+        m_pushButton_goBack->setDisabled(false);
 //        changeRootIndex( m_Model->index(0,0) );
+    }
+}
+
+void IE_IB_listView::loadImageForCurrentRoot()
+{
+    int rowCount = rootIndex().row();
+    for(int i=0; i< rowCount; i++)
+    {
+        QModelIndex curInd = model()->index(i,0,rootIndex());
+        if(curInd.data(100).isNull())
+            continue;
+        QString imgPath = curInd.data(100).toString();
+
+        QImageReader reader(imgPath);
+        reader.setAutoTransform(true);
+        const QImage newImage = reader.read();
+        if (newImage.isNull()) {
+            continue;
+        }
+
+        QImage newImg = newImage.scaled(512, 512, Qt::KeepAspectRatio);
+        QLabel *pImageLabel = new QLabel();
+        pImageLabel->setPixmap(QPixmap::fromImage(newImg));
+
+
+        m_smallImages.insert(curInd.data(0).toString(),pImageLabel);
     }
 }
 
@@ -128,6 +157,8 @@ void IE_IB_listView::changeRootIndex(const QModelIndex &index)
 //        return;
 //    if(index.model()->hasChildren(index))
         setRootIndex(index);
+        loadImageForCurrentRoot();
+
 //    if(rootIndex().parent().isValid())
 //        m_pushButton_goBack->setEnabled(false);
 //    else
@@ -241,10 +272,18 @@ void    Delegate::paint(QPainter *painter,
     QString imagePath = index.data(100).toString();
     if(!imagePath.isEmpty())
     {
-        QImage img(index.data( 100 ).toString());
-        QImage img2( img.scaledToWidth(rec.width()) );
-        rec.setHeight( img2.height() );
-        painter->drawImage( rec, img2 );
+        QMap<QString, QLabel*>::const_iterator i = m_pSmallImages->find( index.data(0).toString() );
+        if( i== m_pSmallImages->end() )
+        {
+        QLabel * curLabel = i.value();
+
+        curLabel->set
+//        QImage img(index.data( 100 ).toString());
+//        QImage img2( img.scaledToWidth(rec.width()) );
+        rec.setHeight( curPixmap.height() );
+
+            painter->drawPixmap(0,0, curPixmap);
+        }
     }
     painter->drawText( rec, Qt::TextWordWrap, ind.data().toString() );
     painter->restore();
