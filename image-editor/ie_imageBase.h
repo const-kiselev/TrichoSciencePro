@@ -42,12 +42,13 @@ public:
     //!     список пересечения этих двух множеств; если изображения с подобным связанным типом не
     //!     оказалось в базе, то приоритет за инструментом. Аналогично, если у изображения нет
     //!     связанного инструмента, то изображение остается.
+    int makeCorellation(QStringList layerTitlesList);
     //! синхронизация со списоком собственных инструментов
     //! проверка изображений и соотсветвующее преобразование больших изображений в размер 512х512 с сохранением соотношения
     static bool containsImageBaseUserChoice(const QJsonObject &json);
 
 signals:
-
+    void needLayerTitlesList();
 public slots:
     int readUserChoice(const QJsonObject &json, int index = -1);
     int setUserChoiceListSize(int size);

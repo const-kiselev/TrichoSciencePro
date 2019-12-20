@@ -14,5 +14,6 @@ public:
 
 private:
     IE_ImageBaseCnt * m_pImageBase;
+    void sendTestLayerTitlesList();
 };
 #endif // TSP_TEST_H

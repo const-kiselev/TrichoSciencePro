@@ -12,13 +12,13 @@
 #include <QAction>
 #include <QLabel>
 
-
-IE_IB_widget::IE_IB_widget(QWidget *parent) : QWidget(parent)
+// ------------- IE_IB_widget
+        IE_IB_widget::IE_IB_widget(QWidget *parent) : QWidget(parent)
 {
 m_pListView = nullptr;
 }
 
-int IE_IB_widget::init()
+int     IE_IB_widget::init()
 {
     m_pListView = new IE_IB_listView();
     QVBoxLayout * pvbl = new QVBoxLayout(this);
@@ -28,21 +28,27 @@ int IE_IB_widget::init()
     QDialogButtonBox * pButtonBox = new QDialogButtonBox();
     pButtonBox->setParent(this);
 
-    pButtonBox->addButton(m_pListView->m_pushButton_goBack, QDialogButtonBox::ButtonRole::NoRole);
-    pButtonBox->addButton(m_pListView->m_pushButton_showSelected, QDialogButtonBox::ButtonRole::NoRole);
-    pButtonBox->addButton(m_pListView->m_pushButton_makeCorrelation, QDialogButtonBox::ButtonRole::NoRole);
+    pButtonBox->addButton(m_pListView->m_pushButton_goBack,
+                          QDialogButtonBox::ButtonRole::NoRole);
+    pButtonBox->addButton(m_pListView->m_pushButton_showSelected,
+                          QDialogButtonBox::ButtonRole::NoRole);
+    pButtonBox->addButton(m_pListView->m_pushButton_makeCorrelation,
+                          QDialogButtonBox::ButtonRole::NoRole);
+    connect(m_pListView->m_pushButton_makeCorrelation, &QPushButton::clicked,
+            this, &IE_IB_widget::pushButtonClicked_corellation);
     pvbl->addWidget(pButtonBox);
-
-
 
     return 0;
 }
 
-void IE_IB_widget::setDataModel(QAbstractItemModel *model)
+void    IE_IB_widget::setDataModel(QAbstractItemModel *model)
 {
     m_model = model;
     m_pListView->setDataModel(m_model);
 }
+
+
+// ------------- IE_IB_listView
 
 IE_IB_listView::IE_IB_listView(): QListView()
 {
@@ -74,16 +80,25 @@ void IE_IB_listView::setDataModel(QAbstractItemModel *model)
 {
     m_Model = model;
     setModel(model);
-    if(rootIndex().parent().isValid())
-        m_pushButton_goBack->setEnabled(true);
-    else
-        m_pushButton_goBack->setEnabled(false);
+
+//    if(rootIndex().parent().isValid())
+//        m_pushButton_goBack->setEnabled(true);
+//    else
+//        m_pushButton_goBack->setEnabled(false);
 
 }
 
 QList<QAction *> IE_IB_listView::getActionList() const
 {
     return m_actionList;
+}
+
+void IE_IB_listView::resizeEvent(QResizeEvent *e)
+{
+    if(model() != Q_NULLPTR){
+        model()->layoutChanged();
+    }
+    QListView::resizeEvent(e);
 }
 
 void IE_IB_listView::showSelectedItems()
@@ -103,10 +118,9 @@ void IE_IB_listView::showSelectedItems()
     {
         setModel(m_Model);
         m_pushButton_showSelected->setText("Выбранные");
-        changeRootIndex( m_Model->index(0,0) );
+//        changeRootIndex( m_Model->index(0,0) );
     }
 }
-
 
 void IE_IB_listView::changeRootIndex(const QModelIndex &index)
 {
@@ -114,13 +128,19 @@ void IE_IB_listView::changeRootIndex(const QModelIndex &index)
 //        return;
 //    if(index.model()->hasChildren(index))
         setRootIndex(index);
-    if(rootIndex().parent().isValid())
-        m_pushButton_goBack->setEnabled(false);
-    else
-        m_pushButton_goBack->setEnabled(true);
+//    if(rootIndex().parent().isValid())
+//        m_pushButton_goBack->setEnabled(false);
+//    else
+//        m_pushButton_goBack->setEnabled(true);
 }
 
-QWidget *Delegate::createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
+
+// ------------- Delegate
+
+QWidget*Delegate::createEditor(QWidget *parent,
+                               const QStyleOptionViewItem &option,
+                               const QModelIndex &index
+                               ) const
 {
     (void)parent;
     (void)option;
@@ -128,7 +148,7 @@ QWidget *Delegate::createEditor(QWidget *parent, const QStyleOptionViewItem &opt
     return nullptr;
 }
 
-QRect Delegate::GetCheckboxRect(const QStyleOptionViewItem &option) const
+QRect   Delegate::GetCheckboxRect(const QStyleOptionViewItem &option) const
 {
     QStyleOptionButton opt_button;
     opt_button.QStyleOption::operator=(option);
@@ -144,12 +164,16 @@ QRect Delegate::GetCheckboxRect(const QStyleOptionViewItem &option) const
     return r;
 }
 
-QRect Delegate::getImageSize(const QStyleOptionViewItem &option) const
+QRect   Delegate::getImageSize(const QStyleOptionViewItem &option) const
 {
 
 }
 
-bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option, const QModelIndex &index)
+bool    Delegate::editorEvent(QEvent *event,
+                              QAbstractItemModel *model,
+                              const QStyleOptionViewItem &option,
+                              const QModelIndex &index
+                              )
 {
     if (event->type() == QEvent::MouseButtonRelease)
     {
@@ -169,7 +193,10 @@ bool Delegate::editorEvent(QEvent *event, QAbstractItemModel *model, const QStyl
     return QStyledItemDelegate::editorEvent(event, model, option, index);
 }
 
-void Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void    Delegate::paint(QPainter *painter,
+                        const QStyleOptionViewItem &option,
+                        const QModelIndex &index
+                        ) const
 {
     painter->save();
 
@@ -207,10 +234,6 @@ void Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option, cons
 
 
 
-//    painter->setFont(opt.font);
-//    painter->setPen( Qt::black );
-
-
 
 
     QModelIndex ind = index;
@@ -227,14 +250,15 @@ void Delegate::paint(QPainter *painter, const QStyleOptionViewItem &option, cons
     painter->restore();
 }
 
-QSize Delegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+QSize   Delegate::sizeHint(const QStyleOptionViewItem &option,
+                           const QModelIndex &index
+                           ) const
 {
     QStyleOptionViewItem options = option;
         initStyleOption(&options, index);
     int scrollBarrWidth = options.widget->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
     QRect rowRect(0,0,(options.widget->rect().right()-scrollBarrWidth),options.widget->rect().bottom());
 
-    qDebug() << rowRect;
 
     QString imagePath = index.data(100).toString();
     if(!imagePath.isEmpty())
@@ -252,69 +276,123 @@ QSize Delegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &
 
 }
 
-void SortProxy::fixModel()
+
+// ------------- SortProxy
+
+            SortProxy::SortProxy(QObject *parent) : QAbstractProxyModel(parent),
+                                                    hideThem(false)
 {
-    //! поиск всех элементов исходной модели данных
-    if(!m_list.size())
-    {
-        QAbstractItemModel * model = sourceModel();
+    fixModel();
+}
 
+int         SortProxy::rowCount(const QModelIndex &parent) const
+{
+    return mapping.count();
+//    QModelIndex sourceParent;
+//    if (parent.isValid())
+//        sourceParent = mapToSource(parent);
+//    int count = 0;
+//    QMapIterator<QPersistentModelIndex, QPersistentModelIndex> it(proxySourceParent);
+//    while (it.hasNext()) {
+//        it.next();
+//        if (it.value() == sourceParent)
+//            count++;
+//    }
+//    return count;
+}
+
+int         SortProxy::columnCount(const QModelIndex &) const
+{
+    return 1;
+}
+
+QModelIndex SortProxy::index(int row, int column, const QModelIndex &parent) const
+{
+    QModelIndex sourceParent;
+    if (parent.isValid())
+        sourceParent = mapToSource(parent);
+    QMapIterator<QPersistentModelIndex, QPersistentModelIndex> it(proxySourceParent);
+    while (it.hasNext()) {
+        it.next();
+        if (it.value() == sourceParent && it.key().row() == row &&
+                it.key().column() == column)
+            return it.key();
     }
+    return QModelIndex();
+}
 
+QModelIndex SortProxy::parent(const QModelIndex &child) const
+{
+    QModelIndex mi = proxySourceParent.value(child);
+    if (mi.isValid())
+        return mapFromSource(mi);
+    return QModelIndex();
+}
+
+QModelIndex SortProxy::mapToSource(const QModelIndex &proxyIndex) const
+{
+    if (!proxyIndex.isValid())
+        return QModelIndex();
+    return mapping.key(proxyIndex);
+}
+
+QModelIndex SortProxy::mapFromSource(const QModelIndex &sourceIndex) const
+{
+    if (!sourceIndex.isValid())
+        return QModelIndex();
+    return mapping.value(sourceIndex);
+}
+
+void        SortProxy::hideEverythingButA1AndChildren()
+{
+    hideThem = !hideThem;
+    // Now we set up the proxy <-> source mappings
+    emit layoutAboutToBeChanged();
+    fixModel();
+    emit layoutChanged();
+}
+
+void        SortProxy::fixModel()
+{
+    if(!sourceModel())
+        return;
+    m_list.clear();
+    //! поиск всех элементов исходной модели данных
+    fillListFromTreeModel(sourceModel()->index(0,0).parent());
     mapping.clear();
     proxySourceParent.clear();
 
-    //the following list is already populated
-    //in the tree view and we shall browse and
-    //customize it here
-
-
-
     for (int i=0;i<m_list.size();i++)
     {
-        //pull out a standard item
-        QStandardItem *si = m_list.at(i);
+        QPersistentModelIndex pmi = m_list.at(i);
+        if (!pmi.data(Qt::CheckStateRole).toBool())
+            continue;
+
+        QModelIndex proxy = createIndex(mapping.count(), 0, pmi.internalPointer());
+
+        mapping.insert(pmi, proxy);
+        QModelIndex sourceParent;
+
+        if (pmi.parent().parent().isValid())
+            sourceParent = pmi.parent();
+        proxySourceParent.insert(proxy, sourceParent);
 
 
-            //if the hide item flag is true
-
-            //check if the standard item's text start with 'A'
-            //of the item is not parent
-            if (!si->text().startsWith("A") || !si->parent())
-                continue;
-
-
-            //means that we have encountered item that does not start with 'A'
-            //or the item is not the parent
-
-            //we pull out the model index by creating the model index with the source items
-            //row , column
-            QModelIndex proxy = createIndex(si->row(), si->column(), si->index().internalPointer());
-
-            //insert the source model's index and the proxy index into the map
-            mapping.insert(QPersistentModelIndex(si->index()), proxy);
-            QModelIndex sourceParent;
-
-            if (si->parent()->parent())
-                sourceParent = si->parent()->index();
-            proxySourceParent.insert(proxy, sourceParent);
 
     }
 }
 
-void SortProxy::fillListFromTreeModel(QModelIndex ind)
+void        SortProxy::fillListFromTreeModel(QModelIndex ind)
 {
-
-    QModelIndex curInd;
     int numOfRows = sourceModel()->rowCount(ind);
     if(!numOfRows)
         return;
     for(int i=0; i<numOfRows; i++)
     {
-        if( sourceModel()->rowCount(ind.child(i,0)) )
-            fillListFromTreeModel( ind.child(i,0) );
+        if( sourceModel()->rowCount( sourceModel()->index(i,0, ind) ) )
+            fillListFromTreeModel( sourceModel()->index(i,0, ind) );
         else
-            m_list << sourceModel()-> ind.child(i,0)
+            m_list << QPersistentModelIndex(sourceModel()->index(i,0, ind));
 
     }
 

@@ -1,0 +1,377 @@
+{
+    "TSP_docType": "TSP_JSON_imageBase",
+    "data":[
+		{
+			"name": "interfollicularRegion",
+			"title": "Межфолликулярная область",
+			"note": "Комментарий",
+			"data": 
+			[
+				{
+                                        "name": "fineScaling",
+                                        "title": "Незначительное шелушение у здоровых лиц",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_fineScaling"]
+                                },
+{
+                                        "name": "yellowishScaling",
+                                        "title": "Желтоватое шелушение при себорейном дерматите",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_yellowishScaling"]
+                                },
+{
+                                        "name": "whiteScaling1",
+                                        "title": "Белое диффузное шелушение при псориазе",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_whiteScaling"]
+                                },
+                                {
+                                        "name": "whiteScaling2",
+                                        "title": "Шелушение при декальвирующем фолликулите",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_whiteScaling"]
+                                },
+{
+                                        "name": "lamellarScaling",
+                                        "title": "Пластинчатое шелушение при волчанке",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_lamellarScaling"]
+                                },
+                                {
+                                        "name": "perifollicularScaling",
+                                        "title": "Перифолликулярное шелушение  при плоском волосяном лишает",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_perifollicularScaling"]
+                                },
+{
+                                        "name": "whiteAreas",
+                                        "title": "Белые зоны фиброза при рубцовой алопеции",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_whiteAreas"]
+                                },
+{
+                                        "name": "pinkAreas",
+                                        "title": "Белые зоны фиброза при рубцовой алопеции",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_pinkAreas"]
+                                },
+{
+                                        "name": "redAreas",
+                                        "title": "Красные зоны –периваскулярное воспаление при дискоидной волчанке",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_redAreas"]
+                                },
+{
+                                        "name": "milkyRedAreas",
+                                        "title": "Молочно-красные зоны. Плоский волосяной лишай",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_milkyRedAreas"]
+                                },
+{
+                                        "name": "pustules1",
+                                        "title": "Желтые фолликулярные пустулы при подрывающем фолликулите",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_pustules"]
+                                },
+                                {
+                                        "name": "pustules1",
+                                        "title": "Желтая пустула при бактериальном фолликулите",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_pustules"]
+                                },
+{
+                                        "name": "exudate",
+                                        "title": "Экссудат при подрывающем фолликулите",
+                                        "note": "",
+                                        "relatedTools":["interfollicularRegion_exudate"]
+                                }
+			]
+		},
+		{
+			"name": "follicularSigns",
+			"title": "Фолликулярные признаки (точки)",
+			"note": "Комментарий 2",
+			"data": 
+			[
+				{
+                                        "name": "peripillaryPigmentation1",
+                                        "title": "Перипилярная пигментация при андрогенетической алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_peripillaryPigmentation"]
+                                },
+                                {
+                                        "name": "peripillaryPigmentation2",
+                                        "title": "Перипилярная пигментация при диффузном телогеновом выпадении волос",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_peripillaryPigmentation"]
+                                },
+{
+                                        "name": "yellowDots1",
+                                        "title": "Желтые точки при гнездной алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_yellowDot"]
+                                },
+                                {
+                                        "name": "yellowDots2",
+                                        "title": "Желтые точки при андрогенетической алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_yellowDot"]
+                                },
+                                {
+                                        "name": "yellowDots3",
+                                        "title": "Желтые точки при диффузной (скрытой форме) гнездной алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_yellowDot"]
+                                },
+                                {
+                                        "name": "yellowDots4",
+                                        "title": "Желтые точки при первичной рубцовой алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_yellowDot"]
+                                },
+{
+                                        "name": "blackDots1",
+                                        "title": "Черные точки при гнездной алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_blackDot"]
+                                },
+                                {
+                                        "name": "blackDots2",
+                                        "title": "Черные точки при трихотилломании",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_blackDot"]
+                                },
+{
+                                        "name": "whiteDots",
+                                        "title": "Белые точки (фиброзные) при первичной рубцовой алопеции",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_whiteDot"]
+                                },
+{
+                                        "name": "redDots",
+                                        "title": "Красные точки при дискоидной волчанке",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_redDot"]
+                                },
+{
+                                        "name": "peripilarCasts1",
+                                        "title": "Перипилярные муфты",
+                                        "note": "",
+                                        "relatedTools":["follicularSigns_peripilarCasts"]
+                                },
+                                {
+                                        "name": "peripilarCasts2",
+                                        "title": "Перипилярные муфты",
+                                        "note": "",
+                                        "src": "interfollicularRegion/perifollicularScaling.jpg",
+                                        "relatedTools":["follicularSigns_peripilarCasts"]
+                                }
+			]
+		},
+		{
+			"name": "bloodVessels",
+			"title": "Кровеносные сосуды",
+			"note": "",
+			"data": 
+			[
+				{
+                                        "name": "thickArborizingVessels",
+                                        "title": "Толстые древовидные сосуды. Дискоидная волчанка",
+                                        "note": "",
+                                        "src": "interfollicularRegion/redAreas.jpg",
+                                        "relatedTools":["bloodVessels_thickArborizingVessels"]
+                                },
+{
+                                        "name": "thinArborizingVessels",
+                                        "title": "Тонкие древовидные сосуды. Себорейный дерматит",
+                                        "note": "",
+                                        "relatedTools":["bloodVessels_thinArborizingVessels"]
+                                },
+{
+                                        "name": "glomerularAndTwisted",
+                                        "title": "Гломерулярные скрученные сосуды. Псориаз",
+                                        "note": "",
+                                        "relatedTools":["bloodVessels_glomerularAndTwisted"]
+                                },
+{
+                                        "name": "comma",
+                                        "title": "В виде запятой",
+                                        "note": "Сосуды в виде запятой, у здоровых лиц,  бывают при псориазе и себорейном дерматите",
+                                        "relatedTools":["bloodVessels_comma"]
+                                }
+			]
+		},
+		{
+			"name": "hairShaft",
+			"title": "Стержни волос",
+			"note": "",
+			"data": 
+			[
+				{
+                                        "name": "healthy",
+                                        "title": "Здоровые",
+                                        "note": "Равномерный диаметр стержней волос. Сохранность юнитов.",
+                                        "relatedTools":["hairShaft_healthy"]
+                                },
+{
+                                        "name": "intermediate",
+                                        "title": "Промежуточные",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_"]
+                                },
+{
+                                        "name": "vellus",
+                                        "title": "Веллус",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_"]
+                                },
+{
+                                        "name": "uprightRegrowingHairs",
+                                        "title": "Юные (остроконечные)",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_uprightRegrowingHairs"]
+                                },
+{
+                                        "name": "exclamationMarks",
+                                        "title": "Восклицательные знаки",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_exclamationMarks"]
+                                },
+{
+                                        "name": "cone",
+                                        "title": "Конический волос",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_cone"]
+                                },
+{
+                                        "name": "trichoptilosisAndTrichoclasia",
+                                        "title": "Трихоптилоз и трихоклазия",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_trichoptilosis"]
+                                },
+{
+                                        "name": "trichoclasiaAndTrichischisis",
+                                        "title": "Трихоклазия и трихишизис",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_trichorexis"]
+                                },
+{
+                                        "name": "trichorexis",
+                                        "title": "Трихорексис",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_trichorexis"]
+                                },
+{
+                                        "name": "brokenAtDifferentLength-flameAndBroom1",
+                                        "title": "Пламевидные  и метельчатые волосы обломанные на разной длине",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_brokenAtDifferentLength", "hairShaft_flameAndBroom"]
+                                },
+                                {
+                                        "name": "brokenAtDifferentLength-flameAndBroom2",
+                                        "title": "Метельчатые волосы и волосы обломанные на разной длине",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_brokenAtDifferentLength", "hairShaft_flameAndBroom"]
+                                },
+{
+                                        "name": "tuftedHairs",
+                                        "title": "Пучкообразный рост волос  (tufted hairs) при декальвирующем фолликулите",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_tuftedHairs"]
+                                },
+{
+                                        "name": "flameAndBroom",
+                                        "title": "Пламевидные и метельчатые",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_flameAndBroom"]
+                                },
+{
+                                        "name": "ZigzagAndIntermittent",
+                                        "title": "Загзагообразные и прерывистые волосы при микозе",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_ZigzagAndIntermittent"]
+                                },
+{
+                                        "name": "twisted",
+                                        "title": "Перекрученные",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_"]
+                                },
+{
+                                        "name": "piliAnnulati",
+                                        "title": "Кольчатые волосы  (pili annulate)",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_piliAnnulati"]
+                                },
+{
+                                        "name": "moniletrix",
+                                        "title": "Монилетрикс",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_moniletrix"]
+                                },
+{
+                                        "name": "trichonodose",
+                                        "title": "Трихонодоз",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_trichonodose"]
+                                },
+{
+                                        "name": "bamboo",
+                                        "title": "Бамбуковидный волос (инвагинирующий трихорексис)",
+                                        "note": "",
+                                        "relatedTools":["hairShaft_bamboo"]
+                                }
+			]
+		},
+		{
+			"name": "hairRoot",
+			"title": "Корни волос",
+			"note": "",
+			"data": 
+			[
+				{
+                                        "name": "anagen",
+                                        "title": "Корень анагенового волоса",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_anagen"]
+                                },
+                                {
+                                        "name": "anagen1",
+                                        "title": "Корень анагенового волоса",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_anagen"]
+                                },
+{
+                                        "name": "catagen",
+                                        "title": "Корень катагенового волоса",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_catagen"]
+                                },
+{
+                                        "name": "telogen",
+                                        "title": "Корень телогенового волоса",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_telogen"]
+                                },
+{
+                                        "name": "dystrophic",
+                                        "title": "Корень анагенового  дистрофичного волоса",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_dystrophic"]
+                                },
+{
+                                        "name": "brokenHair",
+                                        "title": "Обломанный волос",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_brokenHair"]
+                                },
+{
+                                        "name": "seborrhea",
+                                        "title": "Корень телогенового волоса при себорее",
+                                        "note": "",
+                                        "relatedTools":["hairRoot_seborrhea"]
+                                }
+			]
+		}
+	]
+}

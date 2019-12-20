@@ -51,7 +51,8 @@ public:
         //! метод проверяет, существует ли база изображений.
         //! \todo если нет, то должно происходить копирование из папки ПРИЛОЖЕНИЯ со статичными файлами-примерами.
         static bool containsImageBaseUserChoice(const QJsonObject &json);
-
+        int makeCorellation_selectedImagesAndTools(QStringList layerTitlesList);
+        QStringList getSelectedItemList();
 signals:
 public slots:
         void setCurrentUserChoiceList(int i);
@@ -66,8 +67,10 @@ public slots:
         QHash<QString, QPixmap*> m_smallImages;
         QDir m_workDir;
         int m_currentUserChoiceVector;
+        void fillListFromTreeModel(QModelIndex ind);
 
         QVector< QSet<QString>* > m_userChoice;
+        QList<QPersistentModelIndex> m_list;
 };
 
 

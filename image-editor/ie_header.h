@@ -9,11 +9,11 @@
 
 enum class ToolType {
     NoneTool, Zoom,
-    checkableTool = (1<< 6), // 0b01000000
-        MainImage, // 0b01000001
-        Image, // 0b01000010
+    checkableTool = (1<< 6),            // 0b01000000
+        MainImage,                      // 0b01000001
+        Image,                          // 0b01000010
         ComputingArea,
-        Marker = checkableTool|(1<<5), // 0b01100000
+        Marker = checkableTool|(1<<5),  // 0b01100000
             Marker_Colored,
             Marker_FollicularUnit,
             Marker_PeripilarSign,

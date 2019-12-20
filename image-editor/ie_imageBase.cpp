@@ -32,8 +32,19 @@ QDockWidget *IE_ImageBaseCnt::getDockWidgetWithAllImages()
         m_pWidget->setDataModel(m_pTreeModel);
         m_allImagesDockWidget = new QDockWidget("Справочные изображения");
         m_allImagesDockWidget->setWidget(m_pWidget);
+        connect(m_pWidget, &IE_IB_widget::pushButtonClicked_corellation,
+                this, &IE_ImageBaseCnt::needLayerTitlesList);
     }
     return m_allImagesDockWidget;
+}
+
+int IE_ImageBaseCnt::makeCorellation(QStringList layerTitlesList)
+{
+//    if( !m_allImagesDockWidget )
+    m_pTreeModel->makeCorellation_selectedImagesAndTools(layerTitlesList);
+
+
+    return 0;
 }
 
 bool IE_ImageBaseCnt::containsImageBaseUserChoice(const QJsonObject &json)
@@ -111,8 +122,10 @@ int IE_ImageBaseCnt::open()
     }
     if(!imageBaseFile.open(QIODevice::ReadOnly))
     {
-        QMessageBox::warning(nullptr, "Application", QString("Ошибка. Не удалось открыть файл %1 с пациентами.")
-                                                                .arg(imageBaseFile.fileName()));
+        QMessageBox::warning(nullptr, "Application",
+                             QString("Ошибка. Не удалось открыть файл %1 с пациентами.")
+                                                                .arg(imageBaseFile.fileName())
+                             );
         qWarning() << "Couldn't open patientIndex file " << imageBaseFile.fileName();
         return 1;
     }

@@ -145,6 +145,59 @@ bool IE_IB_treeModel::containsImageBaseUserChoice(const QJsonObject &json)
     return json["imageBaseUserChoiceArray"].isArray();
 }
 
+int IE_IB_treeModel::makeCorellation_selectedImagesAndTools(QStringList layerTitlesList)
+{
+    if(layerTitlesList.isEmpty())
+        return 0;
+
+
+    emit layoutAboutToBeChanged();
+    m_list.clear();
+    fillListFromTreeModel( index(0,0).parent() );
+
+    QSet<QString> layerTitleSet;
+    layerTitleSet.fromList(layerTitlesList);
+
+
+    foreach( QPersistentModelIndex elem, m_list )
+    {
+        QSet<QString> imageRelatedToolSet;
+        QList<QVariant> list = elem.model()->index(elem.row(), 3).data().toList();
+        if( list.isEmpty() )
+            continue;
+        foreach(QVariant listElem, list)
+            imageRelatedToolSet << listElem.toString();
+
+        if( !layerTitleSet.intersects( imageRelatedToolSet ) )
+            setData(elem, false, Qt::CheckStateRole);
+
+    }
+    emit layoutChanged();
+    return 0;
+}
+
+void        IE_IB_treeModel::fillListFromTreeModel(QModelIndex ind)
+{
+    int numOfRows = rowCount(ind);
+    if(!numOfRows)
+        return;
+    for(int i=0; i<numOfRows; i++)
+    {
+        if( rowCount( index(i,0, ind) ) )
+            fillListFromTreeModel( index(i,0, ind) );
+        else
+            m_list << QPersistentModelIndex(index(i,0, ind));
+
+    }
+
+}
+
+
+QStringList IE_IB_treeModel::getSelectedItemList()
+{
+
+}
+
 void IE_IB_treeModel::setCurrentUserChoiceList(int i)
 {
     m_currentUserChoiceVector = i;
@@ -162,7 +215,7 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
     {
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
 
-        return item->data(1);
+        return item->data(0);
     }
     case Qt::CheckStateRole:
     {
@@ -275,26 +328,30 @@ void IE_IB_treeModel::setupModelData(const QJsonArray &jsonArray, IE_IB_treeItem
         QString typeStr;
         // случай, когда родитель пустой, то есть корень!
         if(parents.last()->data(0).toString().isEmpty())
-            typeStr = QString("%1").arg(arrElemObj["type"].toString());
+            typeStr = QString("%1").arg(arrElemObj["name"].toString());
         else
             typeStr = QString("%1_%2")  .arg( parents.last()->data(0).toString() )
-                                        .arg(arrElemObj["type"].toString());
+                                        .arg(arrElemObj["name"].toString());
         if(arrElemObj.contains("data"))
         {
             data = {typeStr,
-                    arrElemObj["name"].toString(),
+                    arrElemObj["title"].toString(),
                     arrElemObj["note"].toString(), "", "", false
                    };
         }
         else
             data = {typeStr,
-                    arrElemObj["name"].toString(),
+                    arrElemObj["title"].toString(),
                     arrElemObj["note"].toString(),
                     arrElemObj["relatedToolsArray"].toArray().toVariantList(),
-                    findImage(typeStr),
+                    arrElemObj.contains("src")
+                        ? m_workDir.filePath(arrElemObj["src"].toString())
+                        : findImage(typeStr),
                     false
                    };
 
+        if( arrElemObj.contains("src") )
+            qDebug() << data[4].toString();
 
         if( !data[4].toString().isEmpty() )
             loadImage( m_smallImages, data[4].toString() , data[0].toString());
@@ -322,12 +379,12 @@ int IE_IB_treeModel::writeModelData(QJsonObject &json, IE_IB_treeItem *parent) c
             {
                 QString parentType = parent->parentItem()->data(0).toString();
                 int m = parentType.length()+1; // с учетом '_'
-                arrElem["type"] = parent->data(0).toString().mid(m);
+                arrElem["name"] = parent->data(0).toString().mid(m);
             }
             else
-                arrElem["type"] = parent->data(0).toString();
+                arrElem["name"] = parent->data(0).toString();
         }
-        arrElem["name"] = current->data(1).toString();
+        arrElem["title"] = current->data(1).toString();
         arrElem["note"] = current->data(2).toString();
         if(current->childCount())
         {
@@ -350,10 +407,10 @@ int IE_IB_treeModel::writeModelData(QJsonObject &json, IE_IB_treeItem *parent) c
     {
         QString parentType = parent->parentItem()->data(0).toString();
         int m = parentType.length()+1; // с учетом '_'
-        elemObj["type"] = parent->data(0).toString().mid(m);
+        elemObj["name"] = parent->data(0).toString().mid(m);
     }
     else
-        elemObj["type"] = parent->data(0).toString();
+        elemObj["name"] = parent->data(0).toString();
     json["data"] = array;
 
     return 0;
@@ -367,7 +424,7 @@ QString IE_IB_treeModel::findImage(QString typeName)
     path = path.left( path.lastIndexOf("/") );
     if( !current.cd(path) )
         return QString();
-    QStringList result = current.entryList( QStringList() << QString("%1.png").arg(fileName), QDir::Files );
+    QStringList result = current.entryList( QStringList() << QString("%1.png").arg(fileName) << QString("%1.jpg").arg(fileName), QDir::Files );
     if(result.isEmpty())
         return QString();
     return current.filePath(result[0]);
