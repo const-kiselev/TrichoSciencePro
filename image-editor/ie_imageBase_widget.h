@@ -47,7 +47,7 @@ public:
 
         friend class IE_IB_listView;
 private:
-        QMap<QString, *> *m_pSmallImages;
+        QMap<QString, QPixmap*> *m_pSmallImages;
 };
 
 
@@ -105,10 +105,10 @@ private:
     QList<QModelIndex> indexList;
     SortProxy * m_pProxyModel;
 
-    QMap<QString, *> m_smallImages;
+    QMap<QString, QPixmap*> m_smallImages;
 
     void changeCurrentParent(const QModelIndex &index);
-    void loadImageForCurrentRoot();
+    void loadImages(const QModelIndex &index);
 
 private slots:
     void changeRootIndex(const QModelIndex &index);

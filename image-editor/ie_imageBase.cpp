@@ -44,7 +44,7 @@ QDockWidget*IE_ImageBaseCnt::getDockWidgetWithAllImages()
 int         IE_ImageBaseCnt::makeCorellation(QStringList layerTitlesList)
 {
 //    if( !m_allImagesDockWidget )
-    m_pTreeModel->makeCorellation_selectedImagesAndTools(layerTitlesList);
+        m_pTreeModel->makeCorellation_selectedImagesAndTools(layerTitlesList);
 
 
     return 0;

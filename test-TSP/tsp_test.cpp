@@ -26,7 +26,7 @@ TSP_test::~TSP_test()
 void TSP_test::sendTestLayerTitlesList()
 {
     QStringList layerTitlesList;
-    layerTitlesList << "PeripilarSign_SpikyHair";
+    layerTitlesList << "interfollicularRegion_fineScaling";
     m_pImageBase->makeCorellation(layerTitlesList);
 }
 

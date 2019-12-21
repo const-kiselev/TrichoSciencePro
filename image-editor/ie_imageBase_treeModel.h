@@ -19,6 +19,7 @@ public:
     public:
         const int TYPE_FIELD = 0;
         static const int SMALL_IMAGE_ROLE = 100;
+        static const int LIST_OF_TOOLS = 101;
         explicit IE_IB_treeModel(const QDir workDir,
                                  QObject *parent = nullptr
                                 );

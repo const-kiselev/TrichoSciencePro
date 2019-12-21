@@ -147,6 +147,7 @@ bool IE_IB_treeModel::containsImageBaseUserChoice(const QJsonObject &json)
 
 int IE_IB_treeModel::makeCorellation_selectedImagesAndTools(QStringList layerTitlesList)
 {
+    qDebug() << "IE_IB_treeModel::makeCorellation_selectedImagesAndTools()";
     if(layerTitlesList.isEmpty())
         return 0;
 
@@ -155,14 +156,13 @@ int IE_IB_treeModel::makeCorellation_selectedImagesAndTools(QStringList layerTit
     m_list.clear();
     fillListFromTreeModel( index(0,0).parent() );
 
-    QSet<QString> layerTitleSet;
-    layerTitleSet.fromList(layerTitlesList);
+    QSet<QString> layerTitleSet= QSet<QString>::fromList(layerTitlesList);
 
 
     foreach( QPersistentModelIndex elem, m_list )
     {
         QSet<QString> imageRelatedToolSet;
-        QList<QVariant> list = elem.model()->index(elem.row(), 3).data().toList();
+        QList<QVariant> list = elem.data(LIST_OF_TOOLS).toList();
         if( list.isEmpty() )
             continue;
         foreach(QVariant listElem, list)
@@ -186,7 +186,12 @@ void        IE_IB_treeModel::fillListFromTreeModel(QModelIndex ind)
         if( rowCount( index(i,0, ind) ) )
             fillListFromTreeModel( index(i,0, ind) );
         else
-            m_list << QPersistentModelIndex(index(i,0, ind));
+        {
+            QVariant d = QPersistentModelIndex(index(i,0, ind)).data(Qt::CheckStateRole);
+            if(!d.isNull())
+                if(d.toBool())
+                    m_list << QPersistentModelIndex(index(i,0, ind));
+        }
 
     }
 
@@ -215,7 +220,7 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
     {
         IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
 
-        return item->data(0);
+        return item->data(1);
     }
     case Qt::CheckStateRole:
     {
@@ -238,6 +243,12 @@ QVariant IE_IB_treeModel::data(const QModelIndex &index, int role) const
 
         return item->data(4).toString();
 //        return QVariant();
+    }
+    case LIST_OF_TOOLS:
+    {
+        IE_IB_treeItem *item = static_cast<IE_IB_treeItem*>(index.internalPointer());
+
+        return item->data(3);
     }
     default:
         return QVariant();
@@ -343,7 +354,7 @@ void IE_IB_treeModel::setupModelData(const QJsonArray &jsonArray, IE_IB_treeItem
             data = {typeStr,
                     arrElemObj["title"].toString(),
                     arrElemObj["note"].toString(),
-                    arrElemObj["relatedToolsArray"].toArray().toVariantList(),
+                    arrElemObj["relatedTools"].toArray().toVariantList(),
                     arrElemObj.contains("src")
                         ? m_workDir.filePath(arrElemObj["src"].toString())
                         : findImage(typeStr),

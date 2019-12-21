@@ -114,23 +114,30 @@ void IE_IB_listView::showSelectedItems()
         setModel(m_pProxyModel);
         emit m_pProxyModel->hideEverythingButA1AndChildren();
         m_pushButton_showSelected->setText("Все изображения");
+        m_pushButton_showSelected->setToolTip("Отображается список всех изображений.");
         m_pushButton_goBack->setDisabled(true);
+        connect(m_Model, &QAbstractItemModel::layoutChanged, m_pProxyModel, &SortProxy::hideEverythingButA1AndChildren);
     }
     else
     {
         setModel(m_Model);
+        disconnect(m_Model, &QAbstractItemModel::layoutChanged, m_pProxyModel, &SortProxy::hideEverythingButA1AndChildren);
         m_pushButton_showSelected->setText("Выбранные");
+        m_pushButton_showSelected->setToolTip("Отображается список выбранных изображений.");
         m_pushButton_goBack->setDisabled(false);
 //        changeRootIndex( m_Model->index(0,0) );
     }
 }
 
-void IE_IB_listView::loadImageForCurrentRoot()
+void IE_IB_listView::loadImages(const QModelIndex &index)
 {
-    int rowCount = rootIndex().row();
+    qDebug() << index;
+    if(!index.isValid())
+        return;
+    int rowCount = index.model()->rowCount(index);
     for(int i=0; i< rowCount; i++)
     {
-        QModelIndex curInd = model()->index(i,0,rootIndex());
+        QModelIndex curInd = model()->index(i,0,index);
         if(curInd.data(100).isNull())
             continue;
         QString imgPath = curInd.data(100).toString();
@@ -142,12 +149,9 @@ void IE_IB_listView::loadImageForCurrentRoot()
             continue;
         }
 
-        QImage newImg = newImage.scaled(512, 512, Qt::KeepAspectRatio);
-        QLabel *pImageLabel = new QLabel();
-        pImageLabel->setPixmap(QPixmap::fromImage(newImg));
+        QPixmap * pPixm = new QPixmap(QPixmap::fromImage(newImage.scaled(512, 512, Qt::KeepAspectRatio)));
 
-
-        m_smallImages.insert(curInd.data(0).toString(),pImageLabel);
+        m_smallImages.insert(curInd.data(0).toString(),pPixm);
     }
 }
 
@@ -156,8 +160,9 @@ void IE_IB_listView::changeRootIndex(const QModelIndex &index)
 //    if(!index.isValid())
 //        return;
 //    if(index.model()->hasChildren(index))
-        setRootIndex(index);
-        loadImageForCurrentRoot();
+    loadImages(index);
+    setRootIndex(index);
+
 
 //    if(rootIndex().parent().isValid())
 //        m_pushButton_goBack->setEnabled(false);
@@ -268,24 +273,47 @@ void    Delegate::paint(QPainter *painter,
 
 
     QModelIndex ind = index;
+    QRect textRect(rec);
+    int width = rec.width()>=512?512:rec.width();
+    QString text = index.data().toString();
+    QRectF r = textRect;
+    r.setWidth(width);
+    QFontMetricsF fm(QApplication::font());
+    int m_currentItemHeight = fm.boundingRect(r, Qt::TextWordWrap, text).height();
+
+    QSize textZize = QStyledItemDelegate::sizeHint(option, index);
+    textZize.setHeight(m_currentItemHeight);
+    textZize.setWidth(textZize.width() - 10);
+
+
 
     QString imagePath = index.data(100).toString();
     if(!imagePath.isEmpty())
     {
-        QMap<QString, QLabel*>::const_iterator i = m_pSmallImages->find( index.data(0).toString() );
-        if( i== m_pSmallImages->end() )
+        QMap<QString, QPixmap*>::const_iterator i = m_pSmallImages->find( index.data(0).toString() );
+        if( i!= m_pSmallImages->end() )
         {
-        QLabel * curLabel = i.value();
 
-        curLabel->set
-//        QImage img(index.data( 100 ).toString());
-//        QImage img2( img.scaledToWidth(rec.width()) );
-        rec.setHeight( curPixmap.height() );
 
-            painter->drawPixmap(0,0, curPixmap);
+
+
+            QPixmap * curPixm = i.value();
+            QSize size = curPixm->size();
+
+            size.scale(width, rec.height()-textZize.height(), Qt::KeepAspectRatio);
+
+
+            QPixmap pixmap( curPixm->scaled(width, rec.height()-textZize.height(), Qt::KeepAspectRatio)  ) ;
+
+            rec.setHeight( pixmap.height() );
+            rec.setWidth(pixmap.width());
+
+            painter->drawPixmap(rec, pixmap);
+            textRect.setTopLeft( rec.bottomLeft() );
         }
     }
-    painter->drawText( rec, Qt::TextWordWrap, ind.data().toString() );
+
+    painter->drawText( textRect, Qt::TextWordWrap, ind.data().toString() );
     painter->restore();
 }
 
@@ -296,22 +324,55 @@ QSize   Delegate::sizeHint(const QStyleOptionViewItem &option,
     QStyleOptionViewItem options = option;
         initStyleOption(&options, index);
     int scrollBarrWidth = options.widget->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
+//    int textHeight =
+
+
+
+
+
     QRect rowRect(0,0,(options.widget->rect().right()-scrollBarrWidth),options.widget->rect().bottom());
 
 
-    QString imagePath = index.data(100).toString();
-    if(!imagePath.isEmpty())
+    int width = rowRect.width()>=512?512:rowRect.width();
+
+
+
+    QString text = index.data().toString();
+    QRectF r = rowRect;
+    r.setWidth(width);
+    QFontMetricsF fm(QApplication::font());
+    int m_currentItemHeight = fm.boundingRect(r, Qt::TextWordWrap, text).height();
+
+    QSize textZize = QStyledItemDelegate::sizeHint(option, index);
+    textZize.setHeight(m_currentItemHeight);
+    textZize.setWidth(textZize.width() - 10);
+
+
+
+
+    QMap<QString, QPixmap*>::const_iterator i = m_pSmallImages->find( index.data(0).toString() );
+    if( i!= m_pSmallImages->end() )
     {
-        QImage img(index.data( 100 ).toString());
-        QImage img2( img.scaledToWidth(  rowRect.width() - 27 ) );
-        return img2.size();
+        QPixmap* pPixmap = i.value();
+        if(pPixmap->isNull())
+        {
+            rowRect.setHeight(QStyledItemDelegate::sizeHint(option, index).height());
+            return rowRect.size();
+        }
+
+        QSize size = pPixmap->size();
+
+
+        size.scale(width, rowRect.height(), Qt::KeepAspectRatio);
+
+        size.setHeight( size.height() + textZize.height());
+
+        return size;
     }
-    else
-    {
+
         rowRect.setHeight(QStyledItemDelegate::sizeHint(option, index).height());
         return rowRect.size();
-    }
-//        return QStyledItemDelegate::sizeHint(option, index);
+
 
 }
 
