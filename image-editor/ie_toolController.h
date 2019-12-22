@@ -41,6 +41,7 @@ protected:
     virtual void mouseMoveEvent   (QMouseEvent* pe)override;
     virtual void wheelEvent (QWheelEvent *pe) override;
     virtual void keyPressEvent (QKeyEvent *pe) override;
+    void groupItem(ToolType tt, QAction* pa);
     _global_ie *p_ie_global_data() const;
 private:
     IE_ModelLayer *pActiveTool;

@@ -107,24 +107,24 @@
         <file>resources/img/black/tilt.png</file>
         <file>resources/img/black/transition.png</file>
     </qresource>
-    <qresource prefix="/">
+    <qresource prefix="/toolIcons">
         <file alias="DensityAndDiameter">resources/img/TSP/DensityAndDiameter.png</file>
         <file alias="Marker_FollicularUnit">resources/img/TSP/Marker_FollicularUnit.png</file>
-        <file alias="PeripilarSign_BrokenHair">resources/img/TSP/PeripilarSign_BrokenHair.png</file>
-        <file alias="PeripilarSign_ExclamationHair">resources/img/TSP/PeripilarSign_ExclamationHair.png</file>
-        <file alias="PeripilarSign_SpikyHair">resources/img/TSP/PeripilarSign_SpikyHair.png</file>
-        <file alias="RootType_Anagen">resources/img/TSP/RootType_Anagen.png</file>
+        <file alias="HairRoot_Broken">resources/img/TSP/PeripilarSign_BrokenHair.png</file>
+        <file alias="HairShaft_ExclamationMark">resources/img/TSP/PeripilarSign_ExclamationHair.png</file>
+        <file alias="HairShaft_UprightRegrowingHair">resources/img/TSP/PeripilarSign_SpikyHair.png</file>
+        <file alias="HairRoot_Anagen">resources/img/TSP/RootType_Anagen.png</file>
         <file alias="RootType_AnagenWithPapilla">resources/img/TSP/RootType_AnagenWithPapilla.png</file>
         <file alias="RootType_BrokenAnagen">resources/img/TSP/RootType_BrokenAnagen.png</file>
-        <file alias="RootType_Catagen">resources/img/TSP/RootType_Catagen.png</file>
+        <file alias="HairRoot_Catagen">resources/img/TSP/RootType_Catagen.png</file>
         <file alias="RootType_DysplasticAnagen">resources/img/TSP/RootType_DysplasticAnagen.png</file>
-        <file alias="RootType_Dystrophic">resources/img/TSP/RootType_Dystrophic.png</file>
-        <file alias="RootType_Telogen">resources/img/TSP/RootType_Telogen.png</file>
+        <file alias="HairRoot_Dystrophic">resources/img/TSP/RootType_Dystrophic.png</file>
+        <file alias="HairRoot_Telogen">resources/img/TSP/RootType_Telogen.png</file>
         <file alias="PeripilarSign_CadaverizedHair">resources/img/TSP/PeripilarSign_CadaverizedHair.png</file>
-        <file alias="PeripilarSign_RedDot">resources/img/TSP/PeripilarSign_RedDot.png</file>
-        <file alias="PeripilarSign_Hyperpigmentation">resources/img/TSP/PeripilarSign_Hyperpigmentation.png</file>
-        <file alias="PeripilarSign_YellowDot">resources/img/TSP/PeripilarSign_YellowDot.png</file>
-        <file alias="PeripilarSign_WhiteDot">resources/img/TSP/PeripilarSign_WhiteDot.png</file>
+        <file alias="HairFollicleOpening_RedDot">resources/img/TSP/PeripilarSign_RedDot.png</file>
+        <file alias="HairFollicleOpening_BlackDot">resources/img/TSP/PeripilarSign_Hyperpigmentation.png</file>
+        <file alias="HairFollicleOpening_YellowDot">resources/img/TSP/PeripilarSign_YellowDot.png</file>
+        <file alias="HairFollicleOpening_WhiteDot">resources/img/TSP/PeripilarSign_WhiteDot.png</file>
     </qresource>
     <qresource prefix="/imageBase">
         <file>resources/imageBase/imageBase.json</file>

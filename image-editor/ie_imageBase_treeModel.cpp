@@ -147,7 +147,6 @@ bool IE_IB_treeModel::containsImageBaseUserChoice(const QJsonObject &json)
 
 int IE_IB_treeModel::makeCorellation_selectedImagesAndTools(QStringList layerTitlesList)
 {
-    qDebug() << "IE_IB_treeModel::makeCorellation_selectedImagesAndTools()";
     if(layerTitlesList.isEmpty())
         return 0;
 
@@ -205,8 +204,10 @@ QStringList IE_IB_treeModel::getSelectedItemList()
 
 void IE_IB_treeModel::setCurrentUserChoiceList(int i)
 {
+    emit layoutAboutToBeChanged();
     m_currentUserChoiceVector = i;
     emit dataChanged( index(0,0), index(rowCount(), columnCount()) );
+    emit layoutChanged();
 }
 
 

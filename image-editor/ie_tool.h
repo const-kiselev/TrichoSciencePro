@@ -7,7 +7,6 @@
 #include "ie_header.h"
 #include <QJsonObject>
 
-
 class ie_tool
 {
 
@@ -30,7 +29,6 @@ public:
 
     virtual int    read(const QJsonObject &json) =0;
     virtual int    write(QJsonObject &json)const =0;
-
 
 };
 

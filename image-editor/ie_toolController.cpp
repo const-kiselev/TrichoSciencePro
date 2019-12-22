@@ -10,10 +10,6 @@ ToolsController::ToolsController(_global_ie *gi):_p_ie_global_data(gi)
     setMovable(false);
 
     toolSetType = ToolSet::AllTools;
-    //addAction(QPixmap(":/icon/imageEditor/colored/magic-wand"), "1tool");
-    //addAction(QPixmap(":/icon/imageEditor/colored/scale"), "scale");
-    //addAction(QPixmap(":/icon/imageEditor/colored/hand"), "Load img");
-    //addAction(QPixmap(":/icon/imageEditor/colored/color"), "marker");
     pDock = nullptr;
     pActiveTool = nullptr;
     activeToolType = ToolType::NoneTool;
@@ -183,21 +179,64 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
         break;
     }
 
-    case ToolType::PeripilarSign_SpikyHair:
-    case ToolType::PeripilarSign_ExclamationHair:
-    case ToolType::PeripilarSign_BrokenHair:
-    case ToolType::PeripilarSign_CadaverizedHair:
-    case ToolType::PeripilarSign_YellowDot:
-    case ToolType::PeripilarSign_RedDot:
-    case ToolType::PeripilarSign_WhiteDot:
-    case ToolType::PeripilarSign_Hyperpigmentation:
-    case ToolType::RootType_Anagen:
-    case ToolType::RootType_DysplasticAnagen:
-    case ToolType::RootType_BrokenAnagen:
-    case ToolType::RootType_AnagenWithPapilla:
-    case ToolType::RootType_Telogen:
-    case ToolType::RootType_Catagen:
-    case ToolType::RootType_Dystrophic:
+    case ToolType::InterfollicularRegion:
+    case ToolType::InterfollicularRegion_FineScaling:
+    case ToolType::InterfollicularRegion_YellowishScaling:
+    case ToolType::InterfollicularRegion_WhiteScaling:
+    case ToolType::InterfollicularRegion_LamellarScaling:
+    case ToolType::InterfollicularRegion_PerifollicularScaling:
+    case ToolType::InterfollicularRegion_WhiteArea:
+    case ToolType::InterfollicularRegion_PinkArea:
+    case ToolType::InterfollicularRegion_RedArea:
+    case ToolType::InterfollicularRegion_MilkyRedArea:
+    case ToolType::InterfollicularRegion_Pustule:
+    case ToolType::InterfollicularRegion_Exudate:
+
+
+    case ToolType::HairFollicleOpening:
+    case ToolType::HairFollicleOpening_PeripilarSigns:
+    case ToolType::HairFollicleOpening_YellowDot:
+    case ToolType::HairFollicleOpening_BlackDot:
+    case ToolType::HairFollicleOpening_WhiteDot:
+    case ToolType::HairFollicleOpening_RedDot:
+    case ToolType::HairFollicleOpening_PeripilarCast:
+
+    case ToolType::BloodVessel:
+    case ToolType::BloodVessel_ThickArborizingVessel:
+    case ToolType::BloodVessel_ThinArborizingVessel:
+    case ToolType::BloodVessel_GlomerularAndTwisted:
+    case ToolType::BloodVessel_CommaHair:
+
+
+    case ToolType::HairShaft:
+    case ToolType::HairShaft_Healthy:
+    case ToolType::HairShaft_Intermediate:
+    case ToolType::HairShaft_Vellus:
+    case ToolType::HairShaft_UprightRegrowingHair:
+    case ToolType::HairShaft_ExclamationMark:
+    case ToolType::HairShaft_Cone:
+    case ToolType::HairShaft_Trichoptilosis:
+    case ToolType::HairShaft_Trichoclasia:
+    case ToolType::HairShaft_Trichoshisis:
+    case ToolType::HairShaft_Trichorexis:
+    case ToolType::HairShaft_BrokenHairsAtDifferentLength:
+    case ToolType::HairShaft_TuftedHairs:
+    case ToolType::HairShaft_FlameAndBroom:
+    case ToolType::HairShaft_ZigzagAndIntermittent:
+    case ToolType::HairShaft_Twisted:
+    case ToolType::HairShaft_PiliAnnulati:
+    case ToolType::HairShaft_Moniletrix:
+    case ToolType::HairShaft_Trichonodosis:
+    case ToolType::HairShaft_BambooHair:
+
+
+    case ToolType::HairRoot:
+    case ToolType::HairRoot_Anagen:
+    case ToolType::HairRoot_Catagen:
+    case ToolType::HairRoot_Telogen:
+    case ToolType::HairRoot_Dystrophic:
+    case ToolType::HairRoot_Broken:
+    case ToolType::HairRoot_Seborrhea:
     {
         switch (pe->type())
         {
@@ -339,6 +378,11 @@ void ToolsController::keyPressEvent(QKeyEvent *pe)
     toolEventFilter(pe);
 }
 
+void ToolsController::groupItem(ToolType tt, QAction *pa)
+{
+
+}
+
 _global_ie *ToolsController::p_ie_global_data() const
 {
     return _p_ie_global_data;
@@ -356,7 +400,7 @@ void ToolsController::setP_ie_global_data(_global_ie *p_ie_global_data)
 
 void ToolsController::initToolActions()
 {
-    QActionGroup *pActionGroup = new QActionGroup(this);
+
     QList<ToolType> toolsList;
     switch (toolSetType){
     case ToolSet::HairDencity:
@@ -380,22 +424,28 @@ void ToolsController::initToolActions()
                     << ToolType::Marker_FollicularUnit
                     << ToolType::Ruler
 
-                    << ToolType::PeripilarSign_SpikyHair
-                    << ToolType::PeripilarSign_ExclamationHair
-                    << ToolType::PeripilarSign_BrokenHair
-                    << ToolType::PeripilarSign_CadaverizedHair
-                    << ToolType::PeripilarSign_YellowDot
-                    << ToolType::PeripilarSign_RedDot
-                    << ToolType::PeripilarSign_WhiteDot
-                    << ToolType::PeripilarSign_Hyperpigmentation
+                    << ToolType::InterfollicularRegion
+                    << ToolType::HairFollicleOpening
+                    << ToolType::BloodVessel
+                    << ToolType::HairShaft
+                    << ToolType::HairRoot;
 
-                    << ToolType::RootType_Anagen
-                    << ToolType::RootType_DysplasticAnagen
-                    << ToolType::RootType_BrokenAnagen
-                    << ToolType::RootType_AnagenWithPapilla
-                    << ToolType::RootType_Telogen
-                    << ToolType::RootType_Catagen
-                    << ToolType::RootType_Dystrophic;
+        break;
+    }
+    case ToolSet::TrichoscopyPatterns:
+    {
+        toolsList   << ToolType::NoneTool
+                    << ToolType::SimpleLine
+                    << ToolType::DensityAndDiameter
+                    << ToolType::Zoom
+                    << ToolType::Marker_FollicularUnit
+                    << ToolType::Ruler
+
+                    << ToolType::InterfollicularRegion
+                    << ToolType::HairFollicleOpening
+                    << ToolType::BloodVessel
+                    << ToolType::HairShaft
+                    << ToolType::HairRoot;
 
         break;
     }
@@ -406,9 +456,13 @@ void ToolsController::initToolActions()
         break;
 
     }
-
+    // группа нужна для того, чтобы можно было выбрать только один инструмент
+    QActionGroup *pActionGroup = new QActionGroup(this);
     QAction *pToolAction;
-
+    QToolButton * pToolButton;
+    pToolButton=nullptr;
+    pToolAction=nullptr;
+    clear();
 
     for(QListIterator<ToolType> iterToolsList(toolsList); iterToolsList.hasNext();)
     {
@@ -429,7 +483,7 @@ void ToolsController::initToolActions()
         }
         case ToolType::DensityAndDiameter:
         {
-            pToolAction = new QAction(QPixmap("://DensityAndDiameter"),"Плотность, диаметр и длина");
+            pToolAction = new QAction(QPixmap("://toolIcons/DensityAndDiameter"),"Плотность, диаметр и длина");
             break;
         }
         case ToolType::Zoom:
@@ -439,7 +493,7 @@ void ToolsController::initToolActions()
         }
         case ToolType::Marker_FollicularUnit:
         {
-            pToolAction = new QAction(QPixmap("://Marker_FollicularUnit"), "Маркер фолликулярных юнитов");
+            pToolAction = new QAction(QPixmap("://toolIcons/Marker_FollicularUnit"), "Маркер фолликулярных юнитов");
             break;
         }
         case ToolType::Ruler:
@@ -448,94 +502,76 @@ void ToolsController::initToolActions()
             break;
         }
 
-            case ToolType::PeripilarSign_SpikyHair:
+            case ToolType::InterfollicularRegion:
+            case ToolType::HairFollicleOpening:
+            case ToolType::BloodVessel:
+            case ToolType::HairShaft:
+            case ToolType::HairRoot:
         {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_SpikyHair"),"Остроконечный волос");
-            break;
-        }
-            case ToolType::PeripilarSign_ExclamationHair:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_ExclamationHair"),"Волос в виде восклицательного знака");
-            break;
-        }
-            case ToolType::PeripilarSign_BrokenHair:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_BrokenHair"),"Обломанный волос");
-            break;
-        }
-            case ToolType::PeripilarSign_CadaverizedHair:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_CadaverizedHair"),"Кадаверизированный волос");
-            break;
-        }
-            case ToolType::PeripilarSign_YellowDot:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_YellowDot"),"Желтая точка");
-            break;
-        }
-            case ToolType::PeripilarSign_RedDot:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_RedDot"),"Красная точка");
-            break;
-        }
-            case ToolType::PeripilarSign_WhiteDot:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_WhiteDot"),"Белая точка");
-            break;
-        }
-        case ToolType::PeripilarSign_Hyperpigmentation:
-        {
-            pToolAction = new QAction(QPixmap("://PeripilarSign_Hyperpigmentation"),"Гиперпигментация");
-            break;
-        }
+            pToolButton = new QToolButton(this);
+            pToolButton->setIcon(QPixmap("://PeripilarSign_SpikyHair"));
+            pToolButton->setText(getToolTitle(actionType));
+            pToolButton->setToolTip(getToolTitle(actionType));
+            QMenu * pMenu = new QMenu(pToolButton);
+            pToolButton->setCheckable(true);
 
-            case ToolType::RootType_Anagen:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_Anagen"), "Анагеновый");
-            break;
-        }
-            case ToolType::RootType_DysplasticAnagen:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_DysplasticAnagen"), "Диспластичный анагеновый");
-            break;
-        }
-            case ToolType::RootType_BrokenAnagen:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_BrokenAnagen"), "Обломанный анагенновый");
-            break;
-        }
-            case ToolType::RootType_AnagenWithPapilla:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_AnagenWithPapilla"), "Анагеновый с папиллой");
-            break;
-        }
-            case ToolType::RootType_Telogen:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_Telogen"), "Телогеновый");
-            break;
-        }
-            case ToolType::RootType_Catagen:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_Catagen"), "Катагеновый");
-            break;
-        }
-            case ToolType::RootType_Dystrophic:
-        {
-            pToolAction = new QAction(QPixmap("://RootType_Dystrophic"), "Дистрофичный");
+
+            QList<QAction*> list = IE_Tool_Marker::getListOfAction(actionType);
+            // соединяем все действия с тригерром выбора для активации нового инстурмента
+            foreach(QAction * pAct, list)
+            {
+                pAct->setCheckable(true);
+                connect(pAct, &QAction::triggered, [=]() {
+                    this->changeTool(convertToolTitleToToolType(pAct->data().toString()), pAct);
+                    pAct->setChecked(true);
+                });
+                pMenu->addAction(pAct);
+                pActionGroup->addAction(pAct);
+            }
+
+
+
+            pToolButton->setMenu(pMenu);
+
+
+            pToolButton->setPopupMode(QToolButton::InstantPopup);
+//
             break;
         }
 
 
-
         }
-        connect(pToolAction, &QAction::triggered, [=]() {
-            this->changeTool(actionType, pToolAction);
-        });
-        pToolAction->setCheckable(true);
-        pActionGroup->addAction(pToolAction);
+        if(!pToolButton)
+        {
+            connect(pToolAction, &QAction::triggered, [=]() {
+                this->changeTool(actionType, pToolAction);
+            });
+            pToolAction->setCheckable(true);
+            pActionGroup->addAction(pToolAction);
+            addAction(pToolAction);
+//            addAction(pToolAction);
+        }
+        else
+        {
+            //  соединение для выделения группы, если ее элемент выбран
+            connect(pActionGroup, &QActionGroup::triggered, [=]()
+            {
+                bool checked = false;
+                QList<QAction*> actList = pToolButton->menu()->actions();
+                foreach(QAction* pAct, actList)
+                    if(pAct->isChecked())
+                    {
+                        checked = true;
+                        break;
+                    }
+                pToolButton->setChecked(checked);
+            });
+
+            addWidget(pToolButton);
+        }
+        pToolButton=nullptr;
+        pToolAction=nullptr;
     }
-    clear();
-    addActions(pActionGroup->actions());
 
 }
 
@@ -567,9 +603,10 @@ void ToolsController::changeTool(ToolType tt, QAction* pa)
 
     if(activeToolType != tt)
     {
+//        if( getToolTypeGroupSet().contains(tt) )
+//            return;
+
         activeToolType = tt;
-//        if(!((int)tt&(int)ToolType::checkableTool))
-//            resetEditingMode();
 
         if(editModeActive)
         {
