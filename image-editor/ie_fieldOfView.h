@@ -19,6 +19,7 @@ public:
     int                     write(QJsonObject &json)const;
     //! функция удаления всех слоев, которые находятся в поле зрения
     QList<IE_ModelLayer*> getLayers();
+    QStringList getLayerTitleList();
 
     void getSquare() {}
     QString getNote() {return QString("");}

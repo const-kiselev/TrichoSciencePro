@@ -140,21 +140,64 @@ int         IE_Model::read                   (const QJsonObject &json)
                     pParentItem = new IE_Tool_FollicularUnit();
                     break;
                 }
-                case ToolType::PeripilarSign_SpikyHair:
-                case ToolType::PeripilarSign_ExclamationHair:
-                case ToolType::PeripilarSign_BrokenHair:
-                case ToolType::PeripilarSign_CadaverizedHair:
-                case ToolType::PeripilarSign_YellowDot:
-                case ToolType::PeripilarSign_RedDot:
-                case ToolType::PeripilarSign_WhiteDot:
-                case ToolType::PeripilarSign_Hyperpigmentation:
-                case ToolType::RootType_Anagen:
-                case ToolType::RootType_DysplasticAnagen:
-                case ToolType::RootType_BrokenAnagen:
-                case ToolType::RootType_AnagenWithPapilla:
-                case ToolType::RootType_Telogen:
-                case ToolType::RootType_Catagen:
-                case ToolType::RootType_Dystrophic:
+                case ToolType::InterfollicularRegion:
+                case ToolType::InterfollicularRegion_FineScaling:
+                case ToolType::InterfollicularRegion_YellowishScaling:
+                case ToolType::InterfollicularRegion_WhiteScaling:
+                case ToolType::InterfollicularRegion_LamellarScaling:
+                case ToolType::InterfollicularRegion_PerifollicularScaling:
+                case ToolType::InterfollicularRegion_WhiteArea:
+                case ToolType::InterfollicularRegion_PinkArea:
+                case ToolType::InterfollicularRegion_RedArea:
+                case ToolType::InterfollicularRegion_MilkyRedArea:
+                case ToolType::InterfollicularRegion_Pustule:
+                case ToolType::InterfollicularRegion_Exudate:
+
+
+                case ToolType::HairFollicleOpening:
+                case ToolType::HairFollicleOpening_PeripilarSigns:
+                case ToolType::HairFollicleOpening_YellowDot:
+                case ToolType::HairFollicleOpening_BlackDot:
+                case ToolType::HairFollicleOpening_WhiteDot:
+                case ToolType::HairFollicleOpening_RedDot:
+                case ToolType::HairFollicleOpening_PeripilarCast:
+
+                case ToolType::BloodVessel:
+                case ToolType::BloodVessel_ThickArborizingVessel:
+                case ToolType::BloodVessel_ThinArborizingVessel:
+                case ToolType::BloodVessel_GlomerularAndTwisted:
+                case ToolType::BloodVessel_CommaHair:
+
+
+                case ToolType::HairShaft:
+                case ToolType::HairShaft_Healthy:
+                case ToolType::HairShaft_Intermediate:
+                case ToolType::HairShaft_Vellus:
+                case ToolType::HairShaft_UprightRegrowingHair:
+                case ToolType::HairShaft_ExclamationMark:
+                case ToolType::HairShaft_Cone:
+                case ToolType::HairShaft_Trichoptilosis:
+                case ToolType::HairShaft_Trichoclasia:
+                case ToolType::HairShaft_Trichoshisis:
+                case ToolType::HairShaft_Trichorexis:
+                case ToolType::HairShaft_BrokenHairsAtDifferentLength:
+                case ToolType::HairShaft_TuftedHairs:
+                case ToolType::HairShaft_FlameAndBroom:
+                case ToolType::HairShaft_ZigzagAndIntermittent:
+                case ToolType::HairShaft_Twisted:
+                case ToolType::HairShaft_PiliAnnulati:
+                case ToolType::HairShaft_Moniletrix:
+                case ToolType::HairShaft_Trichonodosis:
+                case ToolType::HairShaft_BambooHair:
+
+
+                case ToolType::HairRoot:
+                case ToolType::HairRoot_Anagen:
+                case ToolType::HairRoot_Catagen:
+                case ToolType::HairRoot_Telogen:
+                case ToolType::HairRoot_Dystrophic:
+                case ToolType::HairRoot_Broken:
+                case ToolType::HairRoot_Seborrhea:
                 {
                     pParentItem = new IE_Tool_Marker();
                     break;
@@ -223,7 +266,7 @@ int         IE_Model::initAsNewModel         (TSP_PatientData patientData, IEM_t
     case IEM_type::TrichoscopyPatterns:
     {
         m_pFieldOfViewCnt->initImageBase();
-        pToolCnt->setToolSetType(ToolSet::Simple);
+        pToolCnt->setToolSetType(ToolSet::TrichoscopyPatterns);
         break;
     }
     case IEM_type::AssessmentOfScalp:
@@ -314,7 +357,7 @@ int         IE_Model::initWithModel          (TSP_PatientData patientData)
     case IEM_type::TrichoscopyPatterns:
     {
         m_pFieldOfViewCnt->initImageBase();
-        pToolCnt->setToolSetType(ToolSet::Simple);
+        pToolCnt->setToolSetType(ToolSet::TrichoscopyPatterns);
         break;
     }
     case IEM_type::AssessmentOfScalp:

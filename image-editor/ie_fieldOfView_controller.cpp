@@ -125,6 +125,12 @@ int IE_FieldOfView_Controller::initImageBase()
         return 0;
     m_pImageBaseCnt = new IE_ImageBaseCnt();
     m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
+    connect(m_pImageBaseCnt, &IE_ImageBaseCnt::needLayerTitlesList, [=]()
+    {
+        if(m_activeFVIndex < 0)
+            return;
+        m_pImageBaseCnt->makeCorellation(m_fieldOfViewList[m_activeFVIndex]->getLayerTitleList());
+    });
     return 0;
 }
 

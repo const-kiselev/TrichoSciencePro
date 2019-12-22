@@ -7,9 +7,10 @@
 class IE_Tool_Marker : public QObject, public QGraphicsItem, public ie_tool
 {
 public:
+
+
     explicit        IE_Tool_Marker( QObject* parent=nullptr,
-                                    ToolType tt=ToolType::Marker,
-                                    MarkerType mt = MarkerType::None);
+                                    ToolType tt=ToolType::Marker);
     ~IE_Tool_Marker()override{}
     QRectF          boundingRect() const                override;
 
@@ -29,13 +30,15 @@ public:
 
     int    read(const QJsonObject &json)           override;
     int    write(QJsonObject &json)const           override;
+
+    static QList<QAction *> getListOfAction(ToolType tt);
+
 private:
     void drawStar(QPainter *painter);
     void drawArrow(QPainter *painter);
 
 
-    MarkerType _markerType;
-    ToolType _toolType;
+    ToolType m_toolType;
 };
 
 #endif // IE_TOOLMARKER_H

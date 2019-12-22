@@ -61,6 +61,19 @@ QList<IE_ModelLayer *> IE_FieldOfView::getLayers()
     return list;
 }
 
+QStringList IE_FieldOfView::getLayerTitleList()
+{
+    QStringList strList;
+    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
+         tmpIter!=layersList->end();tmpIter++)
+    {
+        if(tmpIter.i->t()->getToolType() == ToolType::MainImage)
+            continue;
+        strList << getToolTitle(tmpIter.i->t()->getToolType());
+    }
+    return strList;
+}
+
 void IE_FieldOfView::removeIntersectedLayersWithFv()
 {
     QList<IE_ModelLayer *> layers = getLayers();
