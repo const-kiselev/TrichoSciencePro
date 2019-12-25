@@ -54,6 +54,7 @@
         <file>resources/img/colored/view.png</file>
         <file alias="zoom">resources/img/colored/zoom.png</file>
         <file alias="arrow-1">resources/img/colored/arrow-1.png</file>
+        <file alias="save">resources/img/colored/046-archive.png</file>
     </qresource>
     <qresource prefix="/icon/imageEditor/black">
         <file>resources/img/black/turn.png</file>

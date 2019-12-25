@@ -80,7 +80,8 @@ void        IELine::mouseFirstPress     (QPointF point)
 {
     if(lineData.p1() == QPointF(-1,-1))
     {
-        lineData.setP1(point);
+        setPos(point);
+        lineData.setP1(QPointF(0,0));
         ignoreMove = false;
     }
     // режим редактирования линии
@@ -102,7 +103,7 @@ int         IELine::mouseMove           (QPointF point)
     emit lineChanged();
     if(ignoreMove)
         return 1;
-    lineData.setP2(point);
+    lineData.setP2(point - pos());
     setLine(lineData);
     return 0;
 }
@@ -439,6 +440,8 @@ IE_Tool_LineInfoWidget::IE_Tool_LineInfoWidget(_global_ie *gi, QWidget *parent,
     delete penWidth;
     delete penColor;
     delete brushColor;
+    delete lengthTip;
+    delete widthTip;
 }
 
 void IE_Tool_LineInfoWidget::init()

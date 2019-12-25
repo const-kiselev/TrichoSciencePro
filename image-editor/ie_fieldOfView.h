@@ -38,6 +38,9 @@ public slots:
     void hideIntersectedLayersWithFv();
     void removeIntersectedLayersWithFv();
     void removeLayersAndMainImage();
+    void hideLayer(IE_ModelLayer* pLayer);
+    void unhideLayer(IE_ModelLayer* pLayer);
+    void deleteLayer(IE_ModelLayer* pLayer);
 
 private:
     QRectF rectData;

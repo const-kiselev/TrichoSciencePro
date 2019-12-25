@@ -117,12 +117,16 @@ signals:
     void showAllElementsOnActiveFV();
     void activeFVNoteWasChanged(QString noteText);
     void getActiveFVNote();
+    void deleteLayer(IE_ModelLayer* pModelLayer);
+    void hideLayer(IE_ModelLayer* pModelLayer);
+    void unhideLayer(IE_ModelLayer* pModelLayer);
 
     void makeInit();
 public slots:
     void changeQuantity(int q);
     void changeActiveFV(int index, QString fvNote);
     void updateActiveFVLayerList(QList<IE_ModelLayer*> layerList);
+
 
 private:
     int oldQuantity;
