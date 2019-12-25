@@ -100,6 +100,42 @@ void IE_FieldOfView::removeLayersAndMainImage()
     resetData();
 }
 
+void IE_FieldOfView::hideLayer(IE_ModelLayer *pLayer)
+{
+    QList<IE_ModelLayer *> layers = getLayers();
+    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
+         tmpIter!=layers.end();tmpIter++)
+        if(tmpIter.i->t() == pLayer)
+        {
+            emit layerAction(IE_ModelLayer::Action::Hide, tmpIter);
+            return;
+        }
+}
+
+void IE_FieldOfView::unhideLayer(IE_ModelLayer *pLayer)
+{
+    QList<IE_ModelLayer *> layers = getLayers();
+    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
+         tmpIter!=layers.end();tmpIter++)
+        if(tmpIter.i->t() == pLayer)
+        {
+            emit layerAction(IE_ModelLayer::Action::Show, tmpIter);
+            return;
+        }
+}
+
+void IE_FieldOfView::deleteLayer(IE_ModelLayer *pLayer)
+{
+    QList<IE_ModelLayer *> layers = getLayers();
+    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
+         tmpIter!=layers.end();tmpIter++)
+        if(tmpIter.i->t() == pLayer)
+        {
+            emit layerAction(IE_ModelLayer::Action::Remove, tmpIter);
+            return;
+        }
+}
+
 QFileInfo IE_FieldOfView::getMainImageFileInfo()
 {
     IE_Tool_Image * pToolImage = convertToImageTool(findMainImageLayer());
@@ -224,7 +260,14 @@ void IE_FieldOfView::moveMainImage(QPointF pos)
     QList<IE_ModelLayer *> layers = getLayers();
     for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
          tmpIter!=layers.end();tmpIter++)
-        tmpIter.i->t()->moveBy(rectData.x()-pos.x(), rectData.y()-pos.y());
+    {
+//        tmpIter.i->t()->moveBy(rectData.x()-pos.x(),
+//                               rectData.y()-pos.y()
+//                               );
+        tmpIter.i->t()->parentItem()->setPos(abs(tmpIter.i->t()->parentItem()->pos().x() - rectData.x())   + pos.x(),
+                                             abs(tmpIter.i->t()->parentItem()->pos().y() - rectData.y()) + pos.y()
+                                             );
+    }
     //pMainImageLayer->setPos(pos);
 
 }

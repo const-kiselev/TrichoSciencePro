@@ -34,10 +34,33 @@ IE_FieldOfView_Controller::IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
     {
         m_fieldOfViewList.at(m_activeFVIndex)->removeIntersectedLayersWithFv();
     });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::changeActiveFVMainImage, [this]()
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->removeIntersectedLayersWithFv();
+        if(m_fieldOfViewList.at(m_activeFVIndex)->setMainImage())
+        {
+            QMessageBox::warning(nullptr, "Ошибка", "Не удалось загрузить изображение. Попробуйте еще раз.");
+            return;
+        }
+        relocateAllFieldOfView();
+        changeActiveFieldOfView(m_activeFVIndex);
+    });
     connect(this, &IE_FieldOfView_Controller::activeFVLayerListWasUpdated, m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList);
     connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::makeInit,[this]()
     {
        makeInitDialog();
+    });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::deleteLayer,[=](IE_ModelLayer* pLayer)
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->deleteLayer(pLayer);
+    });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::hideLayer,[=](IE_ModelLayer* pLayer)
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->hideLayer(pLayer);
+    });
+    connect(m_pInfoWidget, &IE_FieldOfView_ControllerInfoWidget::unhideLayer,[=](IE_ModelLayer* pLayer)
+    {
+        m_fieldOfViewList.at(m_activeFVIndex)->unhideLayer(pLayer);
     });
 
 }
@@ -434,7 +457,7 @@ IE_FieldOfView_Controller::Quantity IE_FieldOfView_Controller::getStandartQuanti
 
 IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget *parent):QWidget(parent)
 {
-    //pcboQuiantityFV = new QComboBox(this);
+    pcboQuiantityFV = new QComboBox(this);
     pcboActiveFV = new QComboBox(this);
     pcboActiveFV->hide();
     m_pDockLayersListWidget = new QListWidget(this);
@@ -446,6 +469,41 @@ IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget
     connect(pInitBut, &QPushButton::clicked, this, &IE_FieldOfView_ControllerInfoWidget::makeInit);
     pHorBoxLayout->addWidget(pInitBut);
     setLayout(pHorBoxLayout);
+    m_pDockLayersListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    connect(m_pDockLayersListWidget, &QListWidget::customContextMenuRequested, [=](const QPoint &pos)
+    {
+        QPoint item = m_pDockLayersListWidget->mapToGlobal(pos);
+            QMenu submenu;
+            submenu.addAction("Удалить");
+
+            if(m_pDockLayersListWidget->indexAt(pos)
+                                    .data(Qt::UserRole)
+                                    .value<IE_ModelLayer*>()->isVisible()
+                    )
+                submenu.addAction("Скрыть");
+            else
+                submenu.addAction("Отобразить");
+            QAction* rightClickItem = submenu.exec(item);
+            if (rightClickItem && rightClickItem->text().contains("Удалить") )
+                emit deleteLayer( m_pDockLayersListWidget
+                                  ->indexAt(pos)
+                                  .data(Qt::UserRole)
+                                  .value<IE_ModelLayer*>()
+                            );
+            if (rightClickItem && rightClickItem->text().contains("Скрыть") )
+                emit hideLayer( m_pDockLayersListWidget
+                                  ->indexAt(pos)
+                                  .data(Qt::UserRole)
+                                  .value<IE_ModelLayer*>()
+                            );
+            if (rightClickItem && rightClickItem->text().contains("Отобразить") )
+                emit unhideLayer( m_pDockLayersListWidget
+                                  ->indexAt(pos)
+                                  .data(Qt::UserRole)
+                                  .value<IE_ModelLayer*>()
+                            );
+    });
 }
 
 IE_FieldOfView_ControllerInfoWidget::~IE_FieldOfView_ControllerInfoWidget()
@@ -463,7 +521,7 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
 
     QHBoxLayout * pHorBoxLayout;
     QLabel *pLabel;
-    /*
+
     {
         pHorBoxLayout = new QHBoxLayout(this);
         pLabel = new QLabel("Количество полей зрения:", this);
@@ -508,7 +566,7 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
                 pcboQuiantityFV->setCurrentText(QString().number(oldQuantity));
 
         });
-    }*/
+    }
 
 
     {
@@ -626,7 +684,17 @@ void IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(QList<IE_Model
     for (QList<IE_ModelLayer*>::iterator iter = layerList.begin();
          iter!=layerList.end();iter++
          )
-        m_pDockLayersListWidget->addItem( IE_ModelLayer::toStr( iter.i->t()->getToolType() ) );
+    {
+        QListWidgetItem * pItem = new QListWidgetItem(m_pDockLayersListWidget);
+        QVariant d;
+        d.setValue(iter.i->t());
+
+        if( !iter.i->t()->isVisible() )
+            pItem->setTextColor(Qt::gray);
+
+        pItem->setText(IE_ModelLayer::toStr( iter.i->t()->getToolType() ));
+        pItem->setData(Qt::UserRole, d);
+    }
 
 }
 

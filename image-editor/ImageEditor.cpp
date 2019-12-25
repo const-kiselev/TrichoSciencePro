@@ -35,8 +35,25 @@ int ImageEditor::init(IE_ProfileType ie_type)
         return 1;
 
     setWindowTitle(getIE_ProfileType(m_ieType)); //! \todo зависит от типа
-
+    setDockOptions(DockOption::AllowNestedDocks | DockOption::AllowTabbedDocks);
     m_pTopToolBar = new QToolBar(this);
+
+    m_pTopToolBar->setIconSize(QSize(25,25));
+    QAction * pAct = new QAction(QIcon(":/icon/imageEditor/colored/save"), "Сохранить");
+    m_pTopToolBar->addAction(pAct);
+    connect(pAct, &QAction::trigger, [this]()
+    {
+        IE_Model * pModel = m_ieViewVec[0]->getPModel();
+        if(!(pModel->saveModel()))
+        {
+            emit this->wasSaved(pModel->get_TSP_patientData());
+        }
+    });
+
+    QWidget* spacer = new QWidget(m_pTopToolBar);
+    spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    m_pTopToolBar->addWidget(spacer);
+
     switch(m_ieType)
     {
     case IE_ProfileType::None:
@@ -66,6 +83,8 @@ int ImageEditor::init(IE_ProfileType ie_type)
                     if(!pIE_model->getImageBaseDockWidget())
                         break;
                     addDockWidget(Qt::RightDockWidgetArea, pIE_model->getImageBaseDockWidget());
+                    tabifyDockWidget(pIE_toolCnt->getPDock(), pIE_model->getImageBaseDockWidget());
+
                     pIE_model->getImageBaseDockWidget()->hide();
                     break;
             }
@@ -108,6 +127,12 @@ int ImageEditor::init(IE_ProfileType ie_type)
 
     m_pTopToolBar->setMovable(false);
     this->setUnifiedTitleAndToolBarOnMac(true);
+    spacer = new QWidget(m_pTopToolBar);
+        spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    m_pTopToolBar->addWidget(spacer);
+    m_pTopToolBar->addWidget(new QLabel("TSP"));
+
+
     addToolBar(Qt::TopToolBarArea, m_pTopToolBar);
 
     m_currentTab = 0;
@@ -267,7 +292,7 @@ void ImageEditor::menuInit()
 
     QMenu *oneMenu = new QMenu("Файл");
 
-    IE_Model * pModel = m_ieViewVec[m_currentTab]->getPModel();
+    IE_Model * pModel = m_ieViewVec[0]->getPModel();
 
     QAction *pActionNewFile = new QAction("Сохранить");
     connect(pActionNewFile, &QAction::triggered, [this, pModel]()

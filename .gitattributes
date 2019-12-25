@@ -1,0 +1,4 @@
+test-TSP/main.cpp merge=ours
+test-TSP/test-TSP.pro merge=ours
+test-TSP/tsp_test.cpp merge=ours
+test-TSP/tsp_test.h merge=ours

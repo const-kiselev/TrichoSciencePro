@@ -9,6 +9,7 @@ SOURCES += \
     $$PWD/ie_imageBase_treeItem.cpp \
     $$PWD/ie_imageBase_treeModel.cpp \
     $$PWD/ie_imageBase_widget.cpp \
+    $$PWD/ie_layerList.cpp \
     $$PWD/ie_layersTableModel.cpp \
     $$PWD/ie_line_dd.cpp \
     $$PWD/ie_model.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
     $$PWD/ie_imageBase_treeItem.h \
     $$PWD/ie_imageBase_treeModel.h \
     $$PWD/ie_imageBase_widget.h \
+    $$PWD/ie_layerList.h \
     $$PWD/ie_layersTableModel.h \
     $$PWD/ie_line_dd.h \
     $$PWD/ie_model.h \

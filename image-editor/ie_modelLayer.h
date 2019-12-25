@@ -47,5 +47,6 @@ private:
     QString layerTitle;
     //QGraphicsItem *pLayerGraphicsItem;
 };
+Q_DECLARE_METATYPE(IE_ModelLayer*)
 
 #endif // IE_MODELLAYER_H
