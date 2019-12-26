@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QMenu>
+#include <QLabel>
 
 PM_PatientIndexCnt::PM_PatientIndexCnt(QDir workDir, QObject *parent): QObject(parent), m_workDir(workDir)
 {
@@ -285,13 +286,35 @@ QList<PM_PatientIndex> PM_PatientIndexCnt::search(QString str)
 QWidget * PM_PatientIndexCnt::initSearchWidget()
 {
     m_pSeacrhWidget = new QWidget();
+    m_pSeacrhWidget->setMinimumSize(QSize(900, 400));
+    QBoxLayout * pbLayout = new QBoxLayout(QBoxLayout::LeftToRight, m_pSeacrhWidget);
+    pbLayout->addStretch(1);
     QVBoxLayout * pvbLayout = new QVBoxLayout(m_pSeacrhWidget);
-    QLineEdit * pSearchLineEdit = new QLineEdit(m_pSeacrhWidget);
-    pvbLayout->addWidget(pSearchLineEdit);
-    QPushButton * pButton = new QPushButton("Поиск", m_pSeacrhWidget);
-    pvbLayout->addWidget(pButton);
 
-    connect(pButton, &QPushButton::clicked, [this, pSearchLineEdit, pvbLayout]()
+    QHBoxLayout * pHBLayout = new QHBoxLayout(m_pSeacrhWidget);
+    QPixmap image(":/main/appIcon64");
+    image.scaledToWidth(50);
+      QLabel * pImgLabel = new QLabel(m_pSeacrhWidget);
+      pImgLabel->setPixmap(image);
+      pHBLayout->addWidget(pImgLabel);
+      pHBLayout->addWidget(new QLabel("TrichoSciencePro 0.5", m_pSeacrhWidget));
+      pvbLayout->addStretch(1);
+      pvbLayout->addItem(pHBLayout);
+      pvbLayout->addStretch(2);
+
+
+
+    pHBLayout = new QHBoxLayout(m_pSeacrhWidget);
+    QLineEdit * pSearchLineEdit = new QLineEdit(m_pSeacrhWidget);
+    pSearchLineEdit->setMinimumWidth(400);
+    pHBLayout->addWidget(pSearchLineEdit);
+    QPushButton * pButton = new QPushButton("Поиск", m_pSeacrhWidget);
+    pHBLayout->addWidget(pButton);
+    pvbLayout->addItem(pHBLayout);
+    pvbLayout->addStretch(2);
+
+
+    connect(pButton, &QPushButton::clicked, [this, pSearchLineEdit, pvbLayout, pbLayout]()
     {
 
         QStringList patientListForWidget;
@@ -303,8 +326,10 @@ QWidget * PM_PatientIndexCnt::initSearchWidget()
 
         if(!m_pPatientListWidget)
         {
-            m_pPatientListWidget = new QListWidget();
-            pvbLayout->addWidget(m_pPatientListWidget);
+            m_pPatientListWidget = new QListWidget(m_pSeacrhWidget);
+            pvbLayout->addWidget(m_pPatientListWidget,0);
+            pvbLayout->addStretch(5);
+            m_pPatientListWidget->show();
             connect(m_pPatientListWidget, &QListWidget::doubleClicked, [this, patientListForWidget](const QModelIndex &index)
             {
                 if(index.row()==-1)
@@ -319,8 +344,13 @@ QWidget * PM_PatientIndexCnt::initSearchWidget()
         }
 
         m_pPatientListWidget->clear();
-        m_pPatientListWidget->addItems(patientListForWidget);
+        m_pPatientListWidget->addItems( patientListForWidget );
     });
+
+    pbLayout->addItem(pvbLayout);
+     pbLayout->addStretch(1);
+    m_pSeacrhWidget->setLayout(pbLayout);
+
     return m_pSeacrhWidget;
 }
 

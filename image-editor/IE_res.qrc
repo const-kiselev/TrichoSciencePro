@@ -177,4 +177,8 @@
         <file>resources/imageBase/interfollicularRegion/whiteScaling2.jpg</file>
         <file>resources/imageBase/interfollicularRegion/yellowishScaling.png</file>
     </qresource>
+    <qresource prefix="/main">
+        <file alias="appIcon512">resources/img/main/app_icon_512x512.png</file>
+        <file alias="appIcon64">resources/img/main/app_icon_64x64.png</file>
+    </qresource>
 </RCC>

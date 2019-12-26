@@ -626,6 +626,7 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
         }
         {
             ppbut = new QPushButton("Примечания", this);
+            ppbut->setEnabled(false);
             pVertBoxLayout->addWidget(ppbut);
             connect(ppbut, &QPushButton::clicked, [this]()
             {

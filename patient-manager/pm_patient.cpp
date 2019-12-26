@@ -204,8 +204,10 @@ int PM_Patient::initWidget()
 //    pvbLayout->addStretch(1);
 
     pPButton = new QPushButton("Открыть мед.карту", m_pWidget);
+    pPButton->setEnabled(false);
     pvbLayout->addWidget(pPButton);
     pPButton = new QPushButton("Добавить протокол осмотра", m_pWidget);
+    pPButton->setEnabled(false);
     pvbLayout->addWidget(pPButton);
 
 
@@ -233,12 +235,14 @@ int PM_Patient::initWidget()
         emit needToRunImageEditor(m_pMedicalRecordCnt->getTSP_PatientData(), IE_ProfileType::Trichoscopy);
     });
     pPButton = new QPushButton("Фототрихограмма", m_pWidget);
+    pPButton->setEnabled(false);
     pvbLayout->addWidget(pPButton);
     connect(pPButton, &QPushButton::clicked,[this]()
     {
         emit needToRunImageEditor(m_pMedicalRecordCnt->getTSP_PatientData(), IE_ProfileType::Phototrichogram);
     });
     pPButton = new QPushButton("Трихограмма", m_pWidget);
+    pPButton->setEnabled(false);
     pvbLayout->addWidget(pPButton);
     connect(pPButton, &QPushButton::clicked,[this]()
     {

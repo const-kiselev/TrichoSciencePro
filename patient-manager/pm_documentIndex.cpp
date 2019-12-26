@@ -366,7 +366,7 @@ void PM_DocumentIndexCnt::initWidget()
     m_tableView = new QTableView(m_widget);
     m_tableView->setModel(m_documentIndexModel);
     m_tableView->hideColumn(1);
-//    m_tableView->hideColumn(2);
+    m_tableView->hideColumn(2);
     m_tableView->setSortingEnabled(true);
     m_tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
