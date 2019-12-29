@@ -32,6 +32,7 @@ int PatientManager::init()
         emit needToRunImageEditor(patientData, ie_type);
     });
 
+
     if(m_pPatientIndexCnt->init())
         return 1;
     m_pPatientIndexCntWidget = m_pPatientIndexCnt->getMainWidget();
@@ -39,4 +40,9 @@ int PatientManager::init()
     setCentralWidget(m_pPatientIndexCntWidget);
 
     return 0;
+}
+
+void PatientManager::updateDocumentData(TSP_PatientData patientData)
+{
+    emit m_pPatientIndexCnt->updateDocumentData(patientData);
 }

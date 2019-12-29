@@ -77,6 +77,12 @@ void PM_Patient::removeAllData()
     emit goBack();
 }
 
+void PM_Patient::updateDocumentList()
+{
+    m_pDocumentIndexCnt->open();
+    m_pDocumentIndexCnt->updateTable();
+}
+
 int PM_Patient::open(uint patientUID)
 {
     if( m_pMedicalRecordCnt )
@@ -233,6 +239,7 @@ int PM_Patient::initWidget()
     connect(pPButton, &QPushButton::clicked,[this]()
     {
         emit needToRunImageEditor(m_pMedicalRecordCnt->getTSP_PatientData(), IE_ProfileType::Trichoscopy);
+
     });
     pPButton = new QPushButton("Фототрихограмма", m_pWidget);
     pPButton->setEnabled(false);
@@ -395,3 +402,4 @@ int PM_Patient::makePatientDirectory()
         m_workDir.mkpath("./res");
     return 0;
 }
+

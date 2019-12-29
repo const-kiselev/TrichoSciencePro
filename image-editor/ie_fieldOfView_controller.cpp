@@ -65,7 +65,7 @@ IE_FieldOfView_Controller::IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
 
 }
 
-IE_FieldOfView_Controller::~IE_FieldOfView_Controller()
+        IE_FieldOfView_Controller::~IE_FieldOfView_Controller()
 {
     while(!m_fieldOfViewList.isEmpty())
     {
@@ -74,7 +74,7 @@ IE_FieldOfView_Controller::~IE_FieldOfView_Controller()
     }
 }
 
-int IE_FieldOfView_Controller::read(const QJsonObject &json)
+int     IE_FieldOfView_Controller::read(const QJsonObject &json)
 {
     QJsonArray fvArray = json["fieldOfViewArray"].toArray();
     if(fvArray.size() < 1 || fvArray.size() == 5 || fvArray.size() > 6)
@@ -105,7 +105,7 @@ int IE_FieldOfView_Controller::read(const QJsonObject &json)
     return 0;
 }
 
-int IE_FieldOfView_Controller::write(QJsonObject &json) const
+int     IE_FieldOfView_Controller::write(QJsonObject &json) const
 {
     QJsonArray fvArray;
     int i = 0;
@@ -121,7 +121,7 @@ int IE_FieldOfView_Controller::write(QJsonObject &json) const
     return 0;
 }
 
-void IE_FieldOfView_Controller::init(IE_FieldOfView_Controller::Quantity quantity)
+void    IE_FieldOfView_Controller::init(IE_FieldOfView_Controller::Quantity quantity)
 {
     if(m_quantityOfFields)
     {
@@ -142,7 +142,7 @@ void IE_FieldOfView_Controller::init(IE_FieldOfView_Controller::Quantity quantit
         m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
 }
 
-int IE_FieldOfView_Controller::initImageBase()
+int     IE_FieldOfView_Controller::initImageBase()
 {
     if(m_pImageBaseCnt)
         return 0;
@@ -157,14 +157,16 @@ int IE_FieldOfView_Controller::initImageBase()
     return 0;
 }
 
-QDockWidget *IE_FieldOfView_Controller::getImageBaseDockWidget()
+QDockWidget *
+        IE_FieldOfView_Controller::getImageBaseDockWidget()
 {
     if(!m_pImageBaseCnt)
         return nullptr;
     return m_pImageBaseCnt->getDockWidgetWithAllImages();
 }
 
-QDialog::DialogCode IE_FieldOfView_Controller::makeInitDialog()
+QDialog::DialogCode
+        IE_FieldOfView_Controller::makeInitDialog()
 {
     if(m_inited)
         return QDialog::Rejected;
@@ -210,7 +212,7 @@ QDialog::DialogCode IE_FieldOfView_Controller::makeInitDialog()
     return (QDialog::DialogCode)answer;
 }
 
-void IE_FieldOfView_Controller::changeQuantity(IE_FieldOfView_Controller::Quantity q)
+void    IE_FieldOfView_Controller::changeQuantity(IE_FieldOfView_Controller::Quantity q)
 {
     if( (int)q == m_quantityOfFields )
         return;
@@ -234,17 +236,18 @@ void IE_FieldOfView_Controller::changeQuantity(IE_FieldOfView_Controller::Quanti
         m_pImageBaseCnt->setUserChoiceListSize(m_quantityOfFields);
 }
 
-uint IE_FieldOfView_Controller::getQuantity()const
+uint    IE_FieldOfView_Controller::getQuantity()const
 {
     return m_quantityOfFields;
 }
 
-QWidget *IE_FieldOfView_Controller::getInfoWidget()const
+QWidget *
+        IE_FieldOfView_Controller::getInfoWidget()const
 {
     return m_pInfoWidget;
 }
 
-void IE_FieldOfView_Controller::relocateAllFieldOfView()
+void    IE_FieldOfView_Controller::relocateAllFieldOfView()
 {
     QPointF followPointF(0,0);
     qreal highest = 0;
@@ -302,7 +305,8 @@ void IE_FieldOfView_Controller::relocateAllFieldOfView()
     emit boundingRectWasChanged(getBoundingRectOfAllFieldOfView());
 }
 
-QDialog::DialogCode IE_FieldOfView_Controller::makeDialogForSetupAsNew()
+QDialog::DialogCode
+        IE_FieldOfView_Controller::makeDialogForSetupAsNew()
 {
     QDialog * locPDialog = new QDialog();
     QVBoxLayout * pMainLayout = new QVBoxLayout(locPDialog);
@@ -355,7 +359,7 @@ QDialog::DialogCode IE_FieldOfView_Controller::makeDialogForSetupAsNew()
     return (QDialog::DialogCode)answer;
 }
 
-QRectF IE_FieldOfView_Controller::getBoundingRectOfAllFieldOfView()
+QRectF  IE_FieldOfView_Controller::getBoundingRectOfAllFieldOfView()
 {
     QRectF answer;
     answer.setTopLeft(QPointF(0,0));
@@ -374,7 +378,7 @@ QRectF IE_FieldOfView_Controller::getBoundingRectOfAllFieldOfView()
     return answer;
 }
 
-void IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
+void    IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
 {
     if(index > ((int)m_quantityOfFields)-1)
         return;
@@ -386,24 +390,32 @@ void IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
         m_pImageBaseCnt->setCurrentUserChoiceList(index);
 }
 
-QList<IE_ModelLayer *> IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
+QList<IE_ModelLayer *>
+        IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
 {
     if(!m_quantityOfFields)
         return QList<IE_ModelLayer *>();
     return m_fieldOfViewList.at(m_activeFVIndex)->getLayers();
 }
 
-void IE_FieldOfView_Controller::checkLayerList()
+void    IE_FieldOfView_Controller::checkLayerList()
 {
     emit activeFVLayerListWasUpdated(getActiveFieldOfViewLayerList());
 }
 
-int IE_FieldOfView_Controller::getActiveFVIndex() const
+int     IE_FieldOfView_Controller::getActiveFVIndex() const
 {
     return m_activeFVIndex;
 }
 
-void IE_FieldOfView_Controller::addFieldOfView(int index)
+QWidget *IE_FieldOfView_Controller::getFastManagerWidget() const
+{
+    if(m_pInfoWidget)
+        return m_pInfoWidget->m_pFastManagerWidget;
+    return nullptr;
+}
+
+void    IE_FieldOfView_Controller::addFieldOfView(int index)
 {
     IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, layersList, m_p_ie_global_data);
     m_fieldOfViewList.append(tmpFV);
@@ -423,7 +435,7 @@ void IE_FieldOfView_Controller::addFieldOfView(int index)
     m_quantityOfFields++;
 }
 
-void IE_FieldOfView_Controller::removeFieldOfView(int index)
+void    IE_FieldOfView_Controller::removeFieldOfView(int index)
 {
     if(index < 0 || index >= m_quantityOfFields || index >= m_fieldOfViewList.size())
         return;
@@ -443,7 +455,8 @@ void IE_FieldOfView_Controller::removeFieldOfView(int index)
 
 
 
-IE_FieldOfView_Controller::Quantity IE_FieldOfView_Controller::getStandartQuantity(IE_ProfileType profileType)
+IE_FieldOfView_Controller::Quantity
+        IE_FieldOfView_Controller::getStandartQuantity(IE_ProfileType profileType)
 {
     switch (profileType)
     {
@@ -455,9 +468,10 @@ IE_FieldOfView_Controller::Quantity IE_FieldOfView_Controller::getStandartQuanti
 }
 
 
-IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget *parent):QWidget(parent)
+        IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget *parent):QWidget(parent)
 {
     pcboQuiantityFV = new QComboBox(this);
+    pcboQuiantityFV->hide();
     pcboActiveFV = new QComboBox(this);
     pcboActiveFV->hide();
     m_pDockLayersListWidget = new QListWidget(this);
@@ -465,7 +479,8 @@ IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget
     m_pDockLayersListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
     QHBoxLayout * pHorBoxLayout = new QHBoxLayout();
-    pInitBut = new QPushButton("Начать работу");
+    pInitBut = new QPushButton("Начать работу", this);
+    m_pFastManagerWidget = pInitBut;
     connect(pInitBut, &QPushButton::clicked, this, &IE_FieldOfView_ControllerInfoWidget::makeInit);
     pHorBoxLayout->addWidget(pInitBut);
     setLayout(pHorBoxLayout);
@@ -506,13 +521,13 @@ IE_FieldOfView_ControllerInfoWidget::IE_FieldOfView_ControllerInfoWidget(QWidget
     });
 }
 
-IE_FieldOfView_ControllerInfoWidget::~IE_FieldOfView_ControllerInfoWidget()
+        IE_FieldOfView_ControllerInfoWidget::~IE_FieldOfView_ControllerInfoWidget()
 {
     //delete pcboQuiantityFV;
     delete pcboActiveFV;
 }
 
-void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
+void    IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
 {
     delete pInitBut;
     pInitBut = nullptr;
@@ -523,6 +538,7 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
     QLabel *pLabel;
 
     {
+
         pHorBoxLayout = new QHBoxLayout(this);
         pLabel = new QLabel("Количество полей зрения:", this);
 
@@ -541,7 +557,8 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
 
         pHorBoxLayout->addWidget(pLabel);
         pHorBoxLayout->addWidget(pcboQuiantityFV);
-        pVertBoxLayout->addItem(pHorBoxLayout);
+        pcboQuiantityFV->show();
+        pVertBoxLayout->addLayout(pHorBoxLayout);
 
         connect(pcboQuiantityFV, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
         {
@@ -573,7 +590,6 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
         pHorBoxLayout = new QHBoxLayout(this);
 
         pLabel = new QLabel("Активное поле зрения:", this);
-        pcboActiveFV->show();
         pLabel->setBuddy(pcboActiveFV);
         QStringList  lst;
         for(int i=0; i < currentFVquantity; i++)
@@ -583,7 +599,8 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
 
         pHorBoxLayout->addWidget(pLabel);
         pHorBoxLayout->addWidget(pcboActiveFV);
-        pVertBoxLayout->addItem(pHorBoxLayout);
+        pcboActiveFV->show();
+        pVertBoxLayout->addLayout(pHorBoxLayout);
 
         connect(pcboActiveFV, QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index)
         {
@@ -657,10 +674,13 @@ void IE_FieldOfView_ControllerInfoWidget::init(int currentFVquantity)
     pVertBoxLayout->addWidget(m_pDockLayersListWidget);
     m_pDockLayersListWidget->show();
 
+    m_pFastManagerWidget = pcboActiveFV;
     this->setLayout(pVertBoxLayout);
 }
 
-void IE_FieldOfView_ControllerInfoWidget::changeQuantity(int q)
+
+
+void    IE_FieldOfView_ControllerInfoWidget::changeQuantity(int q)
 {
     pcboQuiantityFV->setCurrentText(QString().number(q));
     QStringList  lst;
@@ -672,13 +692,13 @@ void IE_FieldOfView_ControllerInfoWidget::changeQuantity(int q)
     emit activeFVWasChanged(0);
 }
 
-void IE_FieldOfView_ControllerInfoWidget::changeActiveFV(int index, QString fvNote)
+void    IE_FieldOfView_ControllerInfoWidget::changeActiveFV(int index, QString fvNote)
 {
     pcboActiveFV->setCurrentIndex(index);
     m_activeFVNote = fvNote;
 }
 
-void IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(QList<IE_ModelLayer *> layerList)
+void    IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(QList<IE_ModelLayer *> layerList)
 {
     m_pDockLayersListWidget->clear();
 
@@ -699,7 +719,7 @@ void IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(QList<IE_Model
 
 }
 
-void IE_FieldOfView_ControllerInfoWidget::makeChangeActiveFVNoteDialog()
+void    IE_FieldOfView_ControllerInfoWidget::makeChangeActiveFVNoteDialog()
 {
     QDialog * locPDialog = new QDialog();
     QVBoxLayout * pMainLayout = new QVBoxLayout(locPDialog);
@@ -731,3 +751,5 @@ void IE_FieldOfView_ControllerInfoWidget::makeChangeActiveFVNoteDialog()
     delete locPDialog;
 
 }
+
+

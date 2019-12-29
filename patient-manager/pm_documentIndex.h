@@ -78,6 +78,8 @@ public:
 
     QWidget *getWidget();
 
+    static int updateDocumentData(TSP_PatientData patientData);
+
 signals:
     void documentIndexWasChanged();
     void openImageEditor(QString path);

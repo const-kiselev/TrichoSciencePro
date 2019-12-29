@@ -159,7 +159,6 @@ PM_DocumentIndexElement::IE_ModelInfoStruct PM_DocumentIndexElement::getIeModelI
 {
     return m_ieModelInfo;
 }
-
 void PM_DocumentIndexElement::setIeModelInfo(const IE_ModelInfoStruct &ieModelInfo)
 {
     m_ieModelInfo = ieModelInfo;
@@ -269,7 +268,18 @@ int PM_DocumentIndexCnt::open()
 
 void PM_DocumentIndexCnt::addDocument(PM_DocumentIndexElement &iemis)
 {
-    m_documentList.append(iemis);
+    // поиск на совпадение по modelID
+    int i=0;
+    for(; i<m_documentList.size(); i++)
+    {
+        if(m_documentList.at(i).getPath() == iemis.getPath())
+            m_documentList.removeAt(i);
+    }
+
+    if(i == m_documentList.size())
+        m_documentList.append(iemis);
+    else
+        m_documentList.insert(i, iemis);
     save();
     emit documentIndexWasChanged();
 }
@@ -328,9 +338,10 @@ int PM_DocumentIndexCnt::write(QJsonObject &json) const
 
 void PM_DocumentIndexCnt::updateTable()
 {
+
     m_documentIndexModel->clear();
     QStringList str;
-    str << "Type" << "Alias" << "Path" << "Create" << "Save";
+    str << "Тип" << "Имя" << "Путь" << "Создан" << "Сохранен";
     m_documentIndexModel->setHorizontalHeaderLabels( str );
     foreach(PM_DocumentIndexElement die, m_documentList)
     {
@@ -345,6 +356,11 @@ void PM_DocumentIndexCnt::updateTable()
         row.append(new QStandardItem( QString(  die.getSaveDateTime().toString(Qt::DateFormat::ISODate) ) ) );
         m_documentIndexModel->appendRow(row);
     }
+    if(m_tableView)
+    {
+        m_tableView->hideColumn(1);
+        m_tableView->hideColumn(2);
+    }
 }
 
 void PM_DocumentIndexCnt::changeFilter(PM_DocumentIndexCnt::FilterType ft)
@@ -357,6 +373,17 @@ QWidget * PM_DocumentIndexCnt::getWidget()
     if(!m_widget)
         initWidget();
     return m_widget;
+}
+// static
+int PM_DocumentIndexCnt::updateDocumentData(TSP_PatientData patientData)
+{
+    PM_DocumentIndexCnt * pDocIndex = new PM_DocumentIndexCnt(patientData.patientDir);
+    pDocIndex->open();
+    PM_DocumentIndexElement docIndexElem;
+    docIndexElem.openIE_Model(patientData.modelDir);
+    pDocIndex->addDocument(docIndexElem);
+    delete pDocIndex;
+    return 0;
 }
 
 void PM_DocumentIndexCnt::initWidget()

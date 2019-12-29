@@ -23,21 +23,21 @@ public:
     IE_View(IE_Model *pModel);
     ~IE_View() override;
 
-    QString getStatusBarInfoDataForUser() const;
+    QString         getStatusBarInfoDataForUser() const;
 
-    ToolsController *getPToolsController() const;
+    ToolsController*getToolsController() const;
     void resize(int w, int h);
 
-    int checkTheMousePosViaImageBorder(QMouseEvent *pe);
+    int             checkTheMousePosViaImageBorder(QMouseEvent *pe);
 
-    QPointF computeSceneRelativelyPosition(const QPointF point);
+    QPointF         computeSceneRelativelyPosition(const QPointF point);
 
-    IE_Model *getPModel() const;
+    IE_Model *      getModel() const;
 
-    QDockWidget *getPDockInfo() const;
+    QDockWidget *   getDockInfo() const;
 
-    QDockWidget *getPDockDebugInfo() const;
-    QDockWidget * initDockDebugWidget();
+    QDockWidget *   getDockDebugInfo() const;
+    QDockWidget *   initDockDebugWidget();
 
     void setToolCntType(ToolSet ts);
 

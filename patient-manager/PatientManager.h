@@ -19,6 +19,8 @@ signals:
 
     void needToRunImageEditor(TSP_PatientData patientData, IE_ProfileType ie_type);
 public slots:
+    void updateDocumentData(TSP_PatientData patientData);
+
 
 private:
     QWidget         * m_pPatientIndexCntWidget;

@@ -31,8 +31,9 @@ void TrichoSciencePro::runImageEditor(TSP_PatientData patientData, IE_ProfileTyp
             {
                 pImageEditor->close();
                 pImageEditor->deleteLater();
-                //delete pImageEditor;
             });
+            connect(pImageEditor, &ImageEditor::wasSaved,
+                    pPatientManager, &PatientManager::updateDocumentData );
     }
     else
     {
@@ -50,6 +51,8 @@ void TrichoSciencePro::runImageEditor(TSP_PatientData patientData, IE_ProfileTyp
             pImageEditor->deleteLater();
             //delete pImageEditor;
         });
+        connect(pImageEditor, &ImageEditor::wasSaved,
+                pPatientManager, &PatientManager::updateDocumentData );
     }
 }
 

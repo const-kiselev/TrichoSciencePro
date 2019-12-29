@@ -6,10 +6,11 @@
 #include <QDir>
 #include <QStackedWidget>
 #include <QListWidget>
+#include <QPushButton>
 
 #include "pm_patient.h"
 
-
+class PM_PatientIndex_SearchWidget;
 
 class PM_PatientIndex
 {
@@ -94,18 +95,39 @@ public slots:
     int addPatient_Dialog();
     void checkDirs(); //! функция проверки доступных директорий и формирование и сохранение нового индекса пациентов
     void openPatientWidget(uint patientUID);
+    void updateDocumentData(TSP_PatientData patientData);
+    void makeSearch();
 
 private:
     QList<PM_PatientIndex> m_patientIndexList;
     QDir m_workDir;
-    QWidget * m_pSeacrhWidget;  //! виджет поиска
-    QListWidget        * m_pPatientListWidget; //! виджет со списком найденных пациентов
+    PM_PatientIndex_SearchWidget * m_pSeacrhWidget;  //! виджет поиска
+
     QStackedWidget * m_pStackedWidget;
     PM_Patient     * m_pCurrentPatient;
 
 
     QWidget * initSearchWidget();
+};
 
+
+class PM_PatientIndex_SearchWidget: public QWidget
+{
+    Q_OBJECT
+public:
+    PM_PatientIndex_SearchWidget();
+    friend class PM_PatientIndexCnt;
+signals:
+    void makeSearch();
+    void choosenListElement(uint uid);
+protected:
+    bool event(QEvent *event) override;
+private:
+    QLineEdit * m_pSeacrhLineEdit;
+    QListWidget        * m_pPatientListWidget; //! виджет со списком найденных пациентов
+    QPushButton * m_pSearchButton;
+    void printSearchResult(QList<PM_PatientIndex> &listResult);
+    void sendActionToOpenPatientWidget();
 };
 
 #endif // PM_PATIENTINDEXCNT_H

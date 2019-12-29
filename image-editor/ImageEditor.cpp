@@ -30,6 +30,7 @@ void ImageEditor::closeEvent(QCloseEvent *)
 
 int ImageEditor::init(IE_ProfileType ie_type)
 {
+    pCurrentFVFastManagment = nullptr;
     m_ieType = ie_type;
     if(!m_ieViewVec.count())
         return 1;
@@ -43,7 +44,7 @@ int ImageEditor::init(IE_ProfileType ie_type)
     m_pTopToolBar->addAction(pAct);
     connect(pAct, &QAction::trigger, [this]()
     {
-        IE_Model * pModel = m_ieViewVec[0]->getPModel();
+        IE_Model * pModel = m_ieViewVec[0]->getModel();
         if(!(pModel->saveModel()))
         {
             emit this->wasSaved(pModel->get_TSP_patientData());
@@ -66,8 +67,8 @@ int ImageEditor::init(IE_ProfileType ie_type)
         QTabBar * locTabBar = new QTabBar(this);
         foreach(IE_View * pIEView, m_ieViewVec)
         {
-            IE_Model * pIE_model = pIEView->getPModel();
-            ToolsController * pIE_toolCnt = pIEView->getPToolsController();
+            IE_Model * pIE_model = pIEView->getModel();
+            ToolsController * pIE_toolCnt = pIEView->getToolsController();
             locTabBar->addTab(UI_getIEM_type_title(pIE_model->getIEM_type()));
             addToolBar(Qt::LeftToolBarArea, pIE_toolCnt);
             pIE_toolCnt->hide();
@@ -112,15 +113,19 @@ int ImageEditor::init(IE_ProfileType ie_type)
     }
 
     foreach(IE_View * pIEView, m_ieViewVec)
+    {
         m_stackedWidget.addWidget(pIEView);
+    }
 
-    connect(m_ieViewVec[0]->getPModel(), &IE_Model::wasSaved, [this]()
+
+    connect(m_ieViewVec[0]->getModel(), &IE_Model::wasSaved, [this]()
     {
         foreach(IE_View * pIEView, m_ieViewVec)
         {
+            // в цикле сохраняпм все привзяаные к первой модели
             if(pIEView == m_ieViewVec[0])
                 continue;
-            pIEView->getPModel()->saveModel();
+            pIEView->getModel()->saveModel();
         }
     });
 
@@ -130,7 +135,7 @@ int ImageEditor::init(IE_ProfileType ie_type)
     spacer = new QWidget(m_pTopToolBar);
         spacer->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     m_pTopToolBar->addWidget(spacer);
-    m_pTopToolBar->addWidget(new QLabel("TSP"));
+
 
 
     addToolBar(Qt::TopToolBarArea, m_pTopToolBar);
@@ -174,7 +179,7 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
             case 1:
             {
                 pIE_model->initAsNewModel(relatePatienData, IEM_type::TrichoscopyPatterns, ie_type);
-                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+                m_ieViewVec[0]->getModel()->addRelatedModel( QString("%1/%2_IE_model.json")
                                                               .arg(pIE_model->getPath())
                                                               .arg(pIE_model->get_TSP_patientData().model_ID)
                                                             );
@@ -183,7 +188,7 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
 //            case 2:
 //            {
 //                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfScalp, ie_type);
-//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                m_ieViewVec[0]->getModel()->addRelatedModel( QString("%1/%2_IE_model.json")
 //                                                              .arg(pIE_model->getPath())
 //                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
 //                                                            );
@@ -192,7 +197,7 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
 //            case 3:
 //            {
 //                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRoots, ie_type);
-//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                m_ieViewVec[0]->getModel()->addRelatedModel( QString("%1/%2_IE_model.json")
 //                                                              .arg(pIE_model->getPath())
 //                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
 //                                                            );
@@ -201,7 +206,7 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
 //            case 4:
 //            {
 //                pIE_model->initAsNewModel(relatePatienData, IEM_type::AssessmentOfHairRods, ie_type);
-//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                m_ieViewVec[0]->getModel()->addRelatedModel( QString("%1/%2_IE_model.json")
 //                                                              .arg(pIE_model->getPath())
 //                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
 //                                                            );
@@ -210,7 +215,7 @@ int ImageEditor::initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_
 //            case 5:
 //            {
 //                pIE_model->initAsNewModel(relatePatienData, IEM_type::DermatoscopyOfNeoplasms, ie_type);
-//                m_ieViewVec[0]->getPModel()->addRelatedModel( QString("%1/%2_IE_model.json")
+//                m_ieViewVec[0]->getModel()->addRelatedModel( QString("%1/%2_IE_model.json")
 //                                                              .arg(pIE_model->getPath())
 //                                                              .arg(pIE_model->get_TSP_patientData().model_ID)
 //                                                            );
@@ -253,16 +258,16 @@ int ImageEditor::initModels(TSP_PatientData patientData)
 
     IE_View * pIEView = new IE_View(new IE_Model());
 
-    if(pIEView->getPModel()->initWithModel(patientData))
+    if(pIEView->getModel()->initWithModel(patientData))
     {
         delete pIEView;
         return 1;
     }
     m_ieViewVec.push_front(pIEView);
 
-    if(!m_ieViewVec[0]->getPModel()->getRelatedModelList().isEmpty())
+    if(!m_ieViewVec[0]->getModel()->getRelatedModelList().isEmpty())
     {
-        QStringList relatedModelList = m_ieViewVec[0]->getPModel()->getRelatedModelList();
+        QStringList relatedModelList = m_ieViewVec[0]->getModel()->getRelatedModelList();
         foreach(QString modelFilePath, relatedModelList)
         {
             IE_Model * pIE_model = new IE_Model();
@@ -277,7 +282,7 @@ int ImageEditor::initModels(TSP_PatientData patientData)
         }
     }
 
-    IE_ProfileType ie_type = m_ieViewVec[0]->getPModel()->getIE_ProfileType();
+    IE_ProfileType ie_type = m_ieViewVec[0]->getModel()->getIE_ProfileType();
     int answer = init(ie_type);
     if(answer)
         return answer;
@@ -292,7 +297,7 @@ void ImageEditor::menuInit()
 
     QMenu *oneMenu = new QMenu("Файл");
 
-    IE_Model * pModel = m_ieViewVec[0]->getPModel();
+    IE_Model * pModel = m_ieViewVec[0]->getModel();
 
     QAction *pActionNewFile = new QAction("Сохранить");
     connect(pActionNewFile, &QAction::triggered, [this, pModel]()
@@ -414,12 +419,12 @@ void ImageEditor::clearIEViewVec()
 
 void ImageEditor::makeCalibration        ()
 {
-    qDebug() << "getMeasureIndex = " << m_ieViewVec[0]->getPModel()->getMeasureIndex();
-    IE_ToolCalibration* calib = new IE_ToolCalibration(nullptr, m_ieViewVec[0]->getPModel()->getMeasureIndex());
+    qDebug() << "getMeasureIndex = " << m_ieViewVec[0]->getModel()->getMeasureIndex();
+    IE_ToolCalibration* calib = new IE_ToolCalibration(nullptr, m_ieViewVec[0]->getModel()->getMeasureIndex());
     calib->show();
     connect(calib, &IE_ToolCalibration::saveChangedMeasureIndex,
             [this, calib](){
-        m_ieViewVec[0]->getPModel()->setMeasureIndex(calib->getMeasureIndex());
+        m_ieViewVec[0]->getModel()->setMeasureIndex(calib->getMeasureIndex());
     });
 }
 
@@ -450,8 +455,8 @@ void ImageEditor::changeTab(int viewIndex)
         return;
 
     IE_View * pIE_view = m_ieViewVec[m_currentTab];
-    IE_Model * pIE_model = pIE_view->getPModel();
-    ToolsController * pIE_toolCnt = pIE_view->getPToolsController();
+    IE_Model * pIE_model = pIE_view->getModel();
+    ToolsController * pIE_toolCnt = pIE_view->getToolsController();
 
     pIE_toolCnt->hide();
     pIE_toolCnt->getPDock()->hide();
@@ -468,9 +473,7 @@ void ImageEditor::changeTab(int viewIndex)
     m_currentTab = viewIndex;
     m_stackedWidget.setCurrentIndex(m_currentTab);
 
-    pIE_view = m_ieViewVec[m_currentTab];
-    pIE_model = pIE_view->getPModel();
-    pIE_toolCnt = pIE_view->getPToolsController();
+    pIE_toolCnt = pIE_view->getToolsController();
 
     pIE_toolCnt->show();
     pIE_toolCnt->getPDock()->show();

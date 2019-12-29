@@ -63,6 +63,7 @@ public:
     //! Порядковый индекс MainImage из списка слоев типа MainImage соотвествует порядковому индексу поля зрения.
     static Quantity getStandartQuantity(IE_ProfileType profileType);
     int getActiveFVIndex() const;
+    QWidget *getFastManagerWidget() const;
 
 signals:
     /// \todo связать с моделью
@@ -75,6 +76,8 @@ signals:
     void hideLayer(QList<IE_ModelLayer*>::iterator iter);
     void layerAction(IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter);
     void activeFVLayerListWasUpdated(QList<IE_ModelLayer*>);
+
+
 
 
 public slots:
@@ -108,6 +111,7 @@ public:
     explicit IE_FieldOfView_ControllerInfoWidget(QWidget *parent=nullptr);
     ~IE_FieldOfView_ControllerInfoWidget();
     void init(int currentFVquantity);
+
 signals:
     void quantityWasChanged(int q);
     void activeFVWasChanged(int index);
@@ -127,7 +131,7 @@ public slots:
     void changeActiveFV(int index, QString fvNote);
     void updateActiveFVLayerList(QList<IE_ModelLayer*> layerList);
 
-
+    friend class IE_FieldOfView_Controller;
 private:
     int oldQuantity;
 
@@ -135,7 +139,10 @@ private:
     QPushButton * pInitBut;
     QString m_activeFVNote;
     QListWidget * m_pDockLayersListWidget;
+    QWidget * m_pFastManagerWidget;
+
     void makeChangeActiveFVNoteDialog();
+
 
 
 };

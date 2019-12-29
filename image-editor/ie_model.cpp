@@ -466,7 +466,16 @@ IEM_type IE_Model::getIEM_type()
 
 QDockWidget *IE_Model::getImageBaseDockWidget()
 {
+    if(m_pFieldOfViewCnt)
         return m_pFieldOfViewCnt->getImageBaseDockWidget();
+    return nullptr;
+}
+
+QWidget *IE_Model::getFieldOfViewFastManagerWidget()
+{
+    if(m_pFieldOfViewCnt)
+        return m_pFieldOfViewCnt->getFastManagerWidget();
+    return nullptr;
 }
 
 // ------- END GETTERS and SETTERS
@@ -1046,6 +1055,7 @@ void IE_ModelData::init(TSP_PatientData patientData)
     patientUID = patientData.patient_UID;
     patientFullName = patientData.patient_fullName;
     modelDir = patientData.modelDir;
+    patientDir = patientData.patientDir;
 //    profile = patientData.ie_type;
     m_iem_type = IEM_type::None;
     if(QFile::exists(patientData.modelFilePath))
@@ -1081,6 +1091,7 @@ TSP_PatientData IE_ModelData::to_TSP_patientData()
     answer.patient_ID = patientID;
     answer.patient_UID = patientUID;
     answer.patient_fullName = patientFullName;
+    answer.patientDir = patientDir.path();
 //    answer.ie_type = profile;
     return answer;
 }

@@ -13,7 +13,7 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
     pModel = new IE_Model();
     pView = new IE_View(pModel);
 
-    pToolController = pView->getPToolsController();
+    pToolController = pView->getToolsController();
     pToolController->setToolSetType(ToolSet::CallibrationToolSet);
     pToolController->setOrientation(Qt::Vertical);
     pModel->setPToolCnt(pToolController);

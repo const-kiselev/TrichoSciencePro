@@ -9,12 +9,12 @@
 #include <QAction>
 #include <QMenu>
 #include <QLabel>
+#include <QEvent>
+#include <qevent.h>
 
 PM_PatientIndexCnt::PM_PatientIndexCnt(QDir workDir, QObject *parent): QObject(parent), m_workDir(workDir)
 {
     m_pStackedWidget = new QStackedWidget();
-
-    m_pPatientListWidget = nullptr;
     m_pSeacrhWidget = nullptr;
     m_pCurrentPatient = nullptr;
     if(!workDir.exists())
@@ -30,6 +30,8 @@ PM_PatientIndexCnt::~PM_PatientIndexCnt()
 
 int PM_PatientIndexCnt::init()
 {
+    if(!m_workDir.exists())
+        m_workDir.mkpath(".");
     int answer = open();
     if(answer == ReturnCode::Error_needToCheckDirs)
     {
@@ -45,8 +47,11 @@ int PM_PatientIndexCnt::init()
 void PM_PatientIndexCnt::checkDirs()
 {
     m_patientIndexList.clear();
-    if(m_pPatientListWidget)
-        m_pPatientListWidget->clear();
+    if(m_pSeacrhWidget)
+    {
+    if(m_pSeacrhWidget->m_pPatientListWidget)
+        m_pSeacrhWidget->m_pPatientListWidget->clear();
+    }
     QStringList folderList = m_workDir.entryList(QDir::Dirs);
     foreach(QString subdir, folderList)
     {
@@ -86,11 +91,46 @@ void PM_PatientIndexCnt::openPatientWidget(uint patientUID)
     emit availableActionsWasChanged();
 }
 
+void PM_PatientIndexCnt::updateDocumentData(TSP_PatientData patientData)
+{
+    PM_DocumentIndexCnt::updateDocumentData(patientData);
+    m_pCurrentPatient->updateDocumentList();
+}
+
+void PM_PatientIndexCnt::makeSearch()
+{
+            QList<PM_PatientIndex> listResult = search(m_pSeacrhWidget->m_pSeacrhLineEdit->text());
+            m_pSeacrhWidget->printSearchResult(listResult);
+}
+
+
 int PM_PatientIndexCnt::addPatient_Dialog()
 {
     PM_Patient patient;
-    patient.initAsNew_Dialog();
+
+    // проверка на валидность ID, т.е. нет ли аналогичного
+    bool isValid = true;
+    do {
+        isValid = true;
+        int i = patient.initAsNew_Dialog();
+        if(i == QDialog::Rejected)
+            return 0;
+        foreach(PM_PatientIndex indData, m_patientIndexList)
+        {
+            if(indData.id == patient.getTSP_PatientData().patient_ID)
+            {
+                QMessageBox::warning(nullptr, "Application", QString("Ошибка. Пациент с подобным ID уже существует. Поменяйте ID."));
+                isValid = false;
+                break;
+            }
+
+        }
+
+    } while(isValid);
+
     checkDirs();
+    QList<PM_PatientIndex> listResult = search(m_pSeacrhWidget->m_pSeacrhLineEdit->text());
+    m_pSeacrhWidget->printSearchResult(listResult);
     return 0;
 }
 
@@ -285,74 +325,17 @@ QList<PM_PatientIndex> PM_PatientIndexCnt::search(QString str)
 
 QWidget * PM_PatientIndexCnt::initSearchWidget()
 {
-    m_pSeacrhWidget = new QWidget();
-    m_pSeacrhWidget->setMinimumSize(QSize(900, 400));
-    QBoxLayout * pbLayout = new QBoxLayout(QBoxLayout::LeftToRight, m_pSeacrhWidget);
-    pbLayout->addStretch(1);
-    QVBoxLayout * pvbLayout = new QVBoxLayout(m_pSeacrhWidget);
+    m_pSeacrhWidget = new PM_PatientIndex_SearchWidget();
 
-    QHBoxLayout * pHBLayout = new QHBoxLayout(m_pSeacrhWidget);
-    QPixmap image(":/main/appIcon64");
-    image.scaledToWidth(50);
-      QLabel * pImgLabel = new QLabel(m_pSeacrhWidget);
-      pImgLabel->setPixmap(image);
-      pHBLayout->addWidget(pImgLabel);
-      pHBLayout->addWidget(new QLabel("TrichoSciencePro 0.5", m_pSeacrhWidget));
-      pvbLayout->addStretch(1);
-      pvbLayout->addItem(pHBLayout);
-      pvbLayout->addStretch(2);
-
-
-
-    pHBLayout = new QHBoxLayout(m_pSeacrhWidget);
-    QLineEdit * pSearchLineEdit = new QLineEdit(m_pSeacrhWidget);
-    pSearchLineEdit->setMinimumWidth(400);
-    pHBLayout->addWidget(pSearchLineEdit);
-    QPushButton * pButton = new QPushButton("Поиск", m_pSeacrhWidget);
-    pHBLayout->addWidget(pButton);
-    pvbLayout->addItem(pHBLayout);
-    pvbLayout->addStretch(2);
-
-
-    connect(pButton, &QPushButton::clicked, [this, pSearchLineEdit, pvbLayout, pbLayout]()
-    {
-
-        QStringList patientListForWidget;
-        patientListForWidget.clear();
-        QList<PM_PatientIndex> listResult = search(pSearchLineEdit->text());
-        QString tmp;
-        foreach(PM_PatientIndex elem, listResult)
-            patientListForWidget.append( QString("%1\tid: %2\tuid: %3").arg(elem.alias).arg(elem.id).arg(elem.uid) );
-
-        if(!m_pPatientListWidget)
-        {
-            m_pPatientListWidget = new QListWidget(m_pSeacrhWidget);
-            pvbLayout->addWidget(m_pPatientListWidget,0);
-            pvbLayout->addStretch(5);
-            m_pPatientListWidget->show();
-            connect(m_pPatientListWidget, &QListWidget::doubleClicked, [this, patientListForWidget](const QModelIndex &index)
-            {
-                if(index.row()==-1)
-                    return;
-                QString text = m_pPatientListWidget->currentItem()->text();
-                int uidPos = text.indexOf("uid: ");
-                uint uid = text.mid(uidPos+5).toUInt();
-
-                openPatientWidget(uid);
-            });
-
-        }
-
-        m_pPatientListWidget->clear();
-        m_pPatientListWidget->addItems( patientListForWidget );
-    });
-
-    pbLayout->addItem(pvbLayout);
-     pbLayout->addStretch(1);
-    m_pSeacrhWidget->setLayout(pbLayout);
+    connect(m_pSeacrhWidget, &PM_PatientIndex_SearchWidget::makeSearch, this, &PM_PatientIndexCnt::makeSearch);
+    connect(m_pSeacrhWidget, &PM_PatientIndex_SearchWidget::choosenListElement, this, &PM_PatientIndexCnt::openPatientWidget);
 
     return m_pSeacrhWidget;
 }
+
+
+
+
 
 bool operator==(const PM_PatientIndex &left, const PM_PatientIndex &right)
 {
@@ -365,4 +348,96 @@ bool operator==(const PM_PatientIndex &left, const PM_PatientIndex &right)
     if(left.alias != right.alias)
         return false;
     return true;
+}
+
+PM_PatientIndex_SearchWidget::PM_PatientIndex_SearchWidget():QWidget(nullptr)
+{
+    setMinimumSize(QSize(900, 400));
+    QBoxLayout * pbLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    pbLayout->addStretch(1);
+    QVBoxLayout * pvbLayout = new QVBoxLayout(this);
+
+    QHBoxLayout * pHBLayout = new QHBoxLayout(this);
+    pHBLayout->setAlignment(Qt::AlignCenter);
+    QPixmap image(":/main/appIcon64");
+      QLabel * pImgLabel = new QLabel(this);
+      pImgLabel->setPixmap(image);
+      pHBLayout->addStretch(50);
+      pHBLayout->addWidget(pImgLabel);
+      pHBLayout->addStretch(10);
+      pHBLayout->addWidget(new QLabel("TrichoSciencePro 0.51", this));
+      pHBLayout->addStretch(50);
+      pvbLayout->addStretch(1);
+      pvbLayout->addItem(pHBLayout);
+      pvbLayout->addStretch(2);
+
+
+
+    pHBLayout = new QHBoxLayout(this);
+    m_pSeacrhLineEdit = new QLineEdit(this);
+    m_pSeacrhLineEdit->setMinimumWidth(400);
+    pHBLayout->addWidget(m_pSeacrhLineEdit);
+    m_pSearchButton = new QPushButton("Поиск", this);
+    pHBLayout->addWidget(m_pSearchButton);
+    pvbLayout->addItem(pHBLayout);
+    pvbLayout->addStretch(2);
+    m_pPatientListWidget = new QListWidget(this);
+    pvbLayout->addWidget(m_pPatientListWidget,0);
+    pvbLayout->addStretch(5);
+    m_pPatientListWidget->hide();
+    pbLayout->addItem(pvbLayout);
+     pbLayout->addStretch(1);
+    setLayout(pbLayout);
+
+
+    connect(m_pPatientListWidget, &QListWidget::doubleClicked, this, &PM_PatientIndex_SearchWidget::sendActionToOpenPatientWidget);
+
+    connect(m_pSearchButton, &QPushButton::clicked, this, &PM_PatientIndex_SearchWidget::makeSearch);
+}
+
+bool PM_PatientIndex_SearchWidget::event(QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+            QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+            switch (ke->key()) {
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+                if(m_pPatientListWidget->hasFocus())
+                    sendActionToOpenPatientWidget();
+                else if(m_pSeacrhLineEdit->hasFocus())
+                {
+                    emit makeSearch();
+                    m_pPatientListWidget->setFocus();
+                }
+                return true;
+            case Qt::Key_Escape:
+                m_pSeacrhLineEdit->setFocus();
+                return true;
+            }
+        }
+
+    return QWidget::event(event);
+}
+
+void PM_PatientIndex_SearchWidget::printSearchResult(QList<PM_PatientIndex> &listResult)
+{
+    m_pPatientListWidget->show();
+    QStringList patientListForWidget;
+    patientListForWidget.clear();
+    foreach(PM_PatientIndex elem, listResult)
+        patientListForWidget.append( QString("%1\tid: %2\tuid: %3").arg(elem.alias).arg(elem.id).arg(elem.uid) );
+
+    m_pPatientListWidget->clear();
+    m_pPatientListWidget->addItems( patientListForWidget );
+}
+
+void PM_PatientIndex_SearchWidget::sendActionToOpenPatientWidget()
+{
+    if(m_pPatientListWidget->currentRow()==-1)
+        return;
+    QString text = m_pPatientListWidget->currentItem()->text();
+    int uidPos = text.indexOf("uid: ");
+    uint uid = text.mid(uidPos+5).toUInt();
+
+    emit choosenListElement(uid);
 }

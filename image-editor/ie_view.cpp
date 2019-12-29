@@ -116,12 +116,12 @@ _global_ie *
 
 
 QDockWidget *
-        IE_View::getPDockDebugInfo() const
+        IE_View::getDockDebugInfo() const
 {
     return pDockDebugInfo;
 }
 QDockWidget *
-        IE_View::getPDockInfo() const
+        IE_View::getDockInfo() const
 {
     return pDockInfo;
 }
@@ -297,7 +297,7 @@ QPointF IE_View::computeSceneRelativelyPosition(const QPointF point)
 
 // ------- GETTERS and SETTERS
 
-ToolsController *IE_View::getPToolsController() const
+ToolsController *IE_View::getToolsController() const
 {
     return pToolsController;
 }
@@ -307,7 +307,7 @@ QString IE_View::getStatusBarInfoDataForUser() const
 {
 
 }
-IE_Model *IE_View::getPModel() const
+IE_Model *IE_View::getModel() const
 {
     return pModel;
 }

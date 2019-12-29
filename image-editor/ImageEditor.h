@@ -45,6 +45,7 @@ private:
     QVector<IE_View*> m_ieViewVec;
     QStackedWidget  m_stackedWidget;
     int m_currentTab;
+    QWidget * pCurrentFVFastManagment;
 
     int     init(IE_ProfileType ie_type);
     int     initModelsAsNew(TSP_PatientData patientData, IE_ProfileType ie_type);

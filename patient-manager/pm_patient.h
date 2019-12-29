@@ -41,6 +41,7 @@ public slots:
     int open(uint patientUID);
     QList<QMenu*> getAvailableActions();
     void removeAllData(); //! Удаление данных о пациенте c подтверждением
+    void updateDocumentList();
 private:
     int init();
     int initAnNew();

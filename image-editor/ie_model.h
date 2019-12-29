@@ -84,8 +84,9 @@ private:
 
     QDir    modelDir, // директория модели. Новая создается в папке IE_MODEL_RES_DIR_NAME
             resDir, // директория ресурсов модели. В ней хранятся различные изображения, файлы, которые используются.
-            tmpDir; // директория временного размещения данных модели,
+            tmpDir, // директория временного размещения данных модели,
                     //  в ней хранятся данные до сохранения. Удаляется после закрытия модели.
+            patientDir;
     uint    patientID,
             patientUID, // присваивается ЕДИНОЖДЫ !!!
             model_ID;
@@ -127,6 +128,7 @@ public:
     QString                 getPath();
     IEM_type                getIEM_type();
     QDockWidget *           getImageBaseDockWidget();
+    QWidget *               getFieldOfViewFastManagerWidget();
 
     void                    addRelatedModel(QString path);
 
