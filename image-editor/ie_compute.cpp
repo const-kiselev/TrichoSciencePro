@@ -12,12 +12,12 @@ IE_Compute::IE_Compute(_global_ie *pieg,
 
 qreal IE_Compute::computeSquareInPixels() const
 {
-    qreal sq = 1;
+    qreal sq = 0;
     for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
          tmpIter!=layersList->end();tmpIter++)
     {
         if( tmpIter.i->t()->getToolType() == ToolType::MainImage)
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
+            sq += tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
         else if( tmpIter.i->t()->getToolType() == ToolType::ComputingArea )
         {
             sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();

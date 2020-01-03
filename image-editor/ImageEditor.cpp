@@ -351,7 +351,7 @@ void ImageEditor::menuInit()
    oneMenu->addAction(pActionNewFile);
    oneMenu->addSeparator();
    pActionNewFile = new QAction("Трихоскопия");
-   pActionNewFile->setDisabled(true);
+   pActionNewFile->setDisabled(false);
    oneMenu->addAction(pActionNewFile);
    pActionNewFile = new QAction("Фототрихограмма");
    pActionNewFile->setDisabled(true);
