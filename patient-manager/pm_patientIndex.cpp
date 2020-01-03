@@ -115,6 +115,7 @@ int PM_PatientIndexCnt::addPatient_Dialog()
         int i = patient.initAsNew_Dialog();
         if(i == QDialog::Rejected)
             return 0;
+
         foreach(PM_PatientIndex indData, m_patientIndexList)
         {
             if(indData.id == patient.getTSP_PatientData().patient_ID)
@@ -123,10 +124,9 @@ int PM_PatientIndexCnt::addPatient_Dialog()
                 isValid = false;
                 break;
             }
-
         }
 
-    } while(isValid);
+    } while(!isValid);
 
     checkDirs();
     QList<PM_PatientIndex> listResult = search(m_pSeacrhWidget->m_pSeacrhLineEdit->text());

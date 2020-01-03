@@ -18,21 +18,25 @@ PM_Patient::PM_Patient(QDir workDir, QObject *parent) : QObject(parent), m_workD
 
 int PM_Patient::initAsNew_Dialog()
 {
-    init();
-    m_pMedicalRecordCnt->initAsNew();
+    if(!m_pMedicalRecordCnt)
+    {
+        init();
+        m_pMedicalRecordCnt->initAsNew();
+    }
+
     int answer = newPatientDialog();
-    if( answer )
+    if( answer == QDialog::Rejected )
         return answer;
 
     answer = makePatientDirectory();
     if( answer )
-        return answer;
+        return QDialog::Rejected;
 
     m_pMedicalRecordCnt->save();
     m_workDir.cd(QString().number( m_pMedicalRecordCnt->getPatientUID() ) );
 
 
-    return answer;
+    return QDialog::Accepted;
 }
 
 
@@ -187,7 +191,6 @@ QList<QMenu *> PM_Patient::getAvailableActions()
 
 int PM_Patient::init()
 {
-    m_pWidget = nullptr;
     m_pMedicalRecordCnt = new PM_MedicalRecordCnt( m_workDir );
     return 0;
 }
@@ -330,6 +333,7 @@ int PM_Patient::newPatientDialog()
 
     QPushButton *pcmdOk = new QPushButton("Добавить");
     QPushButton *pcmdCancel = new QPushButton("Отменить");
+    // проверка на ввод данных в форме
     connect(pcmdOk, &QPushButton::clicked, [ pDialog, pFullName, pradEuroCaucasian,
                                             pradMediterranean, pradAsianPacific, pradAfricanCaribbean, pradMale, pradFemale]()
     {
@@ -361,7 +365,9 @@ int PM_Patient::newPatientDialog()
 
     pDialog->setLayout(pLayout);
 
-    if (pDialog->exec() == QDialog::Accepted)
+    int answerCode = pDialog->exec();
+
+    if (answerCode == QDialog::Accepted)
     {
         medRec.setPatient_ID( pID->text().toUInt() );
         medRec.setPatient_fullName( pFullName->text() );
@@ -380,11 +386,11 @@ int PM_Patient::newPatientDialog()
         delete pDialog;
 
         m_pMedicalRecordCnt->setMedicalRecord(medRec);
-        return 0;
+        return answerCode;
     }
 
     delete pDialog;
-    return 1;
+    return answerCode;
 }
 
 int PM_Patient::loadMedicalRecord()
@@ -394,7 +400,8 @@ int PM_Patient::loadMedicalRecord()
 
 int PM_Patient::makePatientDirectory()
 {
-    m_workDir = m_workDir.filePath( QString().number( m_pMedicalRecordCnt->getPatientUID() ) );
+    m_workDir = m_workDir.filePath( QString().number( m_pMedicalRecordCnt->getPatientUID() )
+                                    );
     if ( m_workDir.exists() )
         m_workDir.mkpath(".");
 

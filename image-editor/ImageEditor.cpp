@@ -73,9 +73,8 @@ int ImageEditor::init(IE_ProfileType ie_type)
             addToolBar(Qt::LeftToolBarArea, pIE_toolCnt);
             pIE_toolCnt->hide();
             addDockWidget(Qt::RightDockWidgetArea,pIE_toolCnt->getPDock());
-            pIE_toolCnt->getPDock()->hide();
-            addDockWidget(Qt::RightDockWidgetArea,pIE_model->getFieldOfViewControllerInfoDock());
-            pIE_model->getFieldOfViewControllerInfoDock()->hide();
+
+
 
             switch ( pIE_model->getIEM_type() )
             {
@@ -90,8 +89,12 @@ int ImageEditor::init(IE_ProfileType ie_type)
                     break;
             }
             }
+            pIE_toolCnt->getPDock()->hide();
+            addDockWidget(Qt::RightDockWidgetArea,pIE_model->getFieldOfViewControllerInfoDock());
+            pIE_model->getFieldOfViewControllerInfoDock()->hide();
 
         }
+
 
         m_pTopToolBar->addWidget(locTabBar);
         locTabBar->setCurrentIndex(0);
@@ -472,19 +475,25 @@ void ImageEditor::changeTab(int viewIndex)
 
     m_currentTab = viewIndex;
     m_stackedWidget.setCurrentIndex(m_currentTab);
-
+    pIE_view = m_ieViewVec[m_currentTab];
+    pIE_model = pIE_view->getModel();
     pIE_toolCnt = pIE_view->getToolsController();
 
     pIE_toolCnt->show();
-    pIE_toolCnt->getPDock()->show();
+
     pIE_model->getFieldOfViewControllerInfoDock()->show();
     switch (pIE_model->getIEM_type())
     {
         case IEM_type::TrichoscopyPatterns:
         if(pIE_model->getImageBaseDockWidget())
+        {
             pIE_model->getImageBaseDockWidget()->show();
+//            tabifyDockWidget(pIE_toolCnt->getPDock(), pIE_model->getImageBaseDockWidget());
+        }
             break;
+
     }
+    pIE_toolCnt->getPDock()->show();
 
 
     menuInit();
