@@ -5,17 +5,6 @@
 #include "ie_report.h"
 #include "ie_fieldOfView_controller.h"
 
-
-#include <QtCharts/QChartView>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QLegend>
-#include <QtCharts/QBarCategoryAxis>
-#include <QtCharts/QValueAxis>
-#include <QtCharts/QCategoryAxis>
-
-QT_CHARTS_USE_NAMESPACE
-
 class IE_ModelData: public QObject
 {
     Q_OBJECT
@@ -93,7 +82,6 @@ private:
 
     QDateTime m_createDateTime, m_saveDateTime;
 };
-
 /*!
 \brief Класс для работы с моделью изображения.
 
@@ -113,13 +101,13 @@ public:
     QRectF                  getModelRect() const;
     qreal                   getMeasureIndex() const;
     ToolsController*        getPToolCnt() const;
-    IE_ModelLayer*          getLayerByListIndex(int listIndex);
-    QList<IE_ModelLayer*>::iterator
-                            getLayerIteratorByListIndex(int listIndex);
+//    IE_ModelLayer*          getLayerByListIndex(int listIndex);
+//    QList<IE_ModelLayer*>::iterator
+//                            getLayerIteratorByListIndex(int listIndex);
     QDockWidget*            getPDockLayers() const;
-    QList<IE_ModelLayer * > :: const_iterator
-                            getLayersListIter() const;
-    QList<IE_ModelLayer * > getLayersList() const;
+//    QList<IE_ModelLayer * > :: const_iterator
+//                            getLayersListIter() const;
+//    QList<IE_ModelLayer * > getLayersList() const;
     TSP_PatientData         get_TSP_patientData();
     IE_ProfileType          getIE_ProfileType()const;
     _global_ie *            getPGlobal_data() const;
@@ -135,19 +123,19 @@ public:
     void                    setMeasureIndex(const qreal &value);
     void                    setPToolCnt(ToolsController *value);
 
-    void                    showLayer(int listIndex);
-    void                    hideLayer(int listIndex);
+//    void                    showLayer(int listIndex);
+//    void                    hideLayer(int listIndex);
 
     QDockWidget*            initInfoDock();
     QDockWidget*            initLayersDock();
     QDockWidget*            initToolInfoDock();
     QDockWidget*            initFieldOfViewControllerInfoDock();
 
-    void                    makeHairDensityComputeWithWidget();
-    void                    makeHairDiameterComputeWithWidget();
+    void                    makeReport(IE_ReportType rt);
+//! \todo реализовать
+    void                    saveReport(IE_ReportType rt);
     void                    setInputArgs();
 
-    qreal                   computeSquare();
 
 signals:
     void                    changedModelSize(qreal fx, qreal fy);
@@ -170,13 +158,13 @@ public slots:
     void                    close(QString modelFilePath);
 
 
-    void                    addLayer(IE_ModelLayer* layerToAdd);
+//    void                    addLayer(IE_ModelLayer* layerToAdd);
     void                    addLayerViaToolCnt();
 
-    void                    removeLayer(int listIndex);
-    void                    removeLayer(QList<IE_ModelLayer*>::iterator iter);
-    void                    hideLayer(QList<IE_ModelLayer*>::iterator iter);
-    void                    showLayer(QList<IE_ModelLayer*>::iterator iter);
+//    void                    removeLayer(int listIndex);
+//    void                    removeLayer(QList<IE_ModelLayer*>::iterator iter);
+//    void                    hideLayer(QList<IE_ModelLayer*>::iterator iter);
+//    void                    showLayer(QList<IE_ModelLayer*>::iterator iter);
 
 
     void                    layerAction(IE_ModelLayer::Action action,
@@ -192,7 +180,7 @@ private:
                             * m_pFVCDockWidget;
 
 
-    QList<IE_ModelLayer*>   layersList;
+//    QList<const IE_ModelLayer*>   m_layerList;
     QStringList             m_relatedModelList;
     ToolsController         * pToolCnt;
     IE_FieldOfView_Controller
@@ -210,6 +198,9 @@ private slots:
     void                    layersController();
     void                    selectedLayer(int row);
 };
+
+
+
 
 
 

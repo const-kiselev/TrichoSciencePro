@@ -5,7 +5,9 @@
 #include "ie_tool.h"
 #include "ie_header.h"
 
-
+/*!
+    \brief Класс для работы со слоем модели изображения
+*/
 //! \todo добавить статичную функцию, которая возвращает строковый список наименования слоев.
 class IE_ModelLayer :public QGraphicsItem
 {
@@ -15,38 +17,45 @@ public:
         Hide,
         Remove
     };
-    IE_ModelLayer(QGraphicsItem *parent = nullptr);
-    IE_ModelLayer(ToolType tt, QGraphicsItem *parent = nullptr);
+                IE_ModelLayer(QGraphicsItem *parent = nullptr);
+                IE_ModelLayer(ToolType tt, QGraphicsItem *parent = nullptr);
 //    explicit IE_ModelLayer(ToolType tt, QGraphicsItem *pLayerGraphicsItem);
-    ~IE_ModelLayer() override;
-    static QString toStr(ToolType tt);
-    ToolType getToolType(){return toolType;}
-    bool isVisible(){return visible;}
+                ~IE_ModelLayer() override;
+    static QString
+                toStr(ToolType tt);
+    ToolType    getToolType()const{return toolType;}
+    bool        isVisible()const{return visible;}
 
-    QRectF boundingRect() const override;
+    QRectF      boundingRect() const override;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+    void        paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                      QWidget *widget) override;
 
-    QPointF getPos();
-    void setPos(QPointF pos);
+    QPointF     getPos() const;
+    void        setPos(QPointF pos);
 
-    void hide();
-    void show();
-    void unhide();
+    void        hide();
+    void        show();
+    void        unhide();
 
-    ie_tool* getToolPtr();
+    ie_tool*    getToolPtr() const;
 
-    void read(const QJsonObject &json);
-    void write(QJsonObject &json) const;
+    void        read(const QJsonObject &json);
+    void        write(QJsonObject &json) const;
+
+
 
 private:
-    ie_tool* pTool;
-    bool visible;
-    ToolType toolType;
-    QString layerTitle;
-    //QGraphicsItem *pLayerGraphicsItem;
+    ie_tool*    pTool;
+    bool        visible;
+    ToolType    toolType;
+    QString     layerTitle;
 };
 Q_DECLARE_METATYPE(IE_ModelLayer*)
+
+typedef QList<const IE_ModelLayer*> IE_ConstMLayerList;
+typedef const IE_ConstMLayerList* IE_ConstMLayerListConstPtr;
+typedef QListIterator<const IE_ModelLayer*> IE_MLayerListIter; // итератор списка
+typedef QList<const IE_ModelLayer*>::iterator IE_MLIter; // итератор на константный элемент списка
 
 #endif // IE_MODELLAYER_H

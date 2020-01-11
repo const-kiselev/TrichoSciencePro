@@ -22,11 +22,13 @@ CONFIG += c++11
 
 
 SOURCES +=  \
+    ie_modelLayer_controller.cpp \
     main.cpp
 
 HEADERS += \
     ../_header_tsp.h \
-    ie_fieldOfView_infoWidget.h
+    ie_fieldOfView_infoWidget.h \
+    ie_modelLayer_controller.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

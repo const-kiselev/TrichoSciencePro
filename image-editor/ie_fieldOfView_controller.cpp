@@ -1,14 +1,14 @@
 #include "ie_fieldOfView_controller.h"
 #include "ie_fieldOfView_infoWidget.h"
 
-IE_FieldOfView_Controller::IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
+IE_FieldOfView_Controller::IE_FieldOfView_Controller(IE_mLayerListConstPtr pModelLayerList,
                                                      _global_ie * pieg,
                                                      QObject *parent
                                                      ) :    QObject(parent),
                                                             m_quantityOfFields(0),
                                                             m_inited(false),
                                                             m_activeFVIndex(-1),
-                                                            layersList(ll),
+                                                            m_pModelLayerList(pModelLayerList),
                                                             m_p_ie_global_data(pieg)
 {
     m_pImageBaseCnt = nullptr;
@@ -390,12 +390,12 @@ void    IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
         m_pImageBaseCnt->setCurrentUserChoiceList(index);
 }
 
-QList<IE_ModelLayer *>
+IE_mLayerListConstPtr
         IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
 {
     if(!m_quantityOfFields)
-        return QList<IE_ModelLayer *>();
-    return m_fieldOfViewList.at(m_activeFVIndex)->getLayers();
+        return IE_mLayerListConstPtr();
+    return m_fieldOfViewList.at(m_activeFVIndex)->getConstPtrOfLayerList();
 }
 
 void    IE_FieldOfView_Controller::checkLayerList()
@@ -415,9 +415,22 @@ QWidget *IE_FieldOfView_Controller::getFastManagerWidget() const
     return nullptr;
 }
 
+const QList<IE_FieldOfView *>* IE_FieldOfView_Controller::getConstPtrOfFieldOfView() const
+{
+    return &m_fieldOfViewList;
+}
+
+qreal IE_FieldOfView_Controller::getTotalAreaValue()
+{
+    qreal area = 0;
+    foreach (IE_FieldOfView * pfv, m_fieldOfViewList)
+        area += pfv->getAreaValue();
+    return area;
+}
+
 void    IE_FieldOfView_Controller::addFieldOfView(int index)
 {
-    IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, layersList, m_p_ie_global_data);
+    IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, m_pModelLayerList, m_p_ie_global_data);
     m_fieldOfViewList.append(tmpFV);
     connect(tmpFV, &IE_FieldOfView::addNewLayer, [this](IE_ModelLayer* pLayer)
     {

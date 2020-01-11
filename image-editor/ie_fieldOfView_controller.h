@@ -32,74 +32,82 @@ public:
         Six = 6
     } quantityMax = Quantity::Six;
 
-    explicit IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
-                                       _global_ie * pieg,
-                                       QObject *parent = nullptr
-                                       );
-    ~IE_FieldOfView_Controller();
+    explicit            IE_FieldOfView_Controller(IE_mLayerListConstPtr pModelLayerList,
+                                                   _global_ie * pieg,
+                                                   QObject *parent = nullptr
+                                                   );
+                        ~IE_FieldOfView_Controller();
 
-    int                     read(const QJsonObject &json);
-    int                     write(QJsonObject &json)const;
+    int                 read(const QJsonObject &json);
+    int                 write(QJsonObject &json)const;
 
 
-    void init(Quantity q = Quantity::One);
-    int initImageBase();
-    QDockWidget *getImageBaseDockWidget();
+    void                init(Quantity q = Quantity::One);
+    int                 initImageBase();
+    QDockWidget *       getImageBaseDockWidget();
 
     QDialog::DialogCode makeInitDialog();
     QDialog::DialogCode makeDialogForSetupAsNew();
 
     /// \todo реализовать!!!
-    void changeQuantity(Quantity q);
-    uint getQuantity() const;
+    void                changeQuantity(Quantity q);
+    uint                getQuantity() const;
 
-    void initDockWidget();
-    QWidget * getInfoWidget()const;
+    void                initDockWidget();
+    QWidget *           getInfoWidget()const;
 
-    void setLayerListIterator(){}
-    void setMainImageInFV(int fvCode){}
+    void                setLayerListIterator(){}
+    void                setMainImageInFV(int fvCode){}
     //!     Запускает соотвествующий процесс релокации/перемещения полей зрения на основе их количества и в случае, если одно изображение заходит за другое.
-    void relocateAllFieldOfView();
+    void                relocateAllFieldOfView();
     //! Порядковый индекс MainImage из списка слоев типа MainImage соотвествует порядковому индексу поля зрения.
-    static Quantity getStandartQuantity(IE_ProfileType profileType);
-    int getActiveFVIndex() const;
-    QWidget *getFastManagerWidget() const;
+    static Quantity     getStandartQuantity(IE_ProfileType profileType);
+    int                 getActiveFVIndex() const;
+    QWidget *           getFastManagerWidget() const;
+
+    const QList<IE_FieldOfView *>*
+                        getConstPtrOfFieldOfView() const;
+    qreal               getTotalAreaValue();
 
 signals:
     /// \todo связать с моделью
-    void addNewLayer(IE_ModelLayer* pLayer);
+    void                addNewLayer(IE_ModelLayer* pLayer);
     /// \todo связать с моделью
-    void removeLayer(QList<IE_ModelLayer*>::iterator iter);
+    void                removeLayer(QList<IE_ModelLayer*>::iterator iter);
     /// \todo связать с моделью
     /// \warning учесть вызов при различных изменениях связанных с FV
-    void boundingRectWasChanged(QRectF);
-    void hideLayer(QList<IE_ModelLayer*>::iterator iter);
-    void layerAction(IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter);
-    void activeFVLayerListWasUpdated(QList<IE_ModelLayer*>);
+    void                boundingRectWasChanged(QRectF);
+    void                hideLayer(QList<IE_ModelLayer*>::iterator iter);
+    void                layerAction(IE_ModelLayer::Action action,
+                                    QList<IE_ModelLayer*>::iterator iter);
+    void                activeFVLayerListWasUpdated(IE_mLayerListConstPtr);
+
+
 
 
 
 
 public slots:
     /// \todo связать с моделью
-    QRectF getBoundingRectOfAllFieldOfView();
-    void changeActiveFieldOfView(int index);
-    QList<IE_ModelLayer*> getActiveFieldOfViewLayerList();
-    void checkLayerList();
+    QRectF              getBoundingRectOfAllFieldOfView();
+    void                changeActiveFieldOfView(int index);
+    IE_mLayerListConstPtr getActiveFieldOfViewLayerList();
+    void                checkLayerList();
 
 private:
-    uint m_quantityOfFields;
-    bool m_inited;
-    int m_activeFVIndex;
-    QList<IE_FieldOfView*> m_fieldOfViewList;
-    QList<IE_ModelLayer*>   *layersList;
-    _global_ie *    m_p_ie_global_data;
-    IE_FieldOfView_ControllerInfoWidget * m_pInfoWidget;
-    IE_ImageBaseCnt         * m_pImageBaseCnt;
+    uint                    m_quantityOfFields;
+    bool                    m_inited;
+    int                     m_activeFVIndex;
+    QList<IE_FieldOfView*>  m_fieldOfViewList;
+    IE_mLayerListConstPtr   m_pModelLayerList;
+    _global_ie *            m_p_ie_global_data;
+    IE_FieldOfView_ControllerInfoWidget *
+                            m_pInfoWidget;
+    IE_ImageBaseCnt*        m_pImageBaseCnt;
 
 
-    void addFieldOfView(int index);
-    void removeFieldOfView(int index);
+    void                addFieldOfView(int index);
+    void                removeFieldOfView(int index);
 
 
 };

@@ -6,7 +6,7 @@
     qsrand(100000);
     globalDataKey = qrand();
     __global_data = new _global_ie(globalDataKey);
-    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(&layersList,__global_data);
+    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(&m_layerList,__global_data);
 
     initFieldOfViewControllerInfoDock();
     initLayersDock();
@@ -500,44 +500,21 @@ QDockWidget *IE_Model::initFieldOfViewControllerInfoDock()
     return m_pFVCDockWidget;
 }
 
-void        IE_Model::makeHairDensityComputeWithWidget
-                                                        ()
+void IE_Model::makeReport(IE_ReportType rt)
 {
-    //! \bug Утечка памяти!
-    IE_Report * pReport = new IE_Report(__global_data);
-    IE_Compute comp(__global_data,&layersList);
-
-    pReport->makeHairDensityReport_dialog(comp.compute(IE_Compute::ComputeType::HairDensity));
+//    IE_Report::makeReport(this,
+//                          __global_data,
+//                          IE_Compute::InputData(m_pFieldOfViewCnt->getConstPtrOfFieldOfView(),
+//                                                rt
+//                                                )
+//                         );
 }
 
-void        IE_Model::makeHairDiameterComputeWithWidget
-                                                        ()
+void IE_Model::saveReport(IE_ReportType rt)
 {
-    //! \bug Утечка памяти!
-    IE_Report * pReport = new IE_Report(__global_data);
-    IE_Compute comp(__global_data,&layersList);
 
-    pReport->makeHairDiameterReport_dialog(comp.compute(IE_Compute::ComputeType::HairDiameter));
 }
 
-
-
-qreal       IE_Model::computeSquare          ()
-{
-    qreal sq = 1;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if( tmpIter.i->t()->getToolType() == ToolType::MainImage)
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
-        else if( tmpIter.i->t()->getToolType() == ToolType::ComputingArea )
-        {
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
-            break;
-        }
-    }
-    return sq;
-}
 
 void        IE_Model::setInputArgs           ()
 {
@@ -829,42 +806,10 @@ void        IE_Model::addLayerViaToolCnt     ()
     }
 }
 
-void        IE_Model::addLayer               (IE_ModelLayer* layerToAdd)
-{
-    for (QList<IE_ModelLayer*>::iterator iter = layersList.begin();iter!=layersList.end();iter++)
-        if((*iter) == layerToAdd)
-        {
-            qWarning() << "Tring to add existed layer.";
-            return;
-        }
 
-    addItem(layerToAdd->parentItem());
-    layersList.append(layerToAdd);
-    emit layerListWasChanged();
-}
 
-void        IE_Model::showLayer              (int listIndex)
-{
-    IE_ModelLayer* foundLayer = getLayerByListIndex     (listIndex);
-    if(!foundLayer)
-    {
-        qDebug() << "TSPImageEditorModel::showLayer(int listIndex) >> getLayerByListIndex returns nullptr.";
-        return;
-    }
 
-    foundLayer->unhide();
-}
-void        IE_Model::hideLayer              (int listIndex)
-{
-    IE_ModelLayer* foundLayer = getLayerByListIndex(listIndex);
-    if(!foundLayer)
-    {
-        qDebug() << "TSPImageEditorModel::hideLayer(int listIndex) >> getLayerByListIndex returns nullptr.";
-        return;
-    }
 
-    foundLayer->hide();
-}
 
 /// \todo !!!!!! ------- :
 void        IE_Model::layersController       ()
@@ -889,63 +834,6 @@ void        IE_Model::layersController       ()
 //        }
 //    }
 
-}
-
-void        IE_Model::removeLayer             (int listIndex)
-{
-    QList<IE_ModelLayer*>::iterator iterResult = getLayerIteratorByListIndex(listIndex);
-    if(iterResult == layersList.end())
-        return;
-    removeLayer(iterResult);
-}
-void        IE_Model::removeLayer             (QList<IE_ModelLayer*>::iterator iter)
-{
-    QGraphicsItem *pGraphicsItem = *iter;
-
-//    if((*iter)->getToolType() == ToolType::MainImage)
-//        return;
-
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if(*iter == *tmpIter)
-        {
-            pGraphicsItem = (QGraphicsItem*) *tmpIter;
-            this->removeItem(pGraphicsItem->parentItem());
-            delete pGraphicsItem;
-            pGraphicsItem = nullptr;
-            layersList.erase(tmpIter);
-            emit layerListWasChanged();
-            pToolCnt->resetPActiveTool();
-            break;
-        }
-    }
-
-}
-
-void IE_Model::hideLayer(QList<IE_ModelLayer*>::iterator iter)
-{
-    QGraphicsItem *pGraphicsItem = *iter;
-
-//    if((*iter)->getToolType() == ToolType::MainImage)
-//        return;
-
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if(*iter == *tmpIter)
-        {
-            tmpIter.i->t()->hide();
-//            pGraphicsItem = (QGraphicsItem*) *tmpIter;
-//            this->removeItem(pGraphicsItem->parentItem());
-//            delete pGraphicsItem;
-//            pGraphicsItem = nullptr;
-//            layersList.erase(tmpIter);
-//            emit layerListWasChanged();
-//            pToolCnt->resetPActiveTool();
-            break;
-        }
-    }
 }
 
 void IE_Model::showLayer(QList<IE_ModelLayer*>::iterator iter)

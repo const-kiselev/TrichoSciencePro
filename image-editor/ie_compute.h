@@ -3,8 +3,8 @@
 
 #include <QtWidgets>
 
-#include "ie_toolController.h"
-
+#include "ie_fieldOfView_controller.h"
+#include "ie_header.h"
 
 /*!
  *      \brief Класс вычислений.
@@ -19,6 +19,7 @@
  *      Проблематика заключается в том, что если несколько полей зрения, площади вычисляются с помощью
  *
  *      Политика работы с классом:
+ *          Класс со статичными методами для вычислений.
  *          Нет необходимости в сущестоввании эксземпляра класса все время.
  * Так что при необходимости лучше создавать экземпляр класса, выполнить все вычисления и удалить его.
  */
@@ -28,7 +29,7 @@ class IE_Compute : public QObject
     Q_OBJECT
 public:
     explicit IE_Compute(_global_ie * pieg,
-                        QList<IE_ModelLayer*> * pll,
+                        IE_FVConstList fieldOfViewListConstPtr,
                         QObject *parent = nullptr
                         );
     enum ComputeType
@@ -36,26 +37,35 @@ public:
         HairDensity = 1,
         HairDiameter = (1 << 1)
     };
-    //! Структура, которая отвечает за информацию о слое, которой будет достаточно для вычислений.
-    struct LayerComputeData
-    {
-        qreal   width,
-                length;
-        ToolType toolType;
-        LayerComputeData(qreal w, qreal l, ToolType tt):width(w),
-                                                        length(l),
-                                                        toolType(tt){}
-    };
+
+
 
     //! Структура входных данных
     struct InputData
     {
+        // вычисление площади происходит каждый раз при выполнении методов compute
+        IE_ReportType reportType;
         ComputeType computeType;
         qreal   squareInPixels;
-        QList<LayerComputeData> layerList;
-        InputData()
+        IE_FVConstList fieldOfViewListConstIter;
+        InputData(IE_FVConstList fieldOfViewListConstPtr,
+                  IE_ReportType rt = IE_ReportType::Full
+                )
         {
-            squareInPixels = qreal(0);
+            reportType = rt;
+            switch (reportType)
+            {
+                case IE_ReportType::Full:
+                computeType = (ComputeType) (ComputeType::HairDensity |
+                                                ComputeType::HairDiameter);
+                break;
+                case IE_ReportType::Trichoscopy:
+                computeType = (ComputeType) (ComputeType::HairDensity |
+                                                ComputeType::HairDiameter);
+                break;
+            }
+            squareInPixels = -1;
+            this->fieldOfViewListConstIter = fieldOfViewListConstIter;
         }
     };
 
@@ -65,7 +75,7 @@ public:
     struct HairDensityReportData
     {
         ComputeType computeType;
-        InputData inputData;
+        qreal   areaValue;
         uint    hairQuantity,       /**< кол-во волос */
                 terminalQuantity,   /**< кол-во терминальных волос */
                 vellusQuantity,     /**< кол-во веллусных волос */
@@ -76,20 +86,19 @@ public:
                 terminHairInCm2,    /**< кол-во терминальных волос на см^2 */
                 vellusHairInCm2;    /**< кол-во веллусных волос на см^2 */
 
-        HairDensityReportData(InputData id = InputData()):  computeType(ComputeType::HairDensity),
-                                                            inputData(id)
+        HairDensityReportData():  computeType(ComputeType::HairDensity)
         {
             hairQuantity = terminalQuantity = vellusQuantity
                     = percentTermin = percentVellus = 0;
             squareInCm2 = totalHairQuantityInCm2 =
-                    terminHairInCm2 = vellusHairInCm2 = qreal(0);
+                    terminHairInCm2 = vellusHairInCm2 = areaValue = qreal(0);
         }
     };
     //! Структура данных для отчета `ДИАМЕТР ВОЛОС`
     struct HairDiameterReportData
     {
         ComputeType computeType;
-        InputData inputData;
+        qreal   areaValue;
         uint    hairQuantity,       /**< кол-во волос */
                 terminalQuantity,   /**< кол-во терминальных волос */
                 vellusQuantity,     /**< кол-во веллусных волос */
@@ -106,15 +115,14 @@ public:
                 midDiameterTermin;
         QList<qreal>
                 diametersListInUm;
-        HairDiameterReportData(InputData id = InputData()): computeType(ComputeType::HairDiameter),
-                                                            inputData(id)
+        HairDiameterReportData(): computeType(ComputeType::HairDiameter)
         {
             hairQuantity = terminalQuantity = vellusQuantity
                     = thinHairQ = mediumHairQ = percentTermin
                     = percentVellus
                     = 0;
             squareInUnitedUnits = sumOfDiametersOfAllHair
-                    = sumOfDiametersOfTerminHair = qreal(0);
+                    = sumOfDiametersOfTerminHair = areaValue = qreal(0);
         }
     };
 
@@ -130,17 +138,21 @@ public:
 
     qreal   computeSquareInPixels() const;
     HairDensityReportData
-            computeHairDensity(InputData id);
+            computeHairDensity();
     HairDiameterReportData
-            computeHairDiameter(InputData id);
+            computeHairDiameter();
 
 
     //! Стоит обратить внимание, что вычисление данных со всех `точек зрения` (в них могут быть определены другие меры в качествве стандартных) происходит в первом документе, то есть он определяет меру, следовательно все поступаемые данные долдны быть в пикселях.
     //!
     //!
-    OutputData compute(InputData id);
-    OutputData compute(ComputeType compType);
-    InputData getInputData() const;
+    static OutputData makeCompute(_global_ie * pieg,
+                                  InputData id,
+                                  QObject *parent = nullptr
+                                );
+//    OutputData compute(ComputeType compType);
+//    static OutputData compute(_global_ie * pieg, ComputeType compType);
+//    InputData getInputData() const;
 
 signals:
 
@@ -150,7 +162,8 @@ public slots:
 
 private:
     _global_ie *_p_ie_global_data;
-    QList<IE_ModelLayer*>   *layersList;
+    IE_FVConstList m_fieldOfViewListConstPtr;
+    OutputData compute(IE_Compute::ComputeType compType);
 
 };
 

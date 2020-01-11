@@ -334,22 +334,25 @@ static QString UI_getIEM_type_title(IEM_type ieType)
 }
 
 
-//static QSet<ToolType> getToolTypeGroupSet()
-//{
-//    QSet<ToolType> set;
-//    set << ToolType::InterfollicularRegion
-//        << ToolType::HairFollicleOpening
-//        << ToolType::BloodVessel
-//        << ToolType::HairShaft
-//        << ToolType::HairRoot;
-//    return set;
-//}
+
 
 struct ToolTypeStruct
 {
     ToolType type;
     QAction * pAction;
 };
+
+enum class IE_ReportType
+{
+    Full,
+    HairDensity,
+    Trichoscopy
+};
+
+
+
+
+
 
 
 #endif // IE_HEADER_H
