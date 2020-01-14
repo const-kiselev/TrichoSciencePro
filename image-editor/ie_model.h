@@ -4,15 +4,7 @@
 #include <QtWidgets>
 #include "ie_report.h"
 #include "ie_fieldOfView_controller.h"
-
-
-#include <QtCharts/QChartView>
-#include <QtCharts/QBarSeries>
-#include <QtCharts/QBarSet>
-#include <QtCharts/QLegend>
-#include <QtCharts/QBarCategoryAxis>
-#include <QtCharts/QValueAxis>
-#include <QtCharts/QCategoryAxis>
+#include "ie_modelLayer_controller.h"
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -113,12 +105,17 @@ public:
     QRectF                  getModelRect() const;
     qreal                   getMeasureIndex() const;
     ToolsController*        getPToolCnt() const;
+    //! \warning срочно убрать из реализации
     IE_ModelLayer*          getLayerByListIndex(int listIndex);
+    //! \warning срочно убрать из реализации передачу подобного списка
     QList<IE_ModelLayer*>::iterator
                             getLayerIteratorByListIndex(int listIndex);
     QDockWidget*            getPDockLayers() const;
+    //! \warning срочно убрать из реализации передачу подобного списка
     QList<IE_ModelLayer * > :: const_iterator
                             getLayersListIter() const;
+
+    //! \warning срочно убрать из реализации передачу подобного списка
     QList<IE_ModelLayer * > getLayersList() const;
     TSP_PatientData         get_TSP_patientData();
     IE_ProfileType          getIE_ProfileType()const;
@@ -152,6 +149,7 @@ public:
 signals:
     void                    changedModelSize(qreal fx, qreal fy);
     void                    measureIndexChanged(qreal measure);
+    //! \todo перенос в контроллер слоев
     void                    layerListWasChanged();
     void                    boundingRectWasChanged(QRectF boundingRect);
     void                    wasSaved();
@@ -169,7 +167,7 @@ public slots:
     void                    save(QString modelFilePath);
     void                    close(QString modelFilePath);
 
-
+    //! \todo манипуляции со слоями должны происходить через метод makeActionWithLayer(...)
     void                    addLayer(IE_ModelLayer* layerToAdd);
     void                    addLayerViaToolCnt();
 
@@ -191,7 +189,8 @@ private:
                             * pDockLayers,
                             * m_pFVCDockWidget;
 
-
+    //! \todo убрать список слоев
+    IE_ModelLayer_Controller m_modelLayerCnt;
     QList<IE_ModelLayer*>   layersList;
     QStringList             m_relatedModelList;
     ToolsController         * pToolCnt;

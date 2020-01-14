@@ -49,4 +49,9 @@ private:
 };
 Q_DECLARE_METATYPE(IE_ModelLayer*)
 
+typedef QList<const IE_ModelLayer*> IE_ConstMLayerList;
+typedef const IE_ConstMLayerList* IE_ConstMLayerListConstPtr;
+typedef QListIterator<const IE_ModelLayer*> IE_MLayerListIter; // итератор списка
+typedef QList<const IE_ModelLayer*>::iterator IE_MLIter; // итератор на константный элемент списка
+
 #endif // IE_MODELLAYER_H

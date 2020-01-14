@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-#include <ie_fieldOfView.h>
+#include "ie_fieldOfView.h"
 #include "ie_imageBase.h"
 
 

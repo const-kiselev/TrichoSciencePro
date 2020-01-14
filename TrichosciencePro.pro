@@ -28,6 +28,7 @@ CONFIG += c++11
 
 SOURCES += \
         TrichoSciencePro.cpp \
+    image-editor/ie_modelLayer_controller.cpp \
         main.cpp \
     patient-manager/PatientManager.cpp \
     patient-manager/pm_documentIndex.cpp \
@@ -39,6 +40,7 @@ SOURCES += \
 HEADERS += \
         TrichoSciencePro.h \
         _header_tsp.h \
+    image-editor/ie_modelLayer_controller.h \
     patient-manager/PatientManager.h \
     patient-manager/pm_documentIndex.h \
     patient-manager/pm_medicalRecord.h \
