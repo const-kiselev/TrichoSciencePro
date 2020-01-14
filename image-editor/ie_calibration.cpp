@@ -14,14 +14,14 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
     pView = new IE_View(pModel);
 
     pToolController = pView->getToolsController();
-    pToolController->setToolSetType(ToolSet::CallibrationToolSet);
+    pToolController->setToolSetType(ToolSet::MeasureIndex);
     pToolController->setOrientation(Qt::Vertical);
     pModel->setPToolCnt(pToolController);
     connect(pToolController, &ToolsController::startUsingNewTool,
             pModel, &IE_Model::addLayerViaToolCnt);
 
 
-    setWindowTitle("Калибровка / настройка масштаба");
+    setWindowTitle("Настройка масштаба");
     setWindowFlags(Qt::Tool);
 
     setLayout(new QBoxLayout(QBoxLayout::LeftToRight));
@@ -30,7 +30,7 @@ IE_ToolCalibration::IE_ToolCalibration(QWidget *parent, qreal mIndex) :
 
     QBoxLayout *pRightLayout = new QBoxLayout(QBoxLayout::TopToBottom);
 
-    QPushButton *pButton = new QPushButton("Загрузить изображение");
+    QPushButton *pButton = new QPushButton("Загрузить изображение с эталоном");
     pRightLayout->addWidget(pButton);
     connect(pButton, &QPushButton::released, this, &IE_ToolCalibration::openImage);
 
@@ -96,30 +96,52 @@ qreal IE_ToolCalibration::getMeasureIndex() const
 // Если на ней больше одной линии, то остается самая новая
 void IE_ToolCalibration::modelItemsControl()
 {
-    QList<IE_ModelLayer *> layersList = pModel->getLayersList();
-    QList<IE_ModelLayer *>::iterator prevLine =layersList.end() , currItem = layersList.end();
-    for(QList<IE_ModelLayer *>::iterator listIter = layersList.begin();listIter!=layersList.end();listIter++ )
+    IE_ConstMLayerListConstPtr layerList = pModel->getConstModelLayerListConstPtr();
+    qDebug() << layerList->size();
+    IE_ConstMLayerList::const_iterator prevLayer = layerList->end() ,
+            currLayer = layerList->end();
+    for(IE_ConstMLayerList::const_iterator layerIter = layerList->begin();
+        layerIter != layerList->end();
+        layerIter++
+        )
     {
-        currItem = listIter;
-        if((*currItem)->getToolType() == ToolType::Ruler)
-        {   if(prevLine!=layersList.end())
+        currLayer = layerIter;
+        if( currLayer.i->t()->getToolType() == ToolType::Ruler)
+        {   if(prevLayer!=layerList->end())
             {
-                pModel->removeLayer(prevLine);
-                layersList.erase(prevLine);
+                pModel->removeLayer(prevLayer.i->t());
             }
-            prevLine = currItem;
+            prevLayer = currLayer;
 
-            line = static_cast<QGraphicsLineItem*>( (QGraphicsItem*)(prevLine.i->t()->parentItem()) );
+            line = static_cast<QGraphicsLineItem*>( (QGraphicsItem*)(prevLayer.i->t()->parentItem()) );
         }
     }
+
+
+
+//    QList<IE_ModelLayer *> layersList = pModel->getLayersList();
+//    QList<IE_ModelLayer *>::iterator prevLine =layersList.end() , currItem = layersList.end();
+//    for(QList<IE_ModelLayer *>::iterator listIter = layersList.begin();listIter!=layersList.end();listIter++ )
+//    {
+//        currItem = listIter;
+//        if((*currItem)->getToolType() == ToolType::Ruler)
+//        {   if(prevLine!=layersList.end())
+//            {
+//                pModel->removeLayer(prevLine);
+//                layersList.erase(prevLine);
+//            }
+//            prevLine = currItem;
+
+//            line = static_cast<QGraphicsLineItem*>( (QGraphicsItem*)(prevLine.i->t()->parentItem()) );
+//        }
+//    }
 
     emit(itemsInModelWasChanged());
 }
 
 void IE_ToolCalibration::openImage()
 {
-
-    pModel->initAsNewModel(TSP_PatientData(), IEM_type::None, IE_ProfileType::MeasureIndex);
+    pModel->initAsNewModel(TSP_PatientData(), IEM_type::None, IE_ProfileType::MeasureIndex, true);
 }
 
 qreal IE_ToolCalibration::calculateMeasure(int measureLenght)

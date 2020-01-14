@@ -12,6 +12,8 @@
 #include <QtCharts/QCategoryAxis>
 #include "ie_compute.h"
 
+QT_CHARTS_USE_NAMESPACE
+
 /*!
   \brief Класс формирования отчета редактора изображения.
     Политика использования:
@@ -25,12 +27,13 @@ class IE_Report: public QObject
 {
     Q_OBJECT
 public:
-    explicit IE_Report(_global_ie * pieg);
+    explicit IE_Report(_global_ie * pieg, QObject * parent);
 
     //! \todo РЕАЛИЗОВАТЬ
     void init(IE_Compute::OutputData computeData) {}
-    //! \todo РЕАЛИЗОВАТЬ
-    void makeReport() {}
+
+    static void makeReport(QObject * parent,_global_ie * pieg, IE_Compute::InputData id);
+    void makeReport(IE_Compute::InputData id);
     //! \todo добавить путь где сохранять
     //! \todo РЕАЛИЗОВАТЬ
     int saveReport(){}
@@ -38,14 +41,14 @@ public:
     //! \todo РЕАЛИЗОВАТЬ
     void addDocObjToFirstReportSection(){}
 
-    void makeHairDensityReport_dialog(IE_Compute::OutputData computeData);
-    void makeHairDiameterReport_dialog(IE_Compute::OutputData computeData);
-    void makeTrichoscopyReport_dialog(IE_Compute::OutputData computeData);
-
 
 
 private:
     _global_ie *_p_ie_global_data;
+    QWidget * m_pWidget;
+    void makeHairDensityReport_dialog(IE_Compute::OutputData computeData);
+    void makeHairDiameterReport_dialog(IE_Compute::OutputData computeData);
+    void makeTrichoscopyReport_dialog(IE_Compute::OutputData computeData);
 };
 
 #endif // IE_REPORT_H

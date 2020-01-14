@@ -4,30 +4,27 @@
 {
     // ключ к глобальному объекту с информацией о масштабе итд
     qsrand(100000);
-    globalDataKey = qrand();
-    __global_data = new _global_ie(globalDataKey);
-    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(&layersList,__global_data);
+    m_ieGlobalData = new _global_ie();
+    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(&layersList,m_ieGlobalData);
+
+    m_modelLayerCnt.m_pGScene = this;
 
     initFieldOfViewControllerInfoDock();
-    initLayersDock();
+//    initLayersDock();
 
 
 
-    connect(this, &IE_Model::changed, this,
-            &IE_Model::layersController);
     connect(&_modelData, &IE_ModelData::updated, [this]()
     {
-        __global_data->setModelDirPath(_modelData.getModelDir().path(),globalDataKey);
-        __global_data->setModelResDirPath(QString("%1/%2")
+        m_ieGlobalData->setModelDirPath(_modelData.getModelDir().path());
+        m_ieGlobalData->setModelResDirPath(QString("%1/%2")
                                           .arg(_modelData.getModelDir().path())
-                                          .arg(_modelData.getResDir().path()),
-                                          globalDataKey
+                                          .arg(_modelData.getResDir().path())
                                           );
-        __global_data->setTmp_modelDirPath(_modelData.getTmpDir().path(),globalDataKey);
-        __global_data->setTmp_modelResDirPath(QString("%1/%2")
+        m_ieGlobalData->setTmp_modelDirPath(_modelData.getTmpDir().path());
+        m_ieGlobalData->setTmp_modelResDirPath(QString("%1/%2")
                                               .arg(_modelData.getTmpDir().path())
-                                              .arg(_modelData.getResDir().path()),
-                                              globalDataKey
+                                              .arg(_modelData.getResDir().path())
                                               );
     });
     connect(m_pFieldOfViewCnt, &IE_FieldOfView_Controller::addNewLayer, this, &IE_Model::addLayer);
@@ -41,6 +38,14 @@
     });
     connect(m_pFieldOfViewCnt, &IE_FieldOfView_Controller::layerAction,this, &IE_Model::layerAction);
     connect(this, &IE_Model::layerListWasChanged, m_pFieldOfViewCnt, &IE_FieldOfView_Controller::checkLayerList);
+
+    // соединения для IE_ModelLayer_Controller
+
+    connect(&m_modelLayerCnt,
+            &IE_ModelLayer_Controller::layerListWasChanged,
+            this,
+            &IE_Model::layerListWasChanged
+            );
 }
 
             IE_Model::~IE_Model   ()
@@ -100,7 +105,7 @@ int         IE_Model::read                   (const QJsonObject &json)
 {
     _modelData.read(json);
 
-    __global_data->setMeasureIndex(json["measureIndex"].toDouble(),globalDataKey);
+    m_ieGlobalData->setMeasureIndex(json["measureIndex"].toDouble());
     //! \todo Добавить пороги!
     QJsonArray layerArray = json["layerArray"].toArray();
     for (int layerIndex = 0; layerIndex < layerArray.size(); ++layerIndex) {
@@ -114,25 +119,25 @@ int         IE_Model::read                   (const QJsonObject &json)
                 case ToolType::MainImage:
                 {
                     pParentItem = new IE_Tool_Image();
-                    dynamic_cast<IE_Tool_Image*>(pParentItem)->setDirs(__global_data->getModelResDirPath(),
-                                                                       __global_data->getModelDirPath(),
-                                                                       __global_data->getTmp_modelResDirPath()
+                    dynamic_cast<IE_Tool_Image*>(pParentItem)->setDirs(m_ieGlobalData->getModelResDirPath(),
+                                                                       m_ieGlobalData->getModelDirPath(),
+                                                                       m_ieGlobalData->getTmp_modelResDirPath()
                                                                        );
                     break;
                 }
                 case ToolType::DensityAndDiameter:
                 {
-                    pParentItem = new IE_Line_DD(__global_data);
+                    pParentItem = new IE_Line_DD(m_ieGlobalData);
                     break;
                 }
                 case ToolType::Ruler:
                 {
-                    pParentItem = new IERuler(__global_data);
+                    pParentItem = new IERuler(m_ieGlobalData);
                     break;
                 }
                 case ToolType::SimpleLine:
                 {
-                    pParentItem = new IELine(__global_data);
+                    pParentItem = new IELine(m_ieGlobalData);
                     break;
                 }
                 case ToolType::Marker_FollicularUnit:
@@ -230,7 +235,7 @@ int         IE_Model::read                   (const QJsonObject &json)
 int         IE_Model::write                  (QJsonObject &json) const
 {
     _modelData.write(json);
-    json["measureIndex"] = __global_data->getMeasureIndex();
+    json["measureIndex"] = m_ieGlobalData->getMeasureIndex();
     //! \todo Добавить пороги!
     QJsonArray layerArray,  relatedModelsArray;
     foreach(IE_ModelLayer* layer, layersList)
@@ -250,7 +255,11 @@ int         IE_Model::write                  (QJsonObject &json) const
     return 0;
 }
 
-int         IE_Model::initAsNewModel         (TSP_PatientData patientData, IEM_type iem_type, IE_ProfileType ie_type, bool dialog)
+int         IE_Model::initAsNewModel         (TSP_PatientData patientData,
+                                              IEM_type iem_type,
+                                              IE_ProfileType ie_type,
+                                              bool dialog
+                                              )
 {
     _modelData.initNew(patientData);
     _modelData.setIem_type(iem_type);
@@ -278,6 +287,26 @@ int         IE_Model::initAsNewModel         (TSP_PatientData patientData, IEM_t
         pToolCnt->setToolSetType(ToolSet::Simple);
         break;
     }
+
+    }
+
+    switch (ie_type)
+    {
+    case IE_ProfileType::Trichogram:
+        break;
+    case IE_ProfileType::Trichoscopy:
+        break;
+    case IE_ProfileType::Phototrichogram:
+        break;
+    case IE_ProfileType::Simple:
+        break;
+    case IE_ProfileType::MeasureIndex:
+        pToolCnt->setToolSetType(ToolSet::MeasureIndex);
+        break;
+    case IE_ProfileType::Full:
+        break;
+    case IE_ProfileType::OnlyImage:
+        break;
     }
 
 
@@ -310,7 +339,7 @@ int         IE_Model::initWithModel          (TSP_PatientData patientData)
     {
         patientData.modelFilePath = QFileDialog::getOpenFileName(nullptr,
                                                              "Выбор модели изображения",
-                                                             __global_data->getLastSelectedDirByUser(),
+                                                             m_ieGlobalData->getLastSelectedDirByUser(),
                                                              QString("*%1.%2")  .arg(IE_MODEL_FILE_NAME_POSTFIX)
                                                                                 .arg(IE_MODEL_FILE_NAME_EXTENSION)
                                                              );
@@ -382,12 +411,12 @@ QRectF      IE_Model::getModelRect           () const
 
 qreal       IE_Model::getMeasureIndex        () const
 {
-    return __global_data->getMeasureIndex();
+    return m_ieGlobalData->getMeasureIndex();
 }
 void        IE_Model::setMeasureIndex        (const qreal &value)
 {
-    __global_data->setMeasureIndex(value, globalDataKey);
-    __global_data->setUnitType(UnitType::mm, globalDataKey);
+    m_ieGlobalData->setMeasureIndex(value);
+    m_ieGlobalData->setUnitType(UnitType::mm);
     emit(measureIndexChanged(value));
 }
 ToolsController *
@@ -409,6 +438,11 @@ QList<IE_ModelLayer*>::const_iterator
     if(layersList.isEmpty())
         return layersList.end();
     return layersList.begin();
+}
+
+IE_ConstMLayerListConstPtr IE_Model::getConstModelLayerListConstPtr() const
+{
+    return m_modelLayerCnt.getConstMLayerConstPtr();
 }
 
 QList<IE_ModelLayer *>
@@ -447,7 +481,7 @@ QList<IE_ModelLayer*>::iterator
 }
 _global_ie *IE_Model::getPGlobal_data() const
 {
-    return __global_data;
+    return m_ieGlobalData;
 }
 QStringList IE_Model::getRelatedModelList() const
 {
@@ -456,7 +490,7 @@ QStringList IE_Model::getRelatedModelList() const
 
 QString IE_Model::getPath()
 {
-    return __global_data->getModelDirPath();
+    return m_ieGlobalData->getModelDirPath();
 }
 
 IEM_type IE_Model::getIEM_type()
@@ -500,25 +534,30 @@ QDockWidget *IE_Model::initFieldOfViewControllerInfoDock()
     return m_pFVCDockWidget;
 }
 
-void        IE_Model::makeHairDensityComputeWithWidget
+void IE_Model::makeReport(IE_ReportType rt)
+{
+
+}
+
+/*void        IE_Model::makeHairDensityComputeWithWidget
                                                         ()
 {
     //! \bug Утечка памяти!
-    IE_Report * pReport = new IE_Report(__global_data);
-    IE_Compute comp(__global_data,&layersList);
+    IE_Report * pReport = new IE_Report(m_ieGlobalData);
+    IE_Compute comp(m_ieGlobalData,&layersList);
 
     pReport->makeHairDensityReport_dialog(comp.compute(IE_Compute::ComputeType::HairDensity));
-}
+}*/
 
-void        IE_Model::makeHairDiameterComputeWithWidget
+/*void        IE_Model::makeHairDiameterComputeWithWidget
                                                         ()
 {
     //! \bug Утечка памяти!
-    IE_Report * pReport = new IE_Report(__global_data);
-    IE_Compute comp(__global_data,&layersList);
+    IE_Report * pReport = new IE_Report(m_ieGlobalData);
+    IE_Compute comp(m_ieGlobalData,&layersList);
 
     pReport->makeHairDiameterReport_dialog(comp.compute(IE_Compute::ComputeType::HairDiameter));
-}
+}*/
 
 
 
@@ -562,13 +601,13 @@ void        IE_Model::setInputArgs           ()
 
     lst << UnitTypeTitle[0] << UnitTypeTitle[1] << UnitTypeTitle[2] << UnitTypeTitle[3] << UnitTypeTitle[4];
     pcbo->addItems(lst);
-    pcbo->setCurrentIndex(__global_data->getUnitType());
+    pcbo->setCurrentIndex(m_ieGlobalData->getUnitType());
     pVertBoxLayout->addWidget(pLabel);
     pVertBoxLayout->addWidget(pcbo);
 
     connect(ppbSave, &QPushButton::released, [this, pcbo]()
     {
-        __global_data->setIndexUnitType(pcbo->currentIndex(), globalDataKey);
+        m_ieGlobalData->setIndexUnitType(pcbo->currentIndex());
     });
 
 
@@ -579,7 +618,7 @@ void        IE_Model::setInputArgs           ()
     QLineEdit *pLineEdit = new QLineEdit(locPDialog);
     pLabel->setBuddy(pLineEdit);
     //pSpinBox->setEnabled(false);
-    pLineEdit->setText(QString().number(__global_data->getThreshold_TW()));
+    pLineEdit->setText(QString().number(m_ieGlobalData->getThreshold_TW()));
 
     pVertBoxLayout->addWidget(pLabel);
     pHorBoxLayout->addWidget(pLineEdit);
@@ -595,7 +634,7 @@ void        IE_Model::setInputArgs           ()
 
     connect(ppbSave, &QPushButton::released, [this, pLineEdit]()
     {
-        __global_data->setThreshold_TW(QString(pLineEdit->text()).toDouble(), globalDataKey);
+        m_ieGlobalData->setThreshold_TW(QString(pLineEdit->text()).toDouble());
     });
 
 
@@ -605,7 +644,7 @@ void        IE_Model::setInputArgs           ()
     pHorBoxLayout = new QHBoxLayout(locPDialog);
     pLineEdit = new QLineEdit(locPDialog);
     pLabel->setBuddy(pLineEdit);
-    pLineEdit->setText(QString().number(__global_data->getThreshold_thinHair()));
+    pLineEdit->setText(QString().number(m_ieGlobalData->getThreshold_thinHair()));
 
     pVertBoxLayout->addWidget(pLabel);
     pHorBoxLayout->addWidget(pLineEdit);
@@ -618,7 +657,7 @@ void        IE_Model::setInputArgs           ()
 
     connect(ppbSave, &QPushButton::released, [this, pLineEdit]()
     {
-        __global_data->setThreshold_thinHair(QString(pLineEdit->text()).toDouble(), globalDataKey);
+        m_ieGlobalData->setThreshold_thinHair(QString(pLineEdit->text()).toDouble());
     });
 
     pLabel = new QLabel("Верхний порог для <b>среднего</b> волоса:");
@@ -627,7 +666,7 @@ void        IE_Model::setInputArgs           ()
     pHorBoxLayout = new QHBoxLayout(locPDialog);
     pLineEdit = new QLineEdit(locPDialog);
     pLabel->setBuddy(pLineEdit);
-    pLineEdit->setText(QString().number(__global_data->getThreshold_mediumHair()));
+    pLineEdit->setText(QString().number(m_ieGlobalData->getThreshold_mediumHair()));
 
     pVertBoxLayout->addWidget(pLabel);
     pHorBoxLayout->addWidget(pLineEdit);
@@ -640,7 +679,7 @@ void        IE_Model::setInputArgs           ()
 
     connect(ppbSave, &QPushButton::released, [this, pLineEdit]()
     {
-        __global_data->setThreshold_mediumHair(QString(pLineEdit->text()).toDouble(), globalDataKey);
+        m_ieGlobalData->setThreshold_mediumHair(QString(pLineEdit->text()).toDouble());
     });
 
 
@@ -657,6 +696,13 @@ void        IE_Model::setInputArgs           ()
 
 QDialog::DialogCode IE_Model::makeDialogForSetupModelAsNew()
 {
+    if(_modelData.getProfile() == IE_ProfileType::MeasureIndex)
+    {
+        m_pFieldOfViewCnt->init(IE_FieldOfView_Controller::Quantity::One);
+        return QDialog::Accepted;
+    }
+
+
     QDialog * locPDialog = new QDialog();
     QVBoxLayout * pMainLayout = new QVBoxLayout(locPDialog);
     pMainLayout->addWidget(new QLabel("Первичные настройки для создания нового обследования:",locPDialog));
@@ -738,112 +784,32 @@ QDialog::DialogCode IE_Model::makeDialogForSetupModelAsNew()
 
 // ------- Layer manipulations
 
-QDockWidget*IE_Model::initLayersDock         ()
-{
-    pDockLayers = new QDockWidget("Слои");
-
-
-    QListWidget * pDockLayersListWidget = new QListWidget();
-    pDockLayersListWidget->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(m_pFieldOfViewCnt, &IE_FieldOfView_Controller::boundingRectWasChanged, [this, pDockLayersListWidget](QRectF rectF)
-    {
-        QList<IE_ModelLayer *> activeFieldOfViewLayerList = m_pFieldOfViewCnt->getActiveFieldOfViewLayerList();
-        pDockLayersListWidget->clear();
-
-        for (QList<IE_ModelLayer*>::iterator iter = activeFieldOfViewLayerList.begin();
-             iter!=activeFieldOfViewLayerList.end();iter++
-             )
-            pDockLayersListWidget->addItem( IE_ModelLayer::toStr( iter.i->t()->getToolType() ) );
-    });
-
-
-
-    connect(this, &IE_Model::layerListWasChanged, [this, pDockLayersListWidget]()
-    {
-        QList<IE_ModelLayer *> activeFieldOfViewLayerList = m_pFieldOfViewCnt->getActiveFieldOfViewLayerList();
-        pDockLayersListWidget->clear();
-
-        for (QList<IE_ModelLayer*>::iterator iter = activeFieldOfViewLayerList.begin();
-             iter!=activeFieldOfViewLayerList.end();iter++
-             )
-            pDockLayersListWidget->addItem( IE_ModelLayer::toStr( iter.i->t()->getToolType() ) );
-    });
-    connect(pDockLayersListWidget, &QListWidget::customContextMenuRequested,
-                [this, pDockLayersListWidget](const QPoint &pos)
-    {
-        QList<IE_ModelLayer *> activeFieldOfViewLayerList = m_pFieldOfViewCnt->getActiveFieldOfViewLayerList();
-        QMenu contextMenu("Context menu");
-
-                int row = pDockLayersListWidget->indexAt(pos).row();
-                if(row==-1)
-                    return;
-                /// \bug : при удалении слоя все вылетает, когда нажимаешь на другой слой
-                   QAction action1("Удалить слой");
-                   connect(&action1, &QAction::triggered, [this, row](){
-                        this->removeLayer(row);
-                   });
-                   contextMenu.addAction(&action1);
-
-                   bool visible = activeFieldOfViewLayerList.at(row)->isVisible();
-
-                   QAction action2;
-
-                   if(visible)
-                       action2.setText("Скрыть слой");
-                   else
-                       action2.setText("Отобразить слой");
-                   connect(&action2, &QAction::triggered, [this, row, visible](){
-                        if(visible)
-                            this->hideLayer(row);
-                        else {
-                            this->showLayer(row);
-                        }
-                   });
-                   contextMenu.addAction(&action2);
-
-
-                   contextMenu.exec(pDockLayersListWidget->mapToGlobal(pos));
-    });
-    connect(pDockLayersListWidget, &QListWidget::clicked, [this](const QModelIndex &tmp)
-    {
-        QList<IE_ModelLayer *> activeFieldOfViewLayerList = m_pFieldOfViewCnt->getActiveFieldOfViewLayerList();
-           if(tmp.isValid())
-               pToolCnt->setPActiveToolForEditing(activeFieldOfViewLayerList.at(tmp.row()));
-           else
-               pToolCnt->resetEditingMode();
-    });
-
-    pDockLayers->setWidget(pDockLayersListWidget);
-
-
-
-    return pDockLayers;
-}
 
 void        IE_Model::addLayerViaToolCnt     ()
 {
-    if(pToolCnt)
-    {
-
-        addLayer(pToolCnt->getPActiveTool());
-    }
+    qDebug() << "IE_Model::addLayerViaToolCnt";
+    if(!pToolCnt)
+        return;
+    qDebug() << "IE_Model::addLayerViaToolCnt 2";
+    addLayer(pToolCnt->getPActiveTool());
 }
 
 void        IE_Model::addLayer               (IE_ModelLayer* layerToAdd)
 {
-    for (QList<IE_ModelLayer*>::iterator iter = layersList.begin();iter!=layersList.end();iter++)
-        if((*iter) == layerToAdd)
-        {
-            qWarning() << "Tring to add existed layer.";
-            return;
-        }
+    m_modelLayerCnt.addLayer(layerToAdd);
+//    for (QList<IE_ModelLayer*>::iterator iter = layersList.begin();iter!=layersList.end();iter++)
+//        if((*iter) == layerToAdd)
+//        {
+//            qWarning() << "Tring to add existed layer.";
+//            return;
+//        }
 
-    addItem(layerToAdd->parentItem());
-    layersList.append(layerToAdd);
-    emit layerListWasChanged();
+//    addItem(layerToAdd->parentItem());
+//    layersList.append(layerToAdd);
+//    emit layerListWasChanged();
 }
 
-void        IE_Model::showLayer              (int listIndex)
+/*void        IE_Model::showLayer              (int listIndex)
 {
     IE_ModelLayer* foundLayer = getLayerByListIndex     (listIndex);
     if(!foundLayer)
@@ -853,8 +819,8 @@ void        IE_Model::showLayer              (int listIndex)
     }
 
     foundLayer->unhide();
-}
-void        IE_Model::hideLayer              (int listIndex)
+}*/
+/*void        IE_Model::hideLayer              (int listIndex)
 {
     IE_ModelLayer* foundLayer = getLayerByListIndex(listIndex);
     if(!foundLayer)
@@ -864,40 +830,15 @@ void        IE_Model::hideLayer              (int listIndex)
     }
 
     foundLayer->hide();
-}
+}*/
 
-/// \todo !!!!!! ------- :
-void        IE_Model::layersController       ()
-{
-//    static QList<QGraphicsItem*> itemsList;
-//    itemsList = items(Qt::AscendingOrder);
-
-//    for (QListIterator<QGraphicsItem*> listIter(itemsList);listIter.hasNext();)
-//    {
-//        static QGraphicsItem* current;
-//        current = listIter.next();
-
-//        if(layersMap.find(current) == layersMap.end() ) // удалить
-//        {
-//            LayersData *newLayer = new LayersData();
-////            newLayer->
-////            layersList.append()
-//        }
-//        else // добавить
-//        {
-
-//        }
-//    }
-
-}
-
-void        IE_Model::removeLayer             (int listIndex)
+/*void        IE_Model::removeLayer             (int listIndex)
 {
     QList<IE_ModelLayer*>::iterator iterResult = getLayerIteratorByListIndex(listIndex);
     if(iterResult == layersList.end())
         return;
     removeLayer(iterResult);
-}
+}*/
 void        IE_Model::removeLayer             (QList<IE_ModelLayer*>::iterator iter)
 {
     QGraphicsItem *pGraphicsItem = *iter;
@@ -905,22 +846,33 @@ void        IE_Model::removeLayer             (QList<IE_ModelLayer*>::iterator i
 //    if((*iter)->getToolType() == ToolType::MainImage)
 //        return;
 
+    m_modelLayerCnt.removeLayer(iter.i->t());
+    pToolCnt->resetPActiveTool();
+
     for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
          tmpIter!=layersList.end();tmpIter++)
     {
         if(*iter == *tmpIter)
         {
-            pGraphicsItem = (QGraphicsItem*) *tmpIter;
-            this->removeItem(pGraphicsItem->parentItem());
-            delete pGraphicsItem;
-            pGraphicsItem = nullptr;
-            layersList.erase(tmpIter);
-            emit layerListWasChanged();
-            pToolCnt->resetPActiveTool();
+
+
+
+//            pGraphicsItem = (QGraphicsItem*) *tmpIter;
+//            this->removeItem(pGraphicsItem->parentItem());
+//            delete pGraphicsItem;
+//            pGraphicsItem = nullptr;
+//            layersList.erase(tmpIter);
+//            emit layerListWasChanged();
+
             break;
         }
     }
 
+}
+
+void IE_Model::removeLayer(IE_ModelLayer_PublicType pLayer)
+{
+    m_modelLayerCnt.removeLayer(pLayer);
 }
 
 void IE_Model::hideLayer(QList<IE_ModelLayer*>::iterator iter)

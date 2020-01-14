@@ -114,6 +114,8 @@ public:
     //! \warning срочно убрать из реализации передачу подобного списка
     QList<IE_ModelLayer * > :: const_iterator
                             getLayersListIter() const;
+    IE_ConstMLayerListConstPtr
+                            getConstModelLayerListConstPtr() const;
 
     //! \warning срочно убрать из реализации передачу подобного списка
     QList<IE_ModelLayer * > getLayersList() const;
@@ -132,16 +134,17 @@ public:
     void                    setMeasureIndex(const qreal &value);
     void                    setPToolCnt(ToolsController *value);
 
-    void                    showLayer(int listIndex);
-    void                    hideLayer(int listIndex);
+//    void                    showLayer(int listIndex);
+//    void                    hideLayer(int listIndex);
 
     QDockWidget*            initInfoDock();
-    QDockWidget*            initLayersDock();
+//    QDockWidget*            initLayersDock();
     QDockWidget*            initToolInfoDock();
     QDockWidget*            initFieldOfViewControllerInfoDock();
 
-    void                    makeHairDensityComputeWithWidget();
-    void                    makeHairDiameterComputeWithWidget();
+//    void                    makeHairDensityComputeWithWidget();
+//    void                    makeHairDiameterComputeWithWidget();
+    void                    makeReport(IE_ReportType rt);
     void                    setInputArgs();
 
     qreal                   computeSquare();
@@ -170,13 +173,15 @@ public slots:
     //! \todo манипуляции со слоями должны происходить через метод makeActionWithLayer(...)
     void                    addLayer(IE_ModelLayer* layerToAdd);
     void                    addLayerViaToolCnt();
-
-    void                    removeLayer(int listIndex);
+    //! \warning    исправить параметр
     void                    removeLayer(QList<IE_ModelLayer*>::iterator iter);
+    void                    removeLayer(IE_ModelLayer_PublicType pLayer);
+    //! \warning    исправить параметр
     void                    hideLayer(QList<IE_ModelLayer*>::iterator iter);
+    //! \warning    исправить параметр
     void                    showLayer(QList<IE_ModelLayer*>::iterator iter);
 
-
+    //! \warning    исправить параметр
     void                    layerAction(IE_ModelLayer::Action action,
                                         QList<IE_ModelLayer*>::iterator iter
                                         );
@@ -198,15 +203,11 @@ private:
                             * m_pFieldOfViewCnt;
     IE_ModelData            _modelData;
 
-    _global_ie              * __global_data;
-
-
-    int globalDataKey; // ключ владения глобальным объектом
+    _global_ie              * m_ieGlobalData;
 
     QDialog::DialogCode makeDialogForSetupModelAsNew();
 
 private slots:
-    void                    layersController();
     void                    selectedLayer(int row);
 };
 

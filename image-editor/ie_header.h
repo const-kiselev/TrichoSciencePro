@@ -247,7 +247,13 @@ static ToolType convertToolTitleToToolType(QString toolTitle)
     if(toolTitle == "DensityAndDiameter") return ToolType::DensityAndDiameter;
 }
 
-enum class ToolSet {AllTools, CallibrationToolSet, HairDencity, Simple, TrichoscopyPatterns};
+enum class ToolSet {
+    AllTools,
+    MeasureIndex,
+    HairDencity,
+    Simple,
+    TrichoscopyPatterns
+};
 
 
 
@@ -275,7 +281,8 @@ enum class IEM_type
     AssessmentOfScalp,
     AssessmentOfHairRoots,
     AssessmentOfHairRods,
-    DermatoscopyOfNeoplasms
+    DermatoscopyOfNeoplasms,
+    MeasureIndex
 
 };
 
@@ -349,6 +356,13 @@ struct ToolTypeStruct
 {
     ToolType type;
     QAction * pAction;
+};
+
+enum class IE_ReportType
+{
+    Full,
+    HairDensity,
+    Trichoscopy
 };
 
 

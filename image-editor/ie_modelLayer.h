@@ -20,8 +20,8 @@ public:
 //    explicit IE_ModelLayer(ToolType tt, QGraphicsItem *pLayerGraphicsItem);
     ~IE_ModelLayer() override;
     static QString toStr(ToolType tt);
-    ToolType getToolType(){return toolType;}
-    bool isVisible(){return visible;}
+    ToolType getToolType() const {return toolType;}
+    bool isVisible() const {return visible;}
 
     QRectF boundingRect() const override;
 
@@ -35,10 +35,12 @@ public:
     void show();
     void unhide();
 
-    ie_tool* getToolPtr();
+    ie_tool* getToolPtr() const;
 
     void read(const QJsonObject &json);
     void write(QJsonObject &json) const;
+
+    void makeAction(Action act);
 
 private:
     ie_tool* pTool;
@@ -49,9 +51,12 @@ private:
 };
 Q_DECLARE_METATYPE(IE_ModelLayer*)
 
-typedef QList<const IE_ModelLayer*> IE_ConstMLayerList;
+
+typedef const IE_ModelLayer* IE_ModelLayer_PublicType;
+typedef QList<IE_ModelLayer_PublicType> IE_ConstMLayerList;
 typedef const IE_ConstMLayerList* IE_ConstMLayerListConstPtr;
-typedef QListIterator<const IE_ModelLayer*> IE_MLayerListIter; // итератор списка
+typedef QListIterator<IE_ModelLayer_PublicType> IE_MLayerListIter; // итератор списка
 typedef QList<const IE_ModelLayer*>::iterator IE_MLIter; // итератор на константный элемент списка
+
 
 #endif // IE_MODELLAYER_H

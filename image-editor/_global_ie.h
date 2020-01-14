@@ -15,6 +15,15 @@ static const char   * IE_MODEL_DIR = "./IE_models",
                     * IE_TMP_DIR = "./tmp", * IE_TMP_DIR_NAME = "tmp";
 
 
+class IE_Model;
+
+
+//! \brief класс для хранения глобальных данных редактора изображений.
+//!
+//! В основном используется для хранения:
+//! - масштаба изображения в экзмепляре модели изображения
+//! - константы вычислений
+//! - директории работы документа
 
 class _global_ie:public QObject
 {
@@ -37,39 +46,45 @@ public slots:
   qreal convertUnitedWithForamtF(qreal value, UnitType uType) const;
 
 
-  void setMeasureIndex(qreal mIndex, int key);
-  void setUnitType(UnitType uType, int key);
-  void setIndexUnitType(int uType, int key);
-  void setThreshold_TW(qreal data, int key);
-  void setThreshold_thinHair(qreal data, int key);
-  void setThreshold_mediumHair(qreal data, int key);
-public:
-//  void setOwner(int randomKey);
 
-    explicit _global_ie(int randomKey, QObject *parent = nullptr);
+public:
+
+    explicit _global_ie(QObject *parent = nullptr);
 
   QString getModelDirPath() const;
-  void setModelDirPath(const QString &value, int key);
+
 
   QString getModelResDirPath() const;
-  void setModelResDirPath(const QString &value, int key);
+
 
   QString getTmp_modelDirPath() const;
-  void setTmp_modelDirPath(const QString &value, int key);
+
 
   QString getTmp_modelResDirPath() const;
-  void setTmp_modelResDirPath(const QString &value, int key);
+
 
   QString getLastSelectedDirByUser() const;
   void setLastSelectedDirByUser(const QString &value);
 
 private:
+  friend class IE_Model;
+
   qreal threshold_terminal_wellus,threshold_thinHair_top, threshold_mediumHair_top;
-  bool ownerSet;
-  int randomKey;
+
   qreal measureIndex;
   UnitType unitType, measureIndexUnitType;
   QString modelDirPath, modelResDirPath, tmp_modelDirPath, tmp_modelResDirPath, lastSelectedDirByUser;
+private slots:
+  void setMeasureIndex(qreal mIndex);
+  void setUnitType(UnitType uType);
+  void setIndexUnitType(int uType);
+  void setThreshold_TW(qreal data);
+  void setThreshold_thinHair(qreal data);
+  void setThreshold_mediumHair(qreal data);
+  void setModelDirPath(const QString &value);
+  void setModelResDirPath(const QString &value);
+  void setTmp_modelDirPath(const QString &value);
+  void setTmp_modelResDirPath(const QString &value);
 };
 
 

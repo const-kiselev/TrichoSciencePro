@@ -1,14 +1,14 @@
 #include "ie_fieldOfView_controller.h"
 #include "ie_fieldOfView_infoWidget.h"
 
-IE_FieldOfView_Controller::IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
+IE_FieldOfView_Controller::IE_FieldOfView_Controller(IE_ConstMLayerListConstPtr modelLayerList,
                                                      _global_ie * pieg,
                                                      QObject *parent
                                                      ) :    QObject(parent),
                                                             m_quantityOfFields(0),
                                                             m_inited(false),
                                                             m_activeFVIndex(-1),
-                                                            layersList(ll),
+                                                            m_modelLayerList(modelLayerList),
                                                             m_p_ie_global_data(pieg)
 {
     m_pImageBaseCnt = nullptr;

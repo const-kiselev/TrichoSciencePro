@@ -32,7 +32,7 @@ public:
         Six = 6
     } quantityMax = Quantity::Six;
 
-    explicit IE_FieldOfView_Controller(QList<IE_ModelLayer*>*ll,
+    explicit IE_FieldOfView_Controller(IE_ConstMLayerListConstPtr modelLayerList,
                                        _global_ie * pieg,
                                        QObject *parent = nullptr
                                        );
@@ -92,7 +92,8 @@ private:
     bool m_inited;
     int m_activeFVIndex;
     QList<IE_FieldOfView*> m_fieldOfViewList;
-    QList<IE_ModelLayer*>   *layersList;
+//    QList<IE_ModelLayer*>   *layersList;
+    IE_ConstMLayerListConstPtr m_modelLayerList;
     _global_ie *    m_p_ie_global_data;
     IE_FieldOfView_ControllerInfoWidget * m_pInfoWidget;
     IE_ImageBaseCnt         * m_pImageBaseCnt;
@@ -103,6 +104,8 @@ private:
 
 
 };
+
+//-------------------------     FVC WIDGET     -------------------------
 
 class IE_FieldOfView_ControllerInfoWidget : public QWidget
 {

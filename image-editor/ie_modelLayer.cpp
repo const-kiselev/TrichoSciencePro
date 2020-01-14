@@ -102,7 +102,7 @@ void IE_ModelLayer::unhide()
     parentItem()->show();
 }
 
-ie_tool *IE_ModelLayer::getToolPtr(){
+ie_tool *IE_ModelLayer::getToolPtr() const{
     return pTool;
 }
 
@@ -132,6 +132,19 @@ void IE_ModelLayer::write(QJsonObject &json) const
     json["layerData"] = layerData;
     json["typeTitle"] = getToolTitle(toolType);
 
+}
+
+void IE_ModelLayer::makeAction(IE_ModelLayer::Action act)
+{
+    switch(act)
+    {
+        case Action::Hide:
+            hide();
+        break;
+        case Action::Show:
+            show();
+
+    }
 }
 
 

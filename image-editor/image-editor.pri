@@ -22,6 +22,7 @@ SOURCES += \
     $$PWD/ie_toolMarker.cpp \
     $$PWD/ie_toolRuler.cpp \
     $$PWD/ie_tool_follicularUnit.cpp \
+    $$PWD/ie_tool_gauge.cpp \
     $$PWD/ie_tool_image.cpp \
     $$PWD/ie_view.cpp \
     $$PWD/ie_fieldOfView.cpp \
@@ -49,6 +50,7 @@ HEADERS += \
     $$PWD/ie_toolLine.h \
     $$PWD/ie_toolRuler.h \
     $$PWD/ie_tool_follicularUnit.h \
+    $$PWD/ie_tool_gauge.h \
     $$PWD/ie_tool_image.h \
     $$PWD/ie_toolmarker.h \
     $$PWD/ie_view.h \

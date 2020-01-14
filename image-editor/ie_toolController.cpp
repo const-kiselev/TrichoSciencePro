@@ -449,7 +449,7 @@ void ToolsController::initToolActions()
 
         break;
     }
-    case ToolSet::CallibrationToolSet:
+    case ToolSet::MeasureIndex:
         toolsList << ToolType::Ruler
                   << ToolType::Zoom
                   << ToolType::NoneTool;
