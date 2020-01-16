@@ -147,7 +147,6 @@ public:
     void                    makeReport(IE_ReportType rt);
     void                    setInputArgs();
 
-    qreal                   computeSquare();
 
 signals:
     void                    changedModelSize(qreal fx, qreal fy);
@@ -173,18 +172,10 @@ public slots:
     //! \todo манипуляции со слоями должны происходить через метод makeActionWithLayer(...)
     void                    addLayer(IE_ModelLayer* layerToAdd);
     void                    addLayerViaToolCnt();
-    //! \warning    исправить параметр
-    void                    removeLayer(QList<IE_ModelLayer*>::iterator iter);
-    void                    removeLayer(IE_ModelLayer_PublicType pLayer);
-    //! \warning    исправить параметр
-    void                    hideLayer(QList<IE_ModelLayer*>::iterator iter);
-    //! \warning    исправить параметр
-    void                    showLayer(QList<IE_ModelLayer*>::iterator iter);
 
-    //! \warning    исправить параметр
     void                    layerAction(IE_ModelLayer::Action action,
-                                        QList<IE_ModelLayer*>::iterator iter
-                                        );
+                                        IE_ModelLayer_PublicType
+                                        layer);
 
 private:
     QFileInfo               modelDataFileInfo;

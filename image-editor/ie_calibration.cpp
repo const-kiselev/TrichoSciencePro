@@ -109,7 +109,7 @@ void IE_ToolCalibration::modelItemsControl()
         if( currLayer.i->t()->getToolType() == ToolType::Ruler)
         {   if(prevLayer!=layerList->end())
             {
-                pModel->removeLayer(prevLayer.i->t());
+                pModel->layerAction(IE_ModelLayer::Action::Remove, prevLayer.i->t());
             }
             prevLayer = currLayer;
 

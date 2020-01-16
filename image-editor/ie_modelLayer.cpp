@@ -75,7 +75,7 @@ void IE_ModelLayer::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
     //parentItem()->paint(painter, option, widget);
 }
 
-QPointF IE_ModelLayer::getPos()
+QPointF IE_ModelLayer::getPos() const
 {
     return parentItem()->pos();
 }

@@ -5,7 +5,9 @@
     // ключ к глобальному объекту с информацией о масштабе итд
     qsrand(100000);
     m_ieGlobalData = new _global_ie();
-    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(&layersList,m_ieGlobalData);
+    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(m_modelLayerCnt.getConstMLayerConstPtr(),
+                                                      m_ieGlobalData
+                                                      );
 
     m_modelLayerCnt.m_pGScene = this;
 
@@ -561,22 +563,7 @@ void IE_Model::makeReport(IE_ReportType rt)
 
 
 
-qreal       IE_Model::computeSquare          ()
-{
-    qreal sq = 1;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if( tmpIter.i->t()->getToolType() == ToolType::MainImage)
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
-        else if( tmpIter.i->t()->getToolType() == ToolType::ComputingArea )
-        {
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
-            break;
-        }
-    }
-    return sq;
-}
+
 
 void        IE_Model::setInputArgs           ()
 {
@@ -839,104 +826,27 @@ void        IE_Model::addLayer               (IE_ModelLayer* layerToAdd)
         return;
     removeLayer(iterResult);
 }*/
-void        IE_Model::removeLayer             (QList<IE_ModelLayer*>::iterator iter)
-{
-    QGraphicsItem *pGraphicsItem = *iter;
-
-//    if((*iter)->getToolType() == ToolType::MainImage)
-//        return;
-
-    m_modelLayerCnt.removeLayer(iter.i->t());
-    pToolCnt->resetPActiveTool();
-
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if(*iter == *tmpIter)
-        {
 
 
 
-//            pGraphicsItem = (QGraphicsItem*) *tmpIter;
-//            this->removeItem(pGraphicsItem->parentItem());
-//            delete pGraphicsItem;
-//            pGraphicsItem = nullptr;
-//            layersList.erase(tmpIter);
-//            emit layerListWasChanged();
 
-            break;
-        }
-    }
 
-}
 
-void IE_Model::removeLayer(IE_ModelLayer_PublicType pLayer)
-{
-    m_modelLayerCnt.removeLayer(pLayer);
-}
 
-void IE_Model::hideLayer(QList<IE_ModelLayer*>::iterator iter)
-{
-    QGraphicsItem *pGraphicsItem = *iter;
 
-//    if((*iter)->getToolType() == ToolType::MainImage)
-//        return;
-
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if(*iter == *tmpIter)
-        {
-            tmpIter.i->t()->hide();
-//            pGraphicsItem = (QGraphicsItem*) *tmpIter;
-//            this->removeItem(pGraphicsItem->parentItem());
-//            delete pGraphicsItem;
-//            pGraphicsItem = nullptr;
-//            layersList.erase(tmpIter);
-//            emit layerListWasChanged();
-//            pToolCnt->resetPActiveTool();
-            break;
-        }
-    }
-}
-
-void IE_Model::showLayer(QList<IE_ModelLayer*>::iterator iter)
-{
-    QGraphicsItem *pGraphicsItem = *iter;
-
-//    if((*iter)->getToolType() == ToolType::MainImage)
-//        return;
-
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList.begin();
-         tmpIter!=layersList.end();tmpIter++)
-    {
-        if(*iter == *tmpIter)
-        {
-            tmpIter.i->t()->show();
-//            pGraphicsItem = (QGraphicsItem*) *tmpIter;
-//            this->removeItem(pGraphicsItem->parentItem());
-//            delete pGraphicsItem;
-//            pGraphicsItem = nullptr;
-//            layersList.erase(tmpIter);
-//            emit layerListWasChanged();
-//            pToolCnt->resetPActiveTool();
-            break;
-        }
-    }
-}
-
-void IE_Model::layerAction(IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter)
+void IE_Model::layerAction(IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer)
 {
     switch (action)
     {
     case IE_ModelLayer::Action::Show:
-        showLayer(iter);
+        m_modelLayerCnt.showLayer(layer);
         break;
     case IE_ModelLayer::Action::Hide:
-        hideLayer(iter);
+        m_modelLayerCnt.hideLayer(layer);
         break;
     case IE_ModelLayer::Action::Remove:
-        removeLayer(iter);
+        m_modelLayerCnt.removeLayer(layer);
+        pToolCnt->resetPActiveTool();
         break;
     }
 }

@@ -69,13 +69,13 @@ signals:
     /// \todo связать с моделью
     void addNewLayer(IE_ModelLayer* pLayer);
     /// \todo связать с моделью
-    void removeLayer(QList<IE_ModelLayer*>::iterator iter);
+//    void removeLayer(QList<IE_ModelLayer*>::iterator iter);
     /// \todo связать с моделью
     /// \warning учесть вызов при различных изменениях связанных с FV
     void boundingRectWasChanged(QRectF);
-    void hideLayer(QList<IE_ModelLayer*>::iterator iter);
-    void layerAction(IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter);
-    void activeFVLayerListWasUpdated(QList<IE_ModelLayer*>);
+//    void hideLayer(QList<IE_ModelLayer*>::iterator iter);
+    void layerAction(IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer);
+    void activeFVLayerListWasUpdated(IE_ConstMLayerList layerList);
 
 
 
@@ -84,7 +84,7 @@ public slots:
     /// \todo связать с моделью
     QRectF getBoundingRectOfAllFieldOfView();
     void changeActiveFieldOfView(int index);
-    QList<IE_ModelLayer*> getActiveFieldOfViewLayerList();
+    IE_ConstMLayerList getActiveFieldOfViewLayerList();
     void checkLayerList();
 
 private:
@@ -132,7 +132,7 @@ signals:
 public slots:
     void changeQuantity(int q);
     void changeActiveFV(int index, QString fvNote);
-    void updateActiveFVLayerList(QList<IE_ModelLayer*> layerList);
+    void updateActiveFVLayerList(IE_ConstMLayerList layerList);
 
     friend class IE_FieldOfView_Controller;
 private:

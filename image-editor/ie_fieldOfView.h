@@ -10,7 +10,7 @@ class IE_FieldOfView : public QObject
     Q_OBJECT
 public:
     explicit IE_FieldOfView(uint index,
-                            QList<IE_ModelLayer*>*ll,
+                            IE_ConstMLayerListConstPtr modelLayerList,
                             _global_ie * pieg,
                             QObject *parent = nullptr
                             );
@@ -18,7 +18,7 @@ public:
     int                     read(const QJsonObject &json);
     int                     write(QJsonObject &json)const;
     //! функция удаления всех слоев, которые находятся в поле зрения
-    QList<IE_ModelLayer*> getLayers();
+    IE_ConstMLayerList getLayers();
     QStringList getLayerTitleList();
 
     void getSquare() {}
@@ -32,7 +32,7 @@ public:
 signals:
     void addNewLayer(IE_ModelLayer* pLayer);
     void boundingRectWasCganged();
-    void layerAction(IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter);
+    void layerAction(IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer);
 public slots:
     void showIntersectedLayersWithFv();
     void hideIntersectedLayersWithFv();
@@ -45,13 +45,15 @@ public slots:
 private:
     QRectF rectData;
     uint num;
-    QList<IE_ModelLayer*>   *layersList;
+//    QList<IE_ModelLayer*>   *layersList;
+    IE_ConstMLayerListConstPtr m_modelLayerList;
     _global_ie *    m_p_ie_global_data;
+    QString m_note;
 
 
-    IE_ModelLayer * findMainImageLayer();
-    QList<IE_ModelLayer*>::iterator findMainImageLayerIter();
-    inline IE_Tool_Image * convertToImageTool(IE_ModelLayer*pLayer);
+    IE_ModelLayer_PublicType findMainImageLayer();
+    IE_ConstMLayerList::const_iterator findMainImageLayerIter();
+    inline IE_Tool_Image * convertToImageTool(IE_ModelLayer_PublicType pLayer);
     void moveMainImage(QPointF pos);
     void resetData();
 };

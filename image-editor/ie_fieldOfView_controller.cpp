@@ -365,16 +365,14 @@ QRectF  IE_FieldOfView_Controller::getBoundingRectOfAllFieldOfView()
     answer.setTopLeft(QPointF(0,0));
     answer.setBottomRight(QPointF(0,0));
     //      находим САМУЮ нижнюю правую точку
-    for(int i = 0; i < m_quantityOfFields; i++)
+    for(uint i = 0; i < m_quantityOfFields; i++)
     {
         IE_FieldOfView * pfv = m_fieldOfViewList.at(i);
-        qDebug() << "!!!!!!! " << pfv->getRect();
         if(pfv->getRect().bottomRight().x() > answer.bottomRight().x())
             answer.setWidth(pfv->getRect().bottomRight().x());
         if(pfv->getRect().bottomRight().y() > answer.bottomRight().y())
             answer.setHeight(pfv->getRect().bottomRight().y());
     }
-    qDebug() << answer;
     return answer;
 }
 
@@ -390,11 +388,11 @@ void    IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
         m_pImageBaseCnt->setCurrentUserChoiceList(index);
 }
 
-QList<IE_ModelLayer *>
+IE_ConstMLayerList
         IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
 {
     if(!m_quantityOfFields)
-        return QList<IE_ModelLayer *>();
+        return IE_ConstMLayerList();
     return m_fieldOfViewList.at(m_activeFVIndex)->getLayers();
 }
 
@@ -417,7 +415,7 @@ QWidget *IE_FieldOfView_Controller::getFastManagerWidget() const
 
 void    IE_FieldOfView_Controller::addFieldOfView(int index)
 {
-    IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, layersList, m_p_ie_global_data);
+    IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, m_modelLayerList, m_p_ie_global_data);
     m_fieldOfViewList.append(tmpFV);
     connect(tmpFV, &IE_FieldOfView::addNewLayer, [this](IE_ModelLayer* pLayer)
     {
@@ -427,9 +425,9 @@ void    IE_FieldOfView_Controller::addFieldOfView(int index)
     {
         emit boundingRectWasChanged(getBoundingRectOfAllFieldOfView());
     });
-    connect(tmpFV, &IE_FieldOfView::layerAction, [this](IE_ModelLayer::Action action, QList<IE_ModelLayer*>::iterator iter)
+    connect(tmpFV, &IE_FieldOfView::layerAction, [this](IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer)
     {
-        emit layerAction(action, iter);
+        emit layerAction(action, layer);
     });
 
     m_quantityOfFields++;
@@ -698,11 +696,11 @@ void    IE_FieldOfView_ControllerInfoWidget::changeActiveFV(int index, QString f
     m_activeFVNote = fvNote;
 }
 
-void    IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(QList<IE_ModelLayer *> layerList)
+void    IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(IE_ConstMLayerList layerList)
 {
     m_pDockLayersListWidget->clear();
 
-    for (QList<IE_ModelLayer*>::iterator iter = layerList.begin();
+    for (IE_ConstMLayerList::const_iterator iter = layerList.begin();
          iter!=layerList.end();iter++
          )
     {

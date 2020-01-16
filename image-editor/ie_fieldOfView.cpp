@@ -1,12 +1,12 @@
 #include "ie_fieldOfView.h"
 
 IE_FieldOfView::IE_FieldOfView(uint num,
-                               QList<IE_ModelLayer*>*ll,
+                               IE_ConstMLayerListConstPtr modelLayerList,
                                _global_ie * pieg,
                                QObject *parent
                                ) :  QObject(parent),
                                     num(num),
-                                    layersList(ll),
+                                    m_modelLayerList(modelLayerList),
                                     m_p_ie_global_data(pieg)
 {
 
@@ -36,18 +36,19 @@ int IE_FieldOfView::write(QJsonObject &json) const
     return 0;
 }
 
-QList<IE_ModelLayer *> IE_FieldOfView::getLayers()
+IE_ConstMLayerList IE_FieldOfView::getLayers()
 {
-    QList<IE_ModelLayer *> list;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
-         tmpIter!=layersList->end();tmpIter++)
+    IE_ConstMLayerList list;
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
     {
-        if(tmpIter.i->t()->getToolType() == ToolType::MainImage)
+        if(layerIter.i->t()->getToolType() == ToolType::MainImage)
             continue;
-        QRectF layerRect = tmpIter.i->t()->boundingRect();
-        if(tmpIter.i->t()->getPos().x()>layerRect.topLeft().x()
-                && tmpIter.i->t()->getPos().y()>layerRect.topLeft().y())
-            layerRect.moveTopLeft(tmpIter.i->t()->getPos());
+        QRectF layerRect = layerIter.i->t()->boundingRect();
+        if(layerIter.i->t()->getPos().x()>layerRect.topLeft().x()
+                && layerIter.i->t()->getPos().y()>layerRect.topLeft().y())
+            layerRect.moveTopLeft(layerIter.i->t()->getPos());
         QRectF intersect = rectData.intersected(layerRect);
         if(intersect.isEmpty())
             continue;
@@ -56,7 +57,7 @@ QList<IE_ModelLayer *> IE_FieldOfView::getLayers()
         qreal   sihp = ih / ( layerRect.height() / 100 ),
                 siwp = iw / ( layerRect.width() / 100 );
          if(sihp >= 80 && siwp >= 80)
-             list.append(tmpIter.i->t());
+             list.append(layerIter.i->t());
     }
     return list;
 }
@@ -64,33 +65,35 @@ QList<IE_ModelLayer *> IE_FieldOfView::getLayers()
 QStringList IE_FieldOfView::getLayerTitleList()
 {
     QStringList strList;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
-         tmpIter!=layersList->end();tmpIter++)
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
     {
-        if(tmpIter.i->t()->getToolType() == ToolType::MainImage)
+        if(layerIter.i->t()->getToolType() == ToolType::MainImage)
             continue;
-        strList << getToolTitle(tmpIter.i->t()->getToolType());
+        strList << getToolTitle(layerIter.i->t()->getToolType());
     }
     return strList;
 }
 
 void IE_FieldOfView::removeIntersectedLayersWithFv()
 {
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
-             emit layerAction(IE_ModelLayer::Action::Remove, tmpIter);
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
+             emit layerAction(IE_ModelLayer::Action::Remove, layerIter.i->t());
 }
 
 void IE_FieldOfView::removeLayersAndMainImage()
 {
     {
-        QList<IE_ModelLayer*>::iterator pMainImageLayerIter
+        IE_ConstMLayerList::const_iterator pMainImageLayerIter
                 = findMainImageLayerIter();
-        if(pMainImageLayerIter!=layersList->end())
+        if(pMainImageLayerIter!=m_modelLayerList->end())
         {
-            layerAction(IE_ModelLayer::Action::Remove, pMainImageLayerIter);
-            pMainImageLayerIter = layersList->end();
+            layerAction(IE_ModelLayer::Action::Remove, pMainImageLayerIter.i->t());
+            pMainImageLayerIter = m_modelLayerList->end();
         }
     }
 //    IE_Tool_Image * pToolImage = convertToImageTool(findMainImageLayer());
@@ -102,36 +105,39 @@ void IE_FieldOfView::removeLayersAndMainImage()
 
 void IE_FieldOfView::hideLayer(IE_ModelLayer *pLayer)
 {
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
-        if(tmpIter.i->t() == pLayer)
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
+        if(layerIter.i->t() == pLayer)
         {
-            emit layerAction(IE_ModelLayer::Action::Hide, tmpIter);
+            emit layerAction(IE_ModelLayer::Action::Hide, layerIter.i->t());
             return;
         }
 }
 
 void IE_FieldOfView::unhideLayer(IE_ModelLayer *pLayer)
 {
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
-        if(tmpIter.i->t() == pLayer)
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
+        if(layerIter.i->t() == pLayer)
         {
-            emit layerAction(IE_ModelLayer::Action::Show, tmpIter);
+            emit layerAction(IE_ModelLayer::Action::Show, layerIter.i->t());
             return;
         }
 }
 
 void IE_FieldOfView::deleteLayer(IE_ModelLayer *pLayer)
 {
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
-        if(tmpIter.i->t() == pLayer)
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
+        if(layerIter.i->t() == pLayer)
         {
-            emit layerAction(IE_ModelLayer::Action::Remove, tmpIter);
+            emit layerAction(IE_ModelLayer::Action::Remove, layerIter.i->t());
             return;
         }
 }
@@ -196,47 +202,50 @@ void IE_FieldOfView::setPos(QPointF pos)
 
 void IE_FieldOfView::showIntersectedLayersWithFv()
 {
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
-        emit layerAction(IE_ModelLayer::Action::Show, tmpIter);
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
+        emit layerAction(IE_ModelLayer::Action::Show, layerIter.i->t());
 }
 
 void IE_FieldOfView::hideIntersectedLayersWithFv()
 {
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
-        emit layerAction(IE_ModelLayer::Action::Hide, tmpIter);
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
+        emit layerAction(IE_ModelLayer::Action::Hide, layerIter.i->t());
 }
 
-IE_ModelLayer *IE_FieldOfView::findMainImageLayer()
+IE_ModelLayer_PublicType IE_FieldOfView::findMainImageLayer()
 {
-    QList<IE_ModelLayer*>::iterator it = findMainImageLayerIter();
-    if(it!=layersList->end())
+    IE_ConstMLayerList::const_iterator it = findMainImageLayerIter();
+    if(it!=m_modelLayerList->end())
         return it.i->t();
     return nullptr;
 }
 
-QList<IE_ModelLayer*>::iterator IE_FieldOfView::findMainImageLayerIter()
+IE_ConstMLayerList::const_iterator IE_FieldOfView::findMainImageLayerIter()
 {
     uint i=0;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
-         tmpIter!=layersList->end();tmpIter++)
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
     {
         //! \warning для других типов слоев не будет работать.
-        if( tmpIter.i->t()->getToolType() == ToolType::MainImage)
+        if( layerIter.i->t()->getToolType() == ToolType::MainImage)
         {
             i++;
             if(i == num)
-                return tmpIter;
+                return layerIter;
         }
     }
     resetData();
-    return layersList->end();
+    return m_modelLayerList->end();
 }
 
-IE_Tool_Image *IE_FieldOfView::convertToImageTool(IE_ModelLayer *pLayer)
+IE_Tool_Image *IE_FieldOfView::convertToImageTool(IE_ModelLayer_PublicType pLayer)
 {
     if(!pLayer)
     {
@@ -250,23 +259,24 @@ IE_Tool_Image *IE_FieldOfView::convertToImageTool(IE_ModelLayer *pLayer)
 
 void IE_FieldOfView::moveMainImage(QPointF pos)
 {
-    IE_ModelLayer * pMainImageLayer = findMainImageLayer();
+    IE_ModelLayer_PublicType pMainImageLayer = findMainImageLayer();
     if(!pMainImageLayer)
     {
         resetData();
         return;
     }
     convertToImageTool(pMainImageLayer)->setPos(pos);
-    QList<IE_ModelLayer *> layers = getLayers();
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layers.begin();
-         tmpIter!=layers.end();tmpIter++)
+    IE_ConstMLayerList layers = getLayers();
+    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+         layerIter != m_modelLayerList->end();
+         layerIter++)
     {
 //        tmpIter.i->t()->moveBy(rectData.x()-pos.x(),
 //                               rectData.y()-pos.y()
 //                               );
-        tmpIter.i->t()->parentItem()->setPos(abs(tmpIter.i->t()->parentItem()->pos().x() - rectData.x())   + pos.x(),
-                                             abs(tmpIter.i->t()->parentItem()->pos().y() - rectData.y()) + pos.y()
-                                             );
+        layerIter.i->t()->parentItem()->setPos(abs(layerIter.i->t()->parentItem()->pos().x() - rectData.x())   + pos.x(),
+                                                abs(layerIter.i->t()->parentItem()->pos().y() - rectData.y()) + pos.y()
+                                               );
     }
     //pMainImageLayer->setPos(pos);
 

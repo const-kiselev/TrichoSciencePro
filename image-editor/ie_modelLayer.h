@@ -28,7 +28,7 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                      QWidget *widget) override;
 
-    QPointF getPos();
+    QPointF getPos() const;
     void setPos(QPointF pos);
 
     void hide();
@@ -58,5 +58,6 @@ typedef const IE_ConstMLayerList* IE_ConstMLayerListConstPtr;
 typedef QListIterator<IE_ModelLayer_PublicType> IE_MLayerListIter; // итератор списка
 typedef QList<const IE_ModelLayer*>::iterator IE_MLIter; // итератор на константный элемент списка
 
+Q_DECLARE_METATYPE(IE_ModelLayer_PublicType)
 
 #endif // IE_MODELLAYER_H
