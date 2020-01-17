@@ -6,7 +6,7 @@ IE_ModelLayer_Controller::IE_ModelLayer_Controller(QObject *parent) : QObject(pa
     m_pGScene = nullptr;
 }
 
-bool IE_ModelLayer_Controller::isExist(IE_ModelLayer_PublicType pLayer)
+bool IE_ModelLayer_Controller::isExist(IE_ModelLayer::PublicType pLayer)
 {
     if(getPublicIter(pLayer) == m_constLayerList.end())
         return false;
@@ -14,9 +14,9 @@ bool IE_ModelLayer_Controller::isExist(IE_ModelLayer_PublicType pLayer)
         return true;
 }
 
-IE_MLIter IE_ModelLayer_Controller::getPublicIter(IE_ModelLayer_PublicType pLayer)
+IE_ModelLayer::PublicListIter IE_ModelLayer_Controller::getPublicIter(IE_ModelLayer::PublicType pLayer)
 {
-    for(IE_MLIter iter = m_constLayerList.begin();
+    for(IE_ModelLayer::PublicListIter iter = m_constLayerList.begin();
         iter!=m_constLayerList.end();
         iter++
         )
@@ -41,7 +41,7 @@ void IE_ModelLayer_Controller::addLayerViaToolCnt()
 
 }
 
-void IE_ModelLayer_Controller::removeLayer(IE_ModelLayer_PublicType pLayer)
+void IE_ModelLayer_Controller::removeLayer(IE_ModelLayer::PublicType pLayer)
 {
     if(!isExist(pLayer))
         return;
@@ -51,7 +51,7 @@ void IE_ModelLayer_Controller::removeLayer(IE_ModelLayer_PublicType pLayer)
     emit layerListWasChanged();
 }
 
-void IE_ModelLayer_Controller::hideLayer(IE_ModelLayer_PublicType pLayer)
+void IE_ModelLayer_Controller::hideLayer(IE_ModelLayer::PublicType pLayer)
 {
     if(!isExist(pLayer))
         return;
@@ -59,7 +59,7 @@ void IE_ModelLayer_Controller::hideLayer(IE_ModelLayer_PublicType pLayer)
     loc_pLayer->makeAction(IE_ModelLayer::Action::Hide);
 }
 
-void IE_ModelLayer_Controller::showLayer(IE_ModelLayer_PublicType pLayer)
+void IE_ModelLayer_Controller::showLayer(IE_ModelLayer::PublicType pLayer)
 {
     if(!isExist(pLayer))
         return;
@@ -67,7 +67,7 @@ void IE_ModelLayer_Controller::showLayer(IE_ModelLayer_PublicType pLayer)
     loc_pLayer->makeAction(IE_ModelLayer::Action::Show);
 }
 
-void IE_ModelLayer_Controller::layerAction(IE_ModelLayer::Action action, IE_ModelLayer_PublicType pLayer)
+void IE_ModelLayer_Controller::layerAction(IE_ModelLayer::Action action, IE_ModelLayer::PublicType pLayer)
 {
     if(!isExist(pLayer))
         return;
@@ -85,12 +85,12 @@ void IE_ModelLayer_Controller::layerAction(IE_ModelLayer::Action action, IE_Mode
     }
 }
 
-IE_ConstMLayerListConstPtr IE_ModelLayer_Controller::getConstMLayerConstPtr() const
+IE_ModelLayer::PublicConstPtrToList IE_ModelLayer_Controller::getPublicConstPtrToList() const
 {
     return &m_constLayerList;
 }
 
-IE_ConstMLayerList IE_ModelLayer_Controller::getModelLayerList() const
+IE_ModelLayer::PublicList IE_ModelLayer_Controller::getModelLayerList() const
 {
     return m_constLayerList;
 }

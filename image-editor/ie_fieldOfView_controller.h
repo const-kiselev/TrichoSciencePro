@@ -23,6 +23,7 @@ class IE_FieldOfView_Controller : public QObject
 {
     Q_OBJECT
 public:
+
     enum Quantity
     {
         One = 1,
@@ -32,7 +33,7 @@ public:
         Six = 6
     } quantityMax = Quantity::Six;
 
-    explicit IE_FieldOfView_Controller(IE_ConstMLayerListConstPtr modelLayerList,
+    explicit IE_FieldOfView_Controller(IE_ModelLayer::PublicConstPtrToList modelLayerList,
                                        _global_ie * pieg,
                                        QObject *parent = nullptr
                                        );
@@ -65,6 +66,10 @@ public:
     int getActiveFVIndex() const;
     QWidget *getFastManagerWidget() const;
 
+    IE_FieldOfView::PublicList
+                        getPublicFieldOfViewList() const;
+    qreal               getTotalAreaValue() const;
+
 signals:
     /// \todo связать с моделью
     void addNewLayer(IE_ModelLayer* pLayer);
@@ -74,8 +79,8 @@ signals:
     /// \warning учесть вызов при различных изменениях связанных с FV
     void boundingRectWasChanged(QRectF);
 //    void hideLayer(QList<IE_ModelLayer*>::iterator iter);
-    void layerAction(IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer);
-    void activeFVLayerListWasUpdated(IE_ConstMLayerList layerList);
+    void layerAction(IE_ModelLayer::Action action, IE_ModelLayer::PublicType layer);
+    void activeFVLayerListWasUpdated(IE_ModelLayer::PublicList layerList);
 
 
 
@@ -84,7 +89,7 @@ public slots:
     /// \todo связать с моделью
     QRectF getBoundingRectOfAllFieldOfView();
     void changeActiveFieldOfView(int index);
-    IE_ConstMLayerList getActiveFieldOfViewLayerList();
+    IE_ModelLayer::PublicList getActiveFieldOfViewLayerList();
     void checkLayerList();
 
 private:
@@ -93,7 +98,7 @@ private:
     int m_activeFVIndex;
     QList<IE_FieldOfView*> m_fieldOfViewList;
 //    QList<IE_ModelLayer*>   *layersList;
-    IE_ConstMLayerListConstPtr m_modelLayerList;
+    IE_ModelLayer::PublicConstPtrToList m_modelLayerList;
     _global_ie *    m_p_ie_global_data;
     IE_FieldOfView_ControllerInfoWidget * m_pInfoWidget;
     IE_ImageBaseCnt         * m_pImageBaseCnt;
@@ -132,7 +137,7 @@ signals:
 public slots:
     void changeQuantity(int q);
     void changeActiveFV(int index, QString fvNote);
-    void updateActiveFVLayerList(IE_ConstMLayerList layerList);
+    void updateActiveFVLayerList(IE_ModelLayer::PublicList layerList);
 
     friend class IE_FieldOfView_Controller;
 private:

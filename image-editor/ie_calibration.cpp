@@ -96,11 +96,11 @@ qreal IE_ToolCalibration::getMeasureIndex() const
 // Если на ней больше одной линии, то остается самая новая
 void IE_ToolCalibration::modelItemsControl()
 {
-    IE_ConstMLayerListConstPtr layerList = pModel->getConstModelLayerListConstPtr();
+    IE_ModelLayer::PublicConstPtrToList layerList = pModel->getConstModelLayerListConstPtr();
     qDebug() << layerList->size();
-    IE_ConstMLayerList::const_iterator prevLayer = layerList->end() ,
+    IE_ModelLayer::PublicList::const_iterator prevLayer = layerList->end() ,
             currLayer = layerList->end();
-    for(IE_ConstMLayerList::const_iterator layerIter = layerList->begin();
+    for(IE_ModelLayer::PublicList::const_iterator layerIter = layerList->begin();
         layerIter != layerList->end();
         layerIter++
         )

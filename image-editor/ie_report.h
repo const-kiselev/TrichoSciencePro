@@ -10,6 +10,7 @@
 #include <QtCharts/QBarCategoryAxis>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QCategoryAxis>
+
 #include "ie_compute.h"
 
 QT_CHARTS_USE_NAMESPACE

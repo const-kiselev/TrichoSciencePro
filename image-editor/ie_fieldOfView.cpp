@@ -1,15 +1,15 @@
 #include "ie_fieldOfView.h"
 
 IE_FieldOfView::IE_FieldOfView(uint num,
-                               IE_ConstMLayerListConstPtr modelLayerList,
+                               IE_ModelLayer::PublicConstPtrToList modelLayerList,
                                _global_ie * pieg,
                                QObject *parent
                                ) :  QObject(parent),
-                                    num(num),
                                     m_modelLayerList(modelLayerList),
+                                    m_num(num),
                                     m_p_ie_global_data(pieg)
 {
-
+    resetData();
 }
 
 IE_FieldOfView::~IE_FieldOfView()
@@ -36,10 +36,10 @@ int IE_FieldOfView::write(QJsonObject &json) const
     return 0;
 }
 
-IE_ConstMLayerList IE_FieldOfView::getLayers()
+IE_ModelLayer::PublicList IE_FieldOfView::getLayers() const
 {
-    IE_ConstMLayerList list;
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+    IE_ModelLayer::PublicList list;
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = m_modelLayerList->begin();
          layerIter != m_modelLayerList->end();
          layerIter++)
     {
@@ -65,8 +65,9 @@ IE_ConstMLayerList IE_FieldOfView::getLayers()
 QStringList IE_FieldOfView::getLayerTitleList()
 {
     QStringList strList;
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
     {
         if(layerIter.i->t()->getToolType() == ToolType::MainImage)
@@ -76,11 +77,24 @@ QStringList IE_FieldOfView::getLayerTitleList()
     return strList;
 }
 
+qreal IE_FieldOfView::getAreaValue() const
+{
+    // вычисление площади поля зрения
+    // если есть инструмент-область, то площадь берется по этому интсрументу
+    // в противном случае — по главному изображению
+    //! \todo   реализовать вычисление площади для интсрумента-области
+    IE_ModelLayer::PublicType pMainImg = findMainImageLayerIter().i->t();
+    if(!pMainImg)
+        return 0;
+    return pMainImg->boundingRect().width() *
+            pMainImg->boundingRect().height();
+}
+
 void IE_FieldOfView::removeIntersectedLayersWithFv()
 {
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
              emit layerAction(IE_ModelLayer::Action::Remove, layerIter.i->t());
 }
@@ -88,7 +102,7 @@ void IE_FieldOfView::removeIntersectedLayersWithFv()
 void IE_FieldOfView::removeLayersAndMainImage()
 {
     {
-        IE_ConstMLayerList::const_iterator pMainImageLayerIter
+        IE_ModelLayer::PublicList::const_iterator pMainImageLayerIter
                 = findMainImageLayerIter();
         if(pMainImageLayerIter!=m_modelLayerList->end())
         {
@@ -105,9 +119,9 @@ void IE_FieldOfView::removeLayersAndMainImage()
 
 void IE_FieldOfView::hideLayer(IE_ModelLayer *pLayer)
 {
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
         if(layerIter.i->t() == pLayer)
         {
@@ -118,9 +132,9 @@ void IE_FieldOfView::hideLayer(IE_ModelLayer *pLayer)
 
 void IE_FieldOfView::unhideLayer(IE_ModelLayer *pLayer)
 {
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
         if(layerIter.i->t() == pLayer)
         {
@@ -131,9 +145,9 @@ void IE_FieldOfView::unhideLayer(IE_ModelLayer *pLayer)
 
 void IE_FieldOfView::deleteLayer(IE_ModelLayer *pLayer)
 {
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
         if(layerIter.i->t() == pLayer)
         {
@@ -152,6 +166,7 @@ QFileInfo IE_FieldOfView::getMainImageFileInfo()
 
 int IE_FieldOfView::setMainImage(QString filePath)
 {
+//    resetData();
     IE_Tool_Image * pToolImage = convertToImageTool(findMainImageLayer());
     if(!pToolImage)
     {
@@ -188,7 +203,7 @@ int IE_FieldOfView::setMainImage(QString filePath)
     return 0;
 }
 
-QRectF IE_FieldOfView::getRect()
+QRectF IE_FieldOfView::getRect() const
 {
     return rectData;
 }
@@ -202,34 +217,35 @@ void IE_FieldOfView::setPos(QPointF pos)
 
 void IE_FieldOfView::showIntersectedLayersWithFv()
 {
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
         emit layerAction(IE_ModelLayer::Action::Show, layerIter.i->t());
 }
 
 void IE_FieldOfView::hideIntersectedLayersWithFv()
 {
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
         emit layerAction(IE_ModelLayer::Action::Hide, layerIter.i->t());
 }
 
-IE_ModelLayer_PublicType IE_FieldOfView::findMainImageLayer()
+IE_ModelLayer::PublicType IE_FieldOfView::findMainImageLayer()
 {
-    IE_ConstMLayerList::const_iterator it = findMainImageLayerIter();
+    IE_ModelLayer::PublicList::const_iterator it = findMainImageLayerIter();
     if(it!=m_modelLayerList->end())
         return it.i->t();
+    resetData();
     return nullptr;
 }
 
-IE_ConstMLayerList::const_iterator IE_FieldOfView::findMainImageLayerIter()
+IE_ModelLayer::PublicList::const_iterator IE_FieldOfView::findMainImageLayerIter() const
 {
     uint i=0;
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = m_modelLayerList->begin();
          layerIter != m_modelLayerList->end();
          layerIter++)
     {
@@ -237,15 +253,15 @@ IE_ConstMLayerList::const_iterator IE_FieldOfView::findMainImageLayerIter()
         if( layerIter.i->t()->getToolType() == ToolType::MainImage)
         {
             i++;
-            if(i == num)
+            if(i == m_num)
                 return layerIter;
         }
     }
-    resetData();
+//
     return m_modelLayerList->end();
 }
 
-IE_Tool_Image *IE_FieldOfView::convertToImageTool(IE_ModelLayer_PublicType pLayer)
+IE_Tool_Image *IE_FieldOfView::convertToImageTool(IE_ModelLayer::PublicType pLayer)
 {
     if(!pLayer)
     {
@@ -259,16 +275,16 @@ IE_Tool_Image *IE_FieldOfView::convertToImageTool(IE_ModelLayer_PublicType pLaye
 
 void IE_FieldOfView::moveMainImage(QPointF pos)
 {
-    IE_ModelLayer_PublicType pMainImageLayer = findMainImageLayer();
+    IE_ModelLayer::PublicType pMainImageLayer = findMainImageLayer();
     if(!pMainImageLayer)
     {
         resetData();
         return;
     }
     convertToImageTool(pMainImageLayer)->setPos(pos);
-    IE_ConstMLayerList layers = getLayers();
-    for (IE_ConstMLayerList::const_iterator layerIter = m_modelLayerList->begin();
-         layerIter != m_modelLayerList->end();
+    IE_ModelLayer::PublicList layers = getLayers();
+    for (IE_ModelLayer::PublicList::const_iterator layerIter = layers.begin();
+         layerIter != layers.end();
          layerIter++)
     {
 //        tmpIter.i->t()->moveBy(rectData.x()-pos.x(),
@@ -279,6 +295,7 @@ void IE_FieldOfView::moveMainImage(QPointF pos)
                                                );
     }
     //pMainImageLayer->setPos(pos);
+    emit boundingRectWasCganged();
 
 }
 

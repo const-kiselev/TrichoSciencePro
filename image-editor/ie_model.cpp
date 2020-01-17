@@ -5,7 +5,7 @@
     // ключ к глобальному объекту с информацией о масштабе итд
     qsrand(100000);
     m_ieGlobalData = new _global_ie();
-    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(m_modelLayerCnt.getConstMLayerConstPtr(),
+    m_pFieldOfViewCnt = new IE_FieldOfView_Controller(m_modelLayerCnt.getPublicConstPtrToList(),
                                                       m_ieGlobalData
                                                       );
 
@@ -240,12 +240,25 @@ int         IE_Model::write                  (QJsonObject &json) const
     json["measureIndex"] = m_ieGlobalData->getMeasureIndex();
     //! \todo Добавить пороги!
     QJsonArray layerArray,  relatedModelsArray;
-    foreach(IE_ModelLayer* layer, layersList)
-    {
+    for(IE_ModelLayer::PublicList::const_iterator iter = m_modelLayerCnt.m_constLayerList.begin();
+        iter!=m_modelLayerCnt.m_constLayerList.end();
+        iter++
+        ){
         QJsonObject layerObject;
-        layer->write(layerObject);
+
+        IE_ModelLayer* pLayer = const_cast<IE_ModelLayer*>(iter.i->t());
+
+        pLayer->write(layerObject);
         layerArray.append(layerObject);
     }
+
+
+//    foreach(IE_ModelLayer* layer, layersList)
+//    {
+//        QJsonObject layerObject;
+//        layer->write(layerObject);
+//        layerArray.append(layerObject);
+//    }
     json["layerArray"] = layerArray;
     if(!m_relatedModelList.isEmpty())
     {
@@ -434,24 +447,24 @@ QDockWidget*IE_Model::getPDockLayers         () const
 {
     return pDockLayers;
 }
-QList<IE_ModelLayer*>::const_iterator
-            IE_Model::getLayersListIter      () const
+//QList<IE_ModelLayer*>::const_iterator
+//            IE_Model::getLayersListIter      () const
+//{
+//    if(layersList.isEmpty())
+//        return layersList.end();
+//    return layersList.begin();
+//}
+
+IE_ModelLayer::PublicConstPtrToList IE_Model::getConstModelLayerListConstPtr() const
 {
-    if(layersList.isEmpty())
-        return layersList.end();
-    return layersList.begin();
+    return m_modelLayerCnt.getPublicConstPtrToList();
 }
 
-IE_ConstMLayerListConstPtr IE_Model::getConstModelLayerListConstPtr() const
-{
-    return m_modelLayerCnt.getConstMLayerConstPtr();
-}
-
-QList<IE_ModelLayer *>
-            IE_Model::getLayersList          () const
-{
-    return layersList;
-}
+//QList<IE_ModelLayer *>
+//            IE_Model::getLayersList          () const
+//{
+//    return layersList;
+//}
 
 IE_ProfileType IE_Model::getIE_ProfileType() const
 {
@@ -464,23 +477,23 @@ TSP_PatientData
 {
     return _modelData.to_TSP_patientData();
 }
-IE_ModelLayer *
-            IE_Model::getLayerByListIndex    (int listIndex)
-{
-    QList<IE_ModelLayer*>::iterator iterResult = getLayerIteratorByListIndex(listIndex);
-    return iterResult == layersList.end() ? nullptr : *iterResult;
-}
-QList<IE_ModelLayer*>::iterator
-            IE_Model::getLayerIteratorByListIndex
-                                                        (int listIndex)
-{
-    if(listIndex<0 || listIndex >= layersList.count())
-        return layersList.end();
+//IE_ModelLayer *
+//            IE_Model::getLayerByListIndex    (int listIndex)
+//{
+//    QList<IE_ModelLayer*>::iterator iterResult = getLayerIteratorByListIndex(listIndex);
+//    return iterResult == layersList.end() ? nullptr : *iterResult;
+//}
+//QList<IE_ModelLayer*>::iterator
+//            IE_Model::getLayerIteratorByListIndex
+//                                                        (int listIndex)
+//{
+//    if(listIndex<0 || listIndex >= layersList.count())
+//        return layersList.end();
 
-    QList<IE_ModelLayer*>::iterator iter = layersList.begin();
-    for (int i=0;i<listIndex;i++, iter++);
-    return iter;
-}
+//    QList<IE_ModelLayer*>::iterator iter = layersList.begin();
+//    for (int i=0;i<listIndex;i++, iter++);
+//    return iter;
+//}
 _global_ie *IE_Model::getPGlobal_data() const
 {
     return m_ieGlobalData;
@@ -538,7 +551,7 @@ QDockWidget *IE_Model::initFieldOfViewControllerInfoDock()
 
 void IE_Model::makeReport(IE_ReportType rt)
 {
-
+    IE_Report::makeReport(this->parent(), m_ieGlobalData, IE_Compute::InputData(m_pFieldOfViewCnt->getPublicFieldOfViewList(), rt));
 }
 
 /*void        IE_Model::makeHairDensityComputeWithWidget
@@ -793,7 +806,7 @@ void        IE_Model::addLayer               (IE_ModelLayer* layerToAdd)
 
 //    addItem(layerToAdd->parentItem());
 //    layersList.append(layerToAdd);
-//    emit layerListWasChanged();
+    emit layerListWasChanged();
 }
 
 /*void        IE_Model::showLayer              (int listIndex)
@@ -834,7 +847,7 @@ void        IE_Model::addLayer               (IE_ModelLayer* layerToAdd)
 
 
 
-void IE_Model::layerAction(IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer)
+void IE_Model::layerAction(IE_ModelLayer::Action action, IE_ModelLayer::PublicType layer)
 {
     switch (action)
     {

@@ -334,10 +334,10 @@ void ImageEditor::menuInit()
    oneMenu->addSeparator();
 
    pActionNewFile = new QAction("Плотность волос");
-//   connect(pActionNewFile, &QAction::triggered, [pModel](){emit(pModel->makeHairDensityComputeWithWidget());});
+   connect(pActionNewFile, &QAction::triggered, [pModel](){pModel->makeReport(IE_ReportType::HairDensity);});
    oneMenu->addAction(pActionNewFile);
    pActionNewFile = new QAction("Диаметр волос");
-//   connect(pActionNewFile, &QAction::triggered, [pModel](){emit(pModel->makeHairDiameterComputeWithWidget());});
+   connect(pActionNewFile, &QAction::triggered, [pModel](){pModel->makeReport(IE_ReportType::Trichoscopy);});
    oneMenu->addAction(pActionNewFile);
 
    pMenuBar->addAction(oneMenu->menuAction());

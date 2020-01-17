@@ -19,24 +19,25 @@ class IE_ModelLayer_Controller : public QObject
     Q_OBJECT
 public:
     explicit                IE_ModelLayer_Controller(QObject *parent = nullptr);
-    bool                    isExist(IE_ModelLayer_PublicType pLayer);
-    IE_MLIter               getPublicIter(IE_ModelLayer_PublicType pLayer);
+    bool                    isExist(IE_ModelLayer::PublicType pLayer);
+    IE_ModelLayer::PublicListIter
+                            getPublicIter(IE_ModelLayer::PublicType pLayer);
 
 public slots:
     void                    addLayer(IE_ModelLayer* pLayer);
     void                    addLayerViaToolCnt();
 
-    void                    removeLayer(IE_ModelLayer_PublicType pLayer);
-    void                    hideLayer(IE_ModelLayer_PublicType pLayer);
-    void                    showLayer(IE_ModelLayer_PublicType pLayer);
+    void                    removeLayer(IE_ModelLayer::PublicType pLayer);
+    void                    hideLayer(IE_ModelLayer::PublicType pLayer);
+    void                    showLayer(IE_ModelLayer::PublicType pLayer);
 
 
     void                    layerAction(IE_ModelLayer::Action action,
-                                        IE_ModelLayer_PublicType pLayer
+                                        IE_ModelLayer::PublicType pLayer
                                         );
-    IE_ConstMLayerListConstPtr
-                            getConstMLayerConstPtr() const;
-    IE_ConstMLayerList      getModelLayerList() const;
+    IE_ModelLayer::PublicConstPtrToList
+                            getPublicConstPtrToList() const;
+    IE_ModelLayer::PublicList      getModelLayerList() const;
 
 signals:
     void                    layerListWasChanged();

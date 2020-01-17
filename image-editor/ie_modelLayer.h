@@ -10,6 +10,13 @@
 class IE_ModelLayer :public QGraphicsItem
 {
 public:
+    typedef const IE_ModelLayer* PublicType;
+    typedef QList<PublicType> PublicList;
+    typedef const PublicList* PublicConstPtrToList;
+    typedef QListIterator<PublicType> IteratorToPublicList; // итератор списка
+    typedef PublicList::iterator PublicListIter; // итератор на константный элемент списка
+
+
     enum Action{
         Show,
         Hide,
@@ -52,12 +59,12 @@ private:
 Q_DECLARE_METATYPE(IE_ModelLayer*)
 
 
-typedef const IE_ModelLayer* IE_ModelLayer_PublicType;
-typedef QList<IE_ModelLayer_PublicType> IE_ConstMLayerList;
-typedef const IE_ConstMLayerList* IE_ConstMLayerListConstPtr;
-typedef QListIterator<IE_ModelLayer_PublicType> IE_MLayerListIter; // итератор списка
-typedef QList<const IE_ModelLayer*>::iterator IE_MLIter; // итератор на константный элемент списка
+//typedef const IE_ModelLayer* IE_ModelLayer::PublicType;
+//typedef QList<IE_ModelLayer::PublicType> IE_ModelLayer::PublicList;
+//typedef const IE_ModelLayer::PublicList* IE_ModelLayer::PublicListConstPtr;
+//typedef QListIterator<IE_ModelLayer::PublicType> IE_MLayerListIter; // итератор списка
+//typedef QList<const IE_ModelLayer*>::iterator PublicListIter; // итератор на константный элемент списка
 
-Q_DECLARE_METATYPE(IE_ModelLayer_PublicType)
+Q_DECLARE_METATYPE(IE_ModelLayer::PublicType)
 
 #endif // IE_MODELLAYER_H

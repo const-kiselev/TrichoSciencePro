@@ -106,19 +106,19 @@ public:
     qreal                   getMeasureIndex() const;
     ToolsController*        getPToolCnt() const;
     //! \warning срочно убрать из реализации
-    IE_ModelLayer*          getLayerByListIndex(int listIndex);
+//    IE_ModelLayer*          getLayerByListIndex(int listIndex);
     //! \warning срочно убрать из реализации передачу подобного списка
-    QList<IE_ModelLayer*>::iterator
-                            getLayerIteratorByListIndex(int listIndex);
+//    QList<IE_ModelLayer*>::iterator
+//                            getLayerIteratorByListIndex(int listIndex);
     QDockWidget*            getPDockLayers() const;
     //! \warning срочно убрать из реализации передачу подобного списка
-    QList<IE_ModelLayer * > :: const_iterator
-                            getLayersListIter() const;
-    IE_ConstMLayerListConstPtr
+//    QList<IE_ModelLayer * > :: const_iterator
+//                            getLayersListIter() const;
+    IE_ModelLayer::PublicConstPtrToList
                             getConstModelLayerListConstPtr() const;
 
     //! \warning срочно убрать из реализации передачу подобного списка
-    QList<IE_ModelLayer * > getLayersList() const;
+//    QList<IE_ModelLayer * > getLayersList() const;
     TSP_PatientData         get_TSP_patientData();
     IE_ProfileType          getIE_ProfileType()const;
     _global_ie *            getPGlobal_data() const;
@@ -174,7 +174,7 @@ public slots:
     void                    addLayerViaToolCnt();
 
     void                    layerAction(IE_ModelLayer::Action action,
-                                        IE_ModelLayer_PublicType
+                                        IE_ModelLayer::PublicType
                                         layer);
 
 private:
@@ -187,7 +187,7 @@ private:
 
     //! \todo убрать список слоев
     IE_ModelLayer_Controller m_modelLayerCnt;
-    QList<IE_ModelLayer*>   layersList;
+//    QList<IE_ModelLayer*>   layersList;
     QStringList             m_relatedModelList;
     ToolsController         * pToolCnt;
     IE_FieldOfView_Controller

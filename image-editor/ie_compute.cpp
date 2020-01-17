@@ -1,59 +1,53 @@
 #include "ie_compute.h"
 
 IE_Compute::IE_Compute(_global_ie *pieg,
-                       QList<IE_ModelLayer *> *pll,
+                       IE_FieldOfView::PublicList fvList,
                        QObject *parent
                        ) :  QObject(parent),
-                            _p_ie_global_data(pieg),
-                            layersList(pll)
+                            m_fvList(fvList),
+                            _p_ie_global_data(pieg)
 {
 
 }
 
-qreal IE_Compute::computeSquareInPixels() const
-{
-    qreal sq = 1;
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
-         tmpIter!=layersList->end();tmpIter++)
-    {
-        if( tmpIter.i->t()->getToolType() == ToolType::MainImage)
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
-        else if( tmpIter.i->t()->getToolType() == ToolType::ComputingArea )
-        {
-            sq = tmpIter.i->t()->boundingRect().width() * tmpIter.i->t()->boundingRect().height();
-            break;
-        }
-    }
-    return sq;
-}
 
-IE_Compute::HairDensityReportData IE_Compute::computeHairDensity(InputData id)
+IE_Compute::HairDensityReportData IE_Compute::computeHairDensity() const
 {
     HairDensityReportData d;
 
-    for (QList<LayerComputeData>::iterator tmpIter = id.layerList.begin();
-         tmpIter!=id.layerList.end();
-         tmpIter++
+    for (IE_FieldOfView::PublicList::const_iterator fvIter = m_fvList.begin();
+         fvIter!=m_fvList.end();
+         fvIter++
          )
     {
-        if( tmpIter.i->t().toolType == ToolType::DensityAndDiameter)
-        {
-            d.hairQuantity++;
 
-            if  (_p_ie_global_data->convertF(tmpIter.i->t().width)
-                    >= _p_ie_global_data->getThreshold_TW()
-                )
-                d.terminalQuantity++;
-            else
-                d.vellusQuantity++;
+        IE_ModelLayer::PublicList layerList = fvIter.i->t()->getLayers();
+        for(IE_ModelLayer::PublicList::const_iterator layerIter = layerList.begin();
+            layerIter != layerList.end();
+            layerIter++
+            ){
+            if( layerIter.i->t()->getToolType() == ToolType::DensityAndDiameter)
+            {
+                d.hairQuantity++;
+                qreal penWidth = dynamic_cast<IELine*>(layerIter.i->t()->getToolPtr())->getPenWidth();
+
+                if  (_p_ie_global_data->convertF(penWidth)
+                        >= _p_ie_global_data->getThreshold_TW()
+                    )
+                    d.terminalQuantity++;
+                else
+                    d.vellusQuantity++;
 
 
+            }
         }
+
+       d.areaValue += fvIter.i->t()->getAreaValue();
     }
 
-    d.inputData.squareInPixels = computeSquareInPixels();
 
-    qreal squareInUnitedUnits = (d.inputData.squareInPixels /
+
+    qreal squareInUnitedUnits = (d.areaValue /
                                        (_p_ie_global_data->getMeasureIndex()*
                                         _p_ie_global_data->getMeasureIndex()
                                         )
@@ -77,42 +71,54 @@ IE_Compute::HairDensityReportData IE_Compute::computeHairDensity(InputData id)
     return d;
 }
 
-IE_Compute::HairDiameterReportData IE_Compute::computeHairDiameter(InputData id)
+IE_Compute::HairDiameterReportData IE_Compute::computeHairDiameter() const
 {
     HairDiameterReportData d;
 
-    for (QList<LayerComputeData>::iterator tmpIter = id.layerList.begin();
-         tmpIter!=id.layerList.end();
-         tmpIter++
+    for (IE_FieldOfView::PublicList::const_iterator fvIter = m_fvList.begin();
+         fvIter!=m_fvList.end();
+         fvIter++
          )
     {
-        if( tmpIter.i->t().toolType == ToolType::DensityAndDiameter)
-        {
-            d.hairQuantity++;
 
-            qreal convertedPenWidth = _p_ie_global_data->convertF(tmpIter.i->t().width);
-            d.diametersListInUm << _p_ie_global_data->convertUnitedWithForamtF(convertedPenWidth, UnitType::um);
-            d.sumOfDiametersOfAllHair += convertedPenWidth;
-            if ( convertedPenWidth
-                    >= _p_ie_global_data->getThreshold_TW()
-                )
+        IE_ModelLayer::PublicList layerList = fvIter.i->t()->getLayers();
+        for(IE_ModelLayer::PublicList::const_iterator layerIter = layerList.begin();
+            layerIter != layerList.end();
+            layerIter++
+            ){
+            if( layerIter.i->t()->getToolType() == ToolType::DensityAndDiameter)
             {
-                d.terminalQuantity++;
-                d.sumOfDiametersOfTerminHair += convertedPenWidth;
-                if ( convertedPenWidth >= _p_ie_global_data->getThreshold_thinHair()
-                        && convertedPenWidth < _p_ie_global_data->getThreshold_mediumHair()
+                d.hairQuantity++;
+                qreal penWidth = dynamic_cast<IELine*>(layerIter.i->t()->getToolPtr())->getPenWidth();
+                qreal convertedPenWidth = _p_ie_global_data->convertF(penWidth);
+
+
+                d.diametersListInUm << _p_ie_global_data->convertUnitedWithForamtF(convertedPenWidth, UnitType::um);
+                d.sumOfDiametersOfAllHair += convertedPenWidth;
+                if ( convertedPenWidth
+                        >= _p_ie_global_data->getThreshold_TW()
                     )
-                    d.mediumHairQ++;
-                else if(convertedPenWidth < _p_ie_global_data->getThreshold_thinHair())
-                    d.thinHairQ++;
+                {
+                    d.terminalQuantity++;
+                    d.sumOfDiametersOfTerminHair += convertedPenWidth;
+                    if ( convertedPenWidth >= _p_ie_global_data->getThreshold_thinHair()
+                            && convertedPenWidth < _p_ie_global_data->getThreshold_mediumHair()
+                        )
+                        d.mediumHairQ++;
+                    else if(convertedPenWidth < _p_ie_global_data->getThreshold_thinHair())
+                        d.thinHairQ++;
+                }
+                else
+                    d.vellusQuantity++;
+
+
             }
-            else
-                d.vellusQuantity++;
         }
+
+       d.areaValue += fvIter.i->t()->getAreaValue();
     }
 
-    d.inputData.squareInPixels = computeSquareInPixels();
-    d.squareInUnitedUnits = d.inputData.squareInPixels
+    d.squareInUnitedUnits = d.areaValue
             /   ( _p_ie_global_data->getMeasureIndex()
                     * _p_ie_global_data->getMeasureIndex()
                 );
@@ -127,55 +133,27 @@ IE_Compute::HairDiameterReportData IE_Compute::computeHairDiameter(InputData id)
     return d;
 }
 
-
-/// \todo доделать
-IE_Compute::OutputData IE_Compute::compute(IE_Compute::InputData id)
+// static
+IE_Compute::OutputData IE_Compute::makeCompute(_global_ie *pieg, IE_Compute::InputData id, QObject *parent)
 {
-    OutputData outD;
-    outD.computeType = id.computeType;
-    if( (id.computeType&ComputeType::HairDensity) == ComputeType::HairDensity)
-    {
-        outD.density = computeHairDensity(id);
-    }
-    if( (id.computeType&ComputeType::HairDiameter) == ComputeType::HairDiameter)
-    {
-        outD.diameter = computeHairDiameter(id);
-    }
-    return outD;
+    IE_Compute comp(pieg, id.fvList, parent);
+    return comp.compute(id.computeType);
 }
+
 
 IE_Compute::OutputData IE_Compute::compute(IE_Compute::ComputeType compType)
 {
-    InputData inputD = getInputData();
-    inputD.computeType = compType;
-    return compute(inputD);
-}
-
-IE_Compute::InputData IE_Compute::getInputData() const
-{
-    InputData inputD;
-
-
-
-    for (QList<IE_ModelLayer *>::iterator tmpIter = layersList->begin();
-         tmpIter!=layersList->end();tmpIter++)
+    OutputData outD;
+    outD.computeType = compType;
+    if( (compType&ComputeType::HairDensity) == ComputeType::HairDensity)
     {
-        //! \warning для других типов слоев не будет работать.
-        if( tmpIter.i->t()->getToolType() == ToolType::DensityAndDiameter)
-        {
-            if(!tmpIter.i->t()->isVisible())
-                continue;
-            inputD.layerList.append(LayerComputeData(
-                                        dynamic_cast<IELine*>(tmpIter.i->t()->getToolPtr())->getPenWidth(),
-                                        dynamic_cast<IELine*>(tmpIter.i->t()->getToolPtr())->getLineLength(),
-                                        tmpIter.i->t()->getToolType()
-                                        ));
-        }
+        outD.density = computeHairDensity();
     }
-
-
-    inputD.squareInPixels = computeSquareInPixels();
-    return inputD;
+    if( (compType&ComputeType::HairDiameter) == ComputeType::HairDiameter)
+    {
+        outD.diameter = computeHairDiameter();
+    }
+    return outD;
 }
 
 

@@ -193,10 +193,9 @@ void IE_Report::makeReport(QObject *parent, _global_ie *pieg, IE_Compute::InputD
 
 void IE_Report::makeReport(IE_Compute::InputData id)
 {
-    //! \todo IE_Compute::InputData после исправления расскоментировать фрагмент функции
-//    switch (id.reportType) {
-//    case IE_ReportType::HairDensity:
-//        makeHairDensityReport_dialog( IE_Compute::makeCompute(_p_ie_global_data, id, parent()) );
-//        break;
-//    }
+    switch (id.reportType) {
+    case IE_ReportType::HairDensity:
+        makeHairDensityReport_dialog( IE_Compute::makeCompute(_p_ie_global_data, id, parent()) );
+        break;
+    }
 }

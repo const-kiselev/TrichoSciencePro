@@ -1,7 +1,7 @@
 #include "ie_fieldOfView_controller.h"
 #include "ie_fieldOfView_infoWidget.h"
 
-IE_FieldOfView_Controller::IE_FieldOfView_Controller(IE_ConstMLayerListConstPtr modelLayerList,
+IE_FieldOfView_Controller::IE_FieldOfView_Controller(IE_ModelLayer::PublicConstPtrToList modelLayerList,
                                                      _global_ie * pieg,
                                                      QObject *parent
                                                      ) :    QObject(parent),
@@ -257,7 +257,7 @@ void    IE_FieldOfView_Controller::relocateAllFieldOfView()
     case Quantity::Two:
     case Quantity::Three:
     {
-        for(int i = 0; i < m_quantityOfFields; i++)
+        for(uint i = 0; i < m_quantityOfFields; i++)
         {
             IE_FieldOfView * pfv = m_fieldOfViewList.at(i);
             pfv->setPos(followPointF);
@@ -269,7 +269,7 @@ void    IE_FieldOfView_Controller::relocateAllFieldOfView()
     case Quantity::Four:
     case Quantity::Six:
     {
-        for(int i = 0; i < m_quantityOfFields; i++)
+        for(uint i = 0; i < m_quantityOfFields; i++)
         {
             IE_FieldOfView * pfv = m_fieldOfViewList.at(i);
             pfv->setPos(followPointF);
@@ -388,11 +388,11 @@ void    IE_FieldOfView_Controller::changeActiveFieldOfView(int index)
         m_pImageBaseCnt->setCurrentUserChoiceList(index);
 }
 
-IE_ConstMLayerList
+IE_ModelLayer::PublicList
         IE_FieldOfView_Controller::getActiveFieldOfViewLayerList()
 {
     if(!m_quantityOfFields)
-        return IE_ConstMLayerList();
+        return IE_ModelLayer::PublicList();
     return m_fieldOfViewList.at(m_activeFVIndex)->getLayers();
 }
 
@@ -413,6 +413,22 @@ QWidget *IE_FieldOfView_Controller::getFastManagerWidget() const
     return nullptr;
 }
 
+IE_FieldOfView::PublicList IE_FieldOfView_Controller::getPublicFieldOfViewList() const
+{
+    IE_FieldOfView::PublicList list;
+    for(uint i = 0; i < m_quantityOfFields; i++)
+        list.append(m_fieldOfViewList.at(i));
+    return list;
+}
+
+qreal IE_FieldOfView_Controller::getTotalAreaValue() const
+{
+    qreal area = 0;
+    for(uint i = 0; i < m_quantityOfFields; i++)
+        area += m_fieldOfViewList.at(i)->getAreaValue();
+    return area;
+}
+
 void    IE_FieldOfView_Controller::addFieldOfView(int index)
 {
     IE_FieldOfView * tmpFV = new IE_FieldOfView(index+1, m_modelLayerList, m_p_ie_global_data);
@@ -425,7 +441,7 @@ void    IE_FieldOfView_Controller::addFieldOfView(int index)
     {
         emit boundingRectWasChanged(getBoundingRectOfAllFieldOfView());
     });
-    connect(tmpFV, &IE_FieldOfView::layerAction, [this](IE_ModelLayer::Action action, IE_ModelLayer_PublicType layer)
+    connect(tmpFV, &IE_FieldOfView::layerAction, [this](IE_ModelLayer::Action action, IE_ModelLayer::PublicType layer)
     {
         emit layerAction(action, layer);
     });
@@ -696,11 +712,11 @@ void    IE_FieldOfView_ControllerInfoWidget::changeActiveFV(int index, QString f
     m_activeFVNote = fvNote;
 }
 
-void    IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(IE_ConstMLayerList layerList)
+void    IE_FieldOfView_ControllerInfoWidget::updateActiveFVLayerList(IE_ModelLayer::PublicList layerList)
 {
     m_pDockLayersListWidget->clear();
 
-    for (IE_ConstMLayerList::const_iterator iter = layerList.begin();
+    for (IE_ModelLayer::PublicList::const_iterator iter = layerList.begin();
          iter!=layerList.end();iter++
          )
     {
