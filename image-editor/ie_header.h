@@ -362,6 +362,7 @@ enum class IE_ReportType
 {
     Full,
     HairDensity,
+    HairDiameter,
     Trichoscopy
 };
 

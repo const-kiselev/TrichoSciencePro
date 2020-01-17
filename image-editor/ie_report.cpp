@@ -197,5 +197,8 @@ void IE_Report::makeReport(IE_Compute::InputData id)
     case IE_ReportType::HairDensity:
         makeHairDensityReport_dialog( IE_Compute::makeCompute(_p_ie_global_data, id, parent()) );
         break;
+    case IE_ReportType::HairDiameter:
+        makeHairDiameterReport_dialog( IE_Compute::makeCompute(_p_ie_global_data, id, parent()) );
+        break;
     }
 }

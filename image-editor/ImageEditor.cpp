@@ -337,7 +337,7 @@ void ImageEditor::menuInit()
    connect(pActionNewFile, &QAction::triggered, [pModel](){pModel->makeReport(IE_ReportType::HairDensity);});
    oneMenu->addAction(pActionNewFile);
    pActionNewFile = new QAction("Диаметр волос");
-   connect(pActionNewFile, &QAction::triggered, [pModel](){pModel->makeReport(IE_ReportType::Trichoscopy);});
+   connect(pActionNewFile, &QAction::triggered, [pModel](){pModel->makeReport(IE_ReportType::HairDiameter);});
    oneMenu->addAction(pActionNewFile);
 
    pMenuBar->addAction(oneMenu->menuAction());
