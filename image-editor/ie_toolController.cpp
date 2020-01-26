@@ -63,8 +63,8 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                 {
                     switch (activeToolType) {
                     case ToolType::HairStandard:
-                    pActiveTool = new IE_ModelLayer(ToolType::HairStandard,
-                                                    new IE_Tool_HairStandard(p_ie_global_data()));
+//                    pActiveTool = new IE_ModelLayer(ToolType::HairStandard,
+//                                                    new IE_Tool_HairStandard(p_ie_global_data()));
                     break;
 
                     }
@@ -93,7 +93,8 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
             case QEvent::MouseMove:
             {
                 if(!pActiveTool)
-                    return;
+                    pActiveTool = new IE_ModelLayer(ToolType::HairStandard,
+                                                    new IE_Tool_HairStandard(p_ie_global_data()));
 
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(pe);
                 QPointF mousePos = mouseEvent->pos();

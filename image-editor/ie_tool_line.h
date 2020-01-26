@@ -8,7 +8,7 @@
 
 class IE_Tool_LineInfoWidget;
 
-class IELine : public QObject, public QGraphicsLineItem, public ie_tool
+class IE_Tool_Line : public QObject, public QGraphicsLineItem, public ie_tool
 {
 Q_OBJECT
 public:
