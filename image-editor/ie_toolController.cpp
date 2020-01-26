@@ -54,6 +54,81 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
     switch (activeToolType)
     {
     case ToolType::HairStandard:
+    {
+            switch (pe->type())
+            {
+            case QEvent::MouseButtonPress:
+            {
+                if(!editModeActive)
+                {
+                    switch (activeToolType) {
+                    case ToolType::HairStandard:
+                    pActiveTool = new IE_ModelLayer(ToolType::HairStandard,
+                                                    new IE_Tool_HairStandard(p_ie_global_data()));
+                    break;
+
+                    }
+
+                    emit(startUsingNewTool());
+//                    pDock->setWidget();
+                }
+                else {
+                    pActiveTool->getToolPtr()->activateEditMode();
+//                    dynamic_cast<IE_Tool_Line*>( pActiveTool->parentItem())->activateEditMode();
+                }
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(pe);
+                QPointF mousePos = mouseEvent->pos();
+                if(mouseEvent->localPos()!=mouseEvent->pos())
+                    mousePos = mouseEvent->localPos();
+
+                // создаем сигнал о том, что началось использование нового инстурмента
+
+                doNextMousePressEvent = false;
+                pActiveTool->getToolPtr()->mouseFirstPress(mousePos);
+//                dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->mouseFirstPress(mousePos);
+
+
+            }
+                break;
+            case QEvent::MouseMove:
+            {
+                if(!pActiveTool)
+                    return;
+
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(pe);
+                QPointF mousePos = mouseEvent->pos();
+                if(mouseEvent->localPos()!=mouseEvent->pos())
+                    mousePos = mouseEvent->localPos();
+                if(pActiveTool->getToolPtr()->mouseMove(mousePos) ) //dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->mouseMove(mousePos)
+                    resetEditingMode();
+            }
+                break;
+            case QEvent::MouseButtonRelease:
+            {
+                doNextMousePressEvent = true;
+                emit(stopUsingTool());
+                if(!pActiveTool)
+                    return;
+                QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(pe);
+                QPointF mousePos = mouseEvent->pos();
+                if(mouseEvent->localPos()!=mouseEvent->pos())
+                    mousePos = mouseEvent->localPos();
+//                dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->release(mousePos);
+                pActiveTool->getToolPtr()->release(mousePos);
+
+            }
+                break;
+            case QEvent::Wheel:
+            {
+                if(pActiveTool)
+                    pActiveTool->getToolPtr()->wheelMode(static_cast<QWheelEvent*>(pe));
+//                    dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->wheelMode(static_cast<QWheelEvent*>(pe));
+            }
+                break;
+            } // ----- END switch (pe->type())
+            break;
+    // ----- END case SimpleLine
+    }
     case ToolType::DensityAndDiameter:
     case ToolType::Ruler:
     case ToolType::SimpleLine:
@@ -69,16 +144,12 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                         pActiveTool = new IE_ModelLayer(ToolType::Ruler, new IERuler(p_ie_global_data()));
                         break;
                         case ToolType::SimpleLine:
-                        pActiveTool = new IE_ModelLayer(ToolType::SimpleLine, new IELine(p_ie_global_data()));
+                        pActiveTool = new IE_ModelLayer(ToolType::SimpleLine, new IE_Tool_Line(p_ie_global_data()));
                         break;
                         case ToolType::DensityAndDiameter:
                         pActiveTool = new IE_ModelLayer(ToolType::DensityAndDiameter,
                                                         new IE_Line_DD(p_ie_global_data()));
                         break;
-                    case ToolType::HairStandard:
-                    pActiveTool = new IE_ModelLayer(ToolType::HairStandard,
-                                                    new IE_Tool_HairStandard(p_ie_global_data()));
-                    break;
 
                     }
 
@@ -87,7 +158,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                 }
                 else {
                     pActiveTool->getToolPtr()->activateEditMode();
-//                    dynamic_cast<IELine*>( pActiveTool->parentItem())->activateEditMode();
+//                    dynamic_cast<IE_Tool_Line*>( pActiveTool->parentItem())->activateEditMode();
                 }
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(pe);
                 QPointF mousePos = mouseEvent->pos();
@@ -98,7 +169,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
 
                 doNextMousePressEvent = false;
                 pActiveTool->getToolPtr()->mouseFirstPress(mousePos);
-//                dynamic_cast<IELine*>(pActiveTool->parentItem())->mouseFirstPress(mousePos);
+//                dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->mouseFirstPress(mousePos);
 
 
             }
@@ -112,7 +183,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                 QPointF mousePos = mouseEvent->pos();
                 if(mouseEvent->localPos()!=mouseEvent->pos())
                     mousePos = mouseEvent->localPos();
-                if(pActiveTool->getToolPtr()->mouseMove(mousePos) ) //dynamic_cast<IELine*>(pActiveTool->parentItem())->mouseMove(mousePos)
+                if(pActiveTool->getToolPtr()->mouseMove(mousePos) ) //dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->mouseMove(mousePos)
                     resetEditingMode();
             }
                 break;
@@ -126,7 +197,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                 QPointF mousePos = mouseEvent->pos();
                 if(mouseEvent->localPos()!=mouseEvent->pos())
                     mousePos = mouseEvent->localPos();
-//                dynamic_cast<IELine*>(pActiveTool->parentItem())->release(mousePos);
+//                dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->release(mousePos);
                 pActiveTool->getToolPtr()->release(mousePos);
 
             }
@@ -135,7 +206,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
             {
                 if(pActiveTool)
                     pActiveTool->getToolPtr()->wheelMode(static_cast<QWheelEvent*>(pe));
-//                    dynamic_cast<IELine*>(pActiveTool->parentItem())->wheelMode(static_cast<QWheelEvent*>(pe));
+//                    dynamic_cast<IE_Tool_Line*>(pActiveTool->parentItem())->wheelMode(static_cast<QWheelEvent*>(pe));
             }
                 break;
             } // ----- END switch (pe->type())
