@@ -2,7 +2,8 @@
 
 IE_Line_DD::IE_Line_DD(_global_ie *gi, QObject *parent):IELine(gi,parent,
                                                ToolType::DensityAndDiameter,
-                                               LineSettings::PenWidth)
+                                               LineSettings::PenWidth),
+                                                        m_hairWidth( .0 )
 {
     QPen locPen(pen());
     locPen.setColor(Qt::red);
@@ -11,6 +12,7 @@ IE_Line_DD::IE_Line_DD(_global_ie *gi, QObject *parent):IELine(gi,parent,
 
 void IE_Line_DD::wheelMode(QWheelEvent *pe)
 {
+    //! \todo если значение меньше минимального, обнулять диматер
     IELine::wheelMode(pe);
     QPen locPen(pen());
     IELine::wheelMode(pe);

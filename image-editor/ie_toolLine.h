@@ -72,7 +72,7 @@ private:
     LineSettings lineSettings;
     bool editMode;
     bool lengthTip, widthTip;
-    QLineF lineData;
+    QLineF lineData; //! \todo отказаться
 
 
 

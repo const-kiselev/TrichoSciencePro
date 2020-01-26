@@ -24,6 +24,7 @@ enum class ToolType {
         SmartLine,
         Ruler,
         DensityAndDiameter,
+        HairStandard,
 
     InterfollicularRegion,
     InterfollicularRegion_FineScaling,
@@ -165,6 +166,7 @@ static QString getToolTitle(ToolType _toolType)
     case ToolType::SmartLine: { return QString("SmartLine");}
     case ToolType::Ruler: { return QString("Ruler");}
     case ToolType::DensityAndDiameter: { return QString("DensityAndDiameter");}
+    case ToolType::HairStandard: { return QString("HairStandard");}
     }
 }
 
@@ -245,6 +247,7 @@ static ToolType convertToolTitleToToolType(QString toolTitle)
     if(toolTitle == "SmartLine") return ToolType::SmartLine;
     if(toolTitle == "Ruler") return ToolType::Ruler;
     if(toolTitle == "DensityAndDiameter") return ToolType::DensityAndDiameter;
+    if(toolTitle == "HairStandard") return ToolType::HairStandard;
 }
 
 enum class ToolSet {

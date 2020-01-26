@@ -53,6 +53,7 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
 
     switch (activeToolType)
     {
+    case ToolType::HairStandard:
     case ToolType::DensityAndDiameter:
     case ToolType::Ruler:
     case ToolType::SimpleLine:
@@ -74,6 +75,10 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
                         pActiveTool = new IE_ModelLayer(ToolType::DensityAndDiameter,
                                                         new IE_Line_DD(p_ie_global_data()));
                         break;
+                    case ToolType::HairStandard:
+                    pActiveTool = new IE_ModelLayer(ToolType::HairStandard,
+                                                    new IE_Tool_HairStandard(p_ie_global_data()));
+                    break;
 
                     }
 
@@ -407,8 +412,9 @@ void ToolsController::initToolActions()
     case ToolSet::Simple:
     {
         toolsList   << ToolType::NoneTool
-                    << ToolType::SimpleLine
+//                    << ToolType::SimpleLine
                     << ToolType::DensityAndDiameter
+                    << ToolType::HairStandard
                     << ToolType::Zoom
                     << ToolType::Marker_FollicularUnit
                     << ToolType::Ruler;
@@ -420,6 +426,7 @@ void ToolsController::initToolActions()
         toolsList   << ToolType::NoneTool
                     << ToolType::SimpleLine
                     << ToolType::DensityAndDiameter
+                    << ToolType::HairStandard
                     << ToolType::Zoom
                     << ToolType::Marker_FollicularUnit
                     << ToolType::Ruler
@@ -435,7 +442,8 @@ void ToolsController::initToolActions()
     case ToolSet::TrichoscopyPatterns:
     {
         toolsList   << ToolType::NoneTool
-                    << ToolType::SimpleLine
+//                    << ToolType::SimpleLine
+                    << ToolType::HairStandard
                     << ToolType::DensityAndDiameter
                     << ToolType::Zoom
                     << ToolType::Marker_FollicularUnit
@@ -450,9 +458,10 @@ void ToolsController::initToolActions()
         break;
     }
     case ToolSet::MeasureIndex:
-        toolsList << ToolType::Ruler
+        toolsList << ToolType::NoneTool
+                  << ToolType::Ruler
                   << ToolType::Zoom
-                  << ToolType::NoneTool;
+                  ;
         break;
 
     }
@@ -484,6 +493,11 @@ void ToolsController::initToolActions()
         case ToolType::DensityAndDiameter:
         {
             pToolAction = new QAction(QPixmap("://toolIcons/DensityAndDiameter"),"Плотность, диаметр и длина");
+            break;
+        }
+        case ToolType::HairStandard:
+        {
+            pToolAction = new QAction(QPixmap("://toolIcons/DensityAndDiameter"),"Эталон");
             break;
         }
         case ToolType::Zoom:
@@ -529,10 +543,7 @@ void ToolsController::initToolActions()
                 pActionGroup->addAction(pAct);
             }
 
-
-
             pToolButton->setMenu(pMenu);
-
 
             pToolButton->setPopupMode(QToolButton::InstantPopup);
 //

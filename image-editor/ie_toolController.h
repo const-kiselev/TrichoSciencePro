@@ -11,6 +11,7 @@
 #include "ie_line_dd.h"
 #include "ie_tool_follicularUnit.h"
 #include "ie_tool_image.h"
+#include "ie_tool_hairStandard.h"
 
 
 

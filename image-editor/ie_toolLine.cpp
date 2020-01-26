@@ -109,6 +109,8 @@ int         IELine::mouseMove           (QPointF point)
 }
 void        IELine::wheelMode           (QWheelEvent* pe)
 {
+
+    //! \bug переписать функцию, так как неправильно происходит инкрементирование (декрементирование), если дельта слишком большая
     QPen locPen(pen());
     QPoint nAngle = pe->angleDelta();
     if (nAngle.isNull())
