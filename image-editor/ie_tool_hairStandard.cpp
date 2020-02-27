@@ -31,9 +31,9 @@ void IE_Tool_HairStandard::wheelMode(QWheelEvent *pe)
     time = QTime::currentTime();
 
 
-    IELine::wheelMode(pe);
+    IE_Tool_Line::wheelMode(pe);
     QPen locPen(pen());
-    IELine::wheelMode(pe);
+    IE_Tool_Line::wheelMode(pe);
     if(p_ie_global_data()->convertF(locPen.widthF())
             >= p_ie_global_data()->getThreshold_TW())
         locPen.setColor(Qt::green);

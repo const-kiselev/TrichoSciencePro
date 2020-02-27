@@ -1,6 +1,6 @@
 #include "ie_line_dd.h"
 
-IE_Line_DD::IE_Line_DD(_global_ie *gi, QObject *parent):IELine(gi,parent,
+IE_Line_DD::IE_Line_DD(_global_ie *gi, QObject *parent):IE_Tool_Line(gi,parent,
                                                ToolType::DensityAndDiameter,
                                                LineSettings::PenWidth),
                                                         m_hairWidth( .0 )
@@ -13,9 +13,9 @@ IE_Line_DD::IE_Line_DD(_global_ie *gi, QObject *parent):IELine(gi,parent,
 void IE_Line_DD::wheelMode(QWheelEvent *pe)
 {
     //! \todo если значение меньше минимального, обнулять диматер
-    IELine::wheelMode(pe);
+    IE_Tool_Line::wheelMode(pe);
     QPen locPen(pen());
-    IELine::wheelMode(pe);
+    IE_Tool_Line::wheelMode(pe);
     if(p_ie_global_data()->convertF(locPen.widthF())
             >= p_ie_global_data()->getThreshold_TW())
         locPen.setColor(Qt::green);
@@ -28,13 +28,13 @@ void IE_Line_DD::wheelMode(QWheelEvent *pe)
 
 int IE_Line_DD::read(const QJsonObject &json)
 {
-    return IELine::read(json);
+    return IE_Tool_Line::read(json);
 }
 
 int IE_Line_DD::write(QJsonObject &json) const
 {
     int answ;
-    if(answ = IELine::write(json))
+    if(answ = IE_Tool_Line::write(json))
         return answ;
     json["typeTitle"] = getToolTitle(ToolType::DensityAndDiameter);
     return 0;

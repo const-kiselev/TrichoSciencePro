@@ -18,12 +18,12 @@ SOURCES += \
     $$PWD/ie_tool.cpp \
     $$PWD/ie_toolController.cpp \
     $$PWD/ie_toolItemDelegate.cpp \
-    $$PWD/ie_toolLine.cpp \
     $$PWD/ie_toolMarker.cpp \
     $$PWD/ie_toolRuler.cpp \
     $$PWD/ie_tool_follicularUnit.cpp \
     $$PWD/ie_tool_hairStandard.cpp \
     $$PWD/ie_tool_image.cpp \
+    $$PWD/ie_tool_line.cpp \
     $$PWD/ie_view.cpp \
     $$PWD/ie_fieldOfView.cpp \
     $$PWD/ie_fieldOfView_controller.cpp
@@ -47,11 +47,11 @@ HEADERS += \
     $$PWD/ie_tool.h \
     $$PWD/ie_toolController.h \
     $$PWD/ie_toolItemDelegate.h \
-    $$PWD/ie_toolLine.h \
     $$PWD/ie_toolRuler.h \
     $$PWD/ie_tool_follicularUnit.h \
     $$PWD/ie_tool_hairStandard.h \
     $$PWD/ie_tool_image.h \
+    $$PWD/ie_tool_line.h \
     $$PWD/ie_toolmarker.h \
     $$PWD/ie_view.h \
     $$PWD/ie_fieldOfView.h \

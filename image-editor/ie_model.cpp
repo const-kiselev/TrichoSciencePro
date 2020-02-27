@@ -139,7 +139,7 @@ int         IE_Model::read                   (const QJsonObject &json)
                 }
                 case ToolType::SimpleLine:
                 {
-                    pParentItem = new IELine(m_ieGlobalData);
+                    pParentItem = new IE_Tool_Line(m_ieGlobalData);
                     break;
                 }
                 case ToolType::Marker_FollicularUnit:

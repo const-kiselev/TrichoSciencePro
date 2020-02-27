@@ -1,13 +1,13 @@
 #ifndef IE_LINE_DD_H
 #define IE_LINE_DD_H
 
-#include "ie_toolLine.h"
+#include "ie_tool_line.h"
 
 //! diameter and density — диаметр и плотность
 //! \brief класс слоя "плотность, диаметр, длина"
 //!
 //! \todo стандартно диаметр волоса равен нулю. Но это не означает, что ширина линии будет нуливой. Необходимо ввести минимальную ширину для отображения.
-class IE_Line_DD: public IELine
+class IE_Line_DD: public IE_Tool_Line
 {
 
 public:

@@ -1,12 +1,12 @@
 #ifndef IE_TOOLRULER_H
 #define IE_TOOLRULER_H
 
-#include "ie_toolLine.h"
+#include "ie_tool_line.h"
 
 // стандартно рулетка работает в пикселях
 
 
-class IERuler: public IELine
+class IERuler: public IE_Tool_Line
 {
 public:
     IERuler(_global_ie *gi, QObject* parent=nullptr);

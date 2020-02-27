@@ -45,6 +45,7 @@ void IE_View::init()
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     pToolsController = new ToolsController(p_ie_global_data());
+
     //! Связывание м/у сигнала "начало использование нового инструмента" и слотом "добавление нового элемента в модель ч/з контроллер инструментов"
     connect(pToolsController, &ToolsController::zoomSignal,
             this, &IE_View::zoomSlot);

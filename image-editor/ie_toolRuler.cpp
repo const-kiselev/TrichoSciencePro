@@ -1,6 +1,6 @@
 #include "ie_toolRuler.h"
 
-IERuler::IERuler(_global_ie *gi, QObject *parent):IELine(gi, parent, ToolType::Ruler, LineSettings::None)
+IERuler::IERuler(_global_ie *gi, QObject *parent):IE_Tool_Line(gi, parent, ToolType::Ruler, LineSettings::None)
 {
     selectionOffset = 10;
 }
@@ -14,7 +14,7 @@ void IERuler::paint(QPainter *painter,
                     const QStyleOptionGraphicsItem *option,
                     QWidget *widget)
 {
-    IELine::paint(painter, option, widget);
+    IE_Tool_Line::paint(painter, option, widget);
     QPen locPen = painter->pen();
     locPen.setWidth(1);
     painter->setPen(locPen);
@@ -26,6 +26,7 @@ void IERuler::paint(QPainter *painter,
 
     painter->drawLine(line().p1() + offset1, line().p1() + offset2);
     painter->drawLine(line().p2() + offset2, line().p2() + offset1);
+    paintLength(painter, option, widget);
     widget->update();
 }
 
@@ -47,12 +48,12 @@ QRectF IERuler::boundingRect() const
 
 int IERuler::read(const QJsonObject &json)
 {
-    return IELine::read(json);
+    return IE_Tool_Line::read(json);
 }
 
 int IERuler::write(QJsonObject &json) const
 {
-    IELine::write(json);
+    IE_Tool_Line::write(json);
     json["typeTitle"] = getToolTitle(ToolType::Ruler);
     return 0;
 }

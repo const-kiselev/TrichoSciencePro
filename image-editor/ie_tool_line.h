@@ -8,7 +8,7 @@
 
 class IE_Tool_LineInfoWidget;
 
-class IELine : public QObject, public QGraphicsLineItem, public ie_tool
+class IE_Tool_Line : public QObject, public QGraphicsLineItem, public ie_tool
 {
 Q_OBJECT
 public:
@@ -24,7 +24,7 @@ public:
 
 
 
-    explicit        IELine( _global_ie *gi,
+    explicit        IE_Tool_Line( _global_ie *gi,
                             QObject* parent=nullptr,
                             ToolType tt = ToolType::SimpleLine,
                             LineSettings settings = LineSettings::AllSettings);
@@ -92,12 +92,12 @@ class IE_Tool_LineInfoWidget : public QWidget
     Q_OBJECT
 public:
     explicit IE_Tool_LineInfoWidget(_global_ie *gi, QWidget *parent=nullptr,
-                                    IELine::LineSettings settings = IELine::LineSettings::AllSettings);
+                                    IE_Tool_Line::LineSettings settings = IE_Tool_Line::LineSettings::AllSettings);
     ~IE_Tool_LineInfoWidget();
     void init();
 private:
     _global_ie *p_ie_global_data;
-    IELine::LineSettings lineSettings;
+    IE_Tool_Line::LineSettings lineSettings;
     QLabel  *length,
             *penWidth;
     QColor  *penColor,

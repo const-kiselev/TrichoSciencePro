@@ -29,7 +29,7 @@ IE_Compute::HairDensityReportData IE_Compute::computeHairDensity() const
             if( layerIter.i->t()->getToolType() == ToolType::DensityAndDiameter)
             {
                 d.hairQuantity++;
-                qreal penWidth = dynamic_cast<IELine*>(layerIter.i->t()->getToolPtr())->getPenWidth();
+                qreal penWidth = dynamic_cast<IE_Tool_Line*>(layerIter.i->t()->getToolPtr())->getPenWidth();
 
                 if  (_p_ie_global_data->convertF(penWidth)
                         >= _p_ie_global_data->getThreshold_TW()
@@ -89,7 +89,7 @@ IE_Compute::HairDiameterReportData IE_Compute::computeHairDiameter() const
             if( layerIter.i->t()->getToolType() == ToolType::DensityAndDiameter)
             {
                 d.hairQuantity++;
-                qreal penWidth = dynamic_cast<IELine*>(layerIter.i->t()->getToolPtr())->getPenWidth();
+                qreal penWidth = dynamic_cast<IE_Tool_Line*>(layerIter.i->t()->getToolPtr())->getPenWidth();
                 qreal convertedPenWidth = _p_ie_global_data->convertF(penWidth);
 
 

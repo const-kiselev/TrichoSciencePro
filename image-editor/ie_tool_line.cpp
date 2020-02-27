@@ -1,6 +1,6 @@
-#include "ie_toolLine.h"
+#include "ie_tool_line.h"
 
-            IELine::IELine              (_global_ie *gi,
+            IE_Tool_Line::IE_Tool_Line              (_global_ie *gi,
                                          QObject* parent,
                                          ToolType tt,
                                          LineSettings settings):
@@ -47,7 +47,7 @@
             this->updateSettings();
         });
 
-    connect(this, &IELine::lineChanged, [this]()
+    connect(this, &IE_Tool_Line::lineChanged, [this]()
     {
         pInfoWidget->changeLenght(getLineLength());
         pInfoWidget->changePenWidth(pen().width());
@@ -76,7 +76,7 @@
 }
 
 // ------- EVENTS
-void        IELine::mouseFirstPress     (QPointF point)
+void        IE_Tool_Line::mouseFirstPress     (QPointF point)
 {
     if(lineData.p1() == QPointF(-1,-1))
     {
@@ -98,7 +98,7 @@ void        IELine::mouseFirstPress     (QPointF point)
 
     }
 }
-int         IELine::mouseMove           (QPointF point)
+int         IE_Tool_Line::mouseMove           (QPointF point)
 {
     emit lineChanged();
     if(ignoreMove)
@@ -107,7 +107,7 @@ int         IELine::mouseMove           (QPointF point)
     setLine(lineData);
     return 0;
 }
-void        IELine::wheelMode           (QWheelEvent* pe)
+void        IE_Tool_Line::wheelMode           (QWheelEvent* pe)
 {
 
     //! \bug переписать функцию, так как неправильно происходит инкрементирование (декрементирование), если дельта слишком большая
@@ -147,21 +147,21 @@ void        IELine::wheelMode           (QWheelEvent* pe)
     updateSettings();
 }
 
-void        IELine::release             (QPointF point)
+void        IE_Tool_Line::release             (QPointF point)
 {
     ignoreMove = false;
 }
 
-QLineF      IELine::getLine             () const
+QLineF      IE_Tool_Line::getLine             () const
 {
     return line();
 }
-qreal       IELine::getLineLength       ()
+qreal       IE_Tool_Line::getLineLength       ()
 {
     return line().length();
 }
 
-void        IELine::paint               (QPainter *painter,
+void        IE_Tool_Line::paint               (QPainter *painter,
                                          const QStyleOptionGraphicsItem *option,
                                          QWidget *widget
                                          )
@@ -193,7 +193,7 @@ void        IELine::paint               (QPainter *painter,
 
 }
 
-void IELine::paintLength(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void IE_Tool_Line::paintLength(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painter->save();
     qreal angle;
@@ -257,7 +257,7 @@ void IELine::paintLength(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->restore();
 }
 
-void IELine::paintWidth(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void IE_Tool_Line::paintWidth(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     painter->save();
     qreal angle;
@@ -319,7 +319,7 @@ void IELine::paintWidth(QPainter *painter, const QStyleOptionGraphicsItem *optio
     painter->restore();
 }
 
-void        IELine::updateSettings      ()
+void        IE_Tool_Line::updateSettings      ()
 {
     //setPen(pen);
     setLine(lineData);
@@ -331,39 +331,39 @@ void        IELine::updateSettings      ()
     update();
 }
 
-_global_ie *IELine::p_ie_global_data() const
+_global_ie *IE_Tool_Line::p_ie_global_data() const
 {
     return _p_ie_global_data;
 }
 
-void IELine::setP_ie_global_data(_global_ie *value)
+void IE_Tool_Line::setP_ie_global_data(_global_ie *value)
 {
     _p_ie_global_data = value;
 }
 
-bool        IELine::activateEditMode    ()
+bool        IE_Tool_Line::activateEditMode    ()
 {
     editMode = true;
     update();
     return editMode;
 }
-bool        IELine::deactivateEditMode  ()
+bool        IE_Tool_Line::deactivateEditMode  ()
 {
     editMode = false;
     update();
     return editMode;
 }
 
-void        IELine::makeCompute         ()
+void        IE_Tool_Line::makeCompute         ()
 {
 
 }
 
 
-QWidget*    IELine::getWidgetPtr        ()
+QWidget*    IE_Tool_Line::getWidgetPtr        ()
 {return pInfoWidget;}
 
-int         IELine::read                (const QJsonObject &json)
+int         IE_Tool_Line::read                (const QJsonObject &json)
 {
     QColor locColor;
     locColor.setNamedColor(json["line_penColor"].toString());
@@ -383,7 +383,7 @@ int         IELine::read                (const QJsonObject &json)
     return 0;
 }
 
-int         IELine::write               (QJsonObject &json) const
+int         IE_Tool_Line::write               (QJsonObject &json) const
 {
     json["typeTitle"] = getToolTitle(ToolType::SimpleLine);
 
@@ -399,7 +399,7 @@ int         IELine::write               (QJsonObject &json) const
     return 0;
 }
 
-QRectF      IELine::boundingRect        () const
+QRectF      IE_Tool_Line::boundingRect        () const
 {
     QRectF rect(QGraphicsLineItem::boundingRect());
 
@@ -416,7 +416,7 @@ QRectF      IELine::boundingRect        () const
 // ------- Widget
 
 IE_Tool_LineInfoWidget::IE_Tool_LineInfoWidget(_global_ie *gi, QWidget *parent,
-                                               IELine::LineSettings settings):  QWidget(parent),
+                                               IE_Tool_Line::LineSettings settings):  QWidget(parent),
                                                                         p_ie_global_data(gi),
                                                                         lineSettings(settings)
 
@@ -459,7 +459,7 @@ void IE_Tool_LineInfoWidget::init()
     pHorBoxLayout->addWidget(length);
     pVertBoxLayout->addItem(pHorBoxLayout);
 
-    if(lineSettings & IELine::LineSettings::PenColor)
+    if(lineSettings & IE_Tool_Line::LineSettings::PenColor)
     {
         pHorBoxLayout = new QHBoxLayout(this);
         pHorBoxLayout->addWidget(new QLabel("Цвет обводки:", this));
@@ -497,7 +497,7 @@ void IE_Tool_LineInfoWidget::init()
         });
     }
 
-    if(lineSettings & IELine::LineSettings::PenWidth)
+    if(lineSettings & IE_Tool_Line::LineSettings::PenWidth)
     {
         penWidth->show();
         QSlider *pWidthSlider = new QSlider(Qt::Horizontal, this);
@@ -515,14 +515,14 @@ void IE_Tool_LineInfoWidget::init()
         pVertBoxLayout->addItem(pHorBoxLayout);
     }
 
-    if(lineSettings & IELine::LineSettings::WidthTip)
+    if(lineSettings & IE_Tool_Line::LineSettings::WidthTip)
     {
         widthTip->show();
         connect(widthTip, &QCheckBox::stateChanged, [this](int value){emit this->widthTipChecnged(value);});
         pVertBoxLayout->addWidget(widthTip);
     }
 
-    if(lineSettings & IELine::LineSettings::LengthTip)
+    if(lineSettings & IE_Tool_Line::LineSettings::LengthTip)
     {
         lengthTip->show();
         connect(lengthTip, &QCheckBox::stateChanged, [this](int value){emit this->lengthTipChecnged(value);});
