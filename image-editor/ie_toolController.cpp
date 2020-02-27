@@ -54,6 +54,10 @@ void ToolsController::toolEventFilter(QInputEvent *pe)
     switch (activeToolType)
     {
     case ToolType::HairStandard:
+    {
+
+        break;
+    }
     case ToolType::DensityAndDiameter:
     case ToolType::Ruler:
     case ToolType::SimpleLine:
@@ -373,8 +377,8 @@ void ToolsController::mouseMoveEvent(QMouseEvent *pe)
 }
 void ToolsController::wheelEvent(QWheelEvent *pe)
 {
-//    static QTime time = QTime::currentTime();
-//    if(QTime::currentTime().msec() - time.msec()  > 10)
+    //    static QTime time = QTime::currentTime();
+    //    if(QTime::currentTime().msec() - time.msec()  > 10)
         toolEventFilter(pe);
 //    time = QTime::currentTime();
 }

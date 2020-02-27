@@ -24,6 +24,12 @@ void IE_Tool_HairStandard::wheelMode(QWheelEvent *pe)
 {
     //! \todo изменение угла наклона прямой
     //!
+    //!
+    static QTime time = QTime::currentTime();
+    if(QTime::currentTime().msec() - time.msec()  < 10)
+        return;
+    time = QTime::currentTime();
+
 
     IELine::wheelMode(pe);
     QPen locPen(pen());
@@ -43,7 +49,7 @@ void IE_Tool_HairStandard::wheelMode(QWheelEvent *pe)
 
 //}
 
-//void IE_Tool_HairStandard::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-//{
+void IE_Tool_HairStandard::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
 
-//}
+}
